@@ -147,6 +147,15 @@
 
 .sticky-btn:hover { opacity: 0.88; }
 
+.sticky-btn--form {
+  background: var(--coral);
+  color: #0a0f1e;
+}
+
+[data-theme="dark"] .sticky-btn--form {
+  color: #ffffff;
+}
+
 /* BLOQUE 3 — CUERPO */
 .evento-cuerpo {
   max-width: 1200px;
@@ -417,6 +426,15 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+}
+
+.compra-btn--form {
+  background: var(--coral);
+  color: #0a0f1e;
+}
+
+[data-theme="dark"] .compra-btn--form {
+  color: #ffffff;
 }
 
 .compra-bases-btn {

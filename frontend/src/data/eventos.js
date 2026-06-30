@@ -123,13 +123,14 @@ export const eventos = [
     descripcion: "El encuentro nacional de niños y jóvenes intérpretes de músicas andinas colombianas. Solistas vocales entre 9 y 16 años.",
     descripcionLarga: "El Festival Colombia Canta y Encanta es un encuentro nacional que reúne a niños y jóvenes intérpretes de las músicas andinas colombianas en un espacio diseñado para aprender, compartir y celebrar nuestro patrimonio musical.\n\nEn su versión 2026, el Festival abre la convocatoria para solistas vocales entre los 9 y 16 años de edad, quienes tendrán la oportunidad de mostrar su talento, recibir acompañamiento artístico y vivir una experiencia formativa alrededor de la música colombiana.\n\nMás que un festival, es un espacio donde las nuevas generaciones fortalecen su identidad cultural, conocen otros artistas, participan en actividades académicas y artísticas, y hacen parte de una comunidad que cree en el poder de la música para transformar vidas.\n\nLos participantes podrán acceder a clases maestras, asesorías especializadas, encuentros culturales, actividades de integración y, para los finalistas, una experiencia presencial en Medellín junto al grupo base oficial del Festival.\n\nDel 23 al 26 de julio de 2026, Medellín volverá a convertirse en el escenario donde las voces jóvenes de Colombia se encuentran para cantar, aprender y brillar.",
     programa: ["Solistas vocales 9-16 años", "Clases magistrales", "Asesorías especializadas", "Encuentros culturales", "Actividades de integración"],
-    precio: "Próximamente",
-    cta: "Inscríbete aquí",
-    ctaWa: "Inscribirme al festival",
+    precio: "Convocatoria abierta",
+    cta: "Inscribirme al festival",
+    ctaWa: "Consultar por WhatsApp",
     bases: "https://drive.google.com/file/d/1aWOLqMxR5OPjEAub1CzRcQQhAVyhBZiE/view?usp=drive_link",
+    inscripcionLink: "https://docs.google.com/forms/d/e/1FAIpQLScezix8vAbwTlC5DsgctJA0UlZD7nht_PE5sVOx8wPbovuaxQ/viewform",
     color: "#6B21A8",
     colorHero: "#3B0764",
-    waLink: "https://wa.me/573015315119?text=Hola%2C+quiero+inscribirme+al+Festival+Colombia+Canta+y+Encanta+2026+(23-26+de+julio+en+Medell%C3%ADn).+Por+favor+env%C3%ADame+informaci%C3%B3n.",
+    waLink: "https://wa.me/573015315119?text=Hola%2C+quiero+informaci%C3%B3n+sobre+el+Festival+Colombia+Canta+y+Encanta+2026+(23-26+de+julio+en+Medell%C3%ADn).",
     testimonios: []
   },
   {
