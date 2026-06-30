@@ -49,7 +49,25 @@ const faqs = [
   },
   {
     q: "¿Hay descuentos para estudiantes?",
-    r: "Sí, ofrecemos descuentos especiales para estudiantes y para inscripciones de hermanos.",
+    r: (
+      <>
+        <p>Sí, contamos con los siguientes descuentos disponibles:</p>
+        <ul className="inscr-faq-descuentos-lista">
+          <li>
+            <span>Hijos de empleados del <strong>Grupo EPM</strong></span>
+            <span className="inscr-faq-descuento-pct">20% de descuento</span>
+          </li>
+          <li>
+            <span>Hijos de empleados de la <strong>Alcaldía de Medellín</strong></span>
+            <span className="inscr-faq-descuento-pct">15% de descuento</span>
+          </li>
+          <li>
+            <span>Afiliados a <strong>Comfama</strong></span>
+            <span className="inscr-faq-descuento-pct">10% de descuento</span>
+          </li>
+        </ul>
+      </>
+    ),
   },
   {
     q: "¿Dónde son las clases?",
@@ -217,6 +235,7 @@ export default function Inscripciones() {
                       type="button"
                       className="inscr-card-btn inscr-card-btn-solido"
                       onClick={() => iniciarInscripcion(c)}
+                      disabled
                     >
                       Inscribirme
                     </button>
@@ -287,7 +306,7 @@ export default function Inscripciones() {
                   </div>
                 </div>
 
-                <div className="inscr-detalle-grupo">
+                <div className="inscr-detalle-grupo inscr-detalle-grupo-niveles">
                   <span className="inscr-detalle-grupo-label">Niveles disponibles</span>
                   <div className="inscr-detalle-chips">
                     {vistaDetalle.niveles.map((n) => (
@@ -334,6 +353,7 @@ export default function Inscripciones() {
                     type="button"
                     className="btn btn-solido-oscuro"
                     onClick={() => iniciarInscripcion(vistaDetalle)}
+                    disabled
                   >
                     Inscribirme ahora →
                   </button>
@@ -580,7 +600,7 @@ export default function Inscripciones() {
                   </span>
                 </button>
                 {openFaq === i && (
-                  <p className="inscr-faq-respuesta">{faq.r}</p>
+                  <div className="inscr-faq-respuesta">{faq.r}</div>
                 )}
               </div>
             ))}

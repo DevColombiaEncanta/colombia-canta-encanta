@@ -141,9 +141,9 @@ export default function Footer() {
                 <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                 3015315119
               </a>
-              <a href="mailto:hola@colombiacanta.org" className="footer-contact-item">
+              <a href="mailto:info@colombiacanta.org" className="footer-contact-item">
                 <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                hola@colombiacanta.org
+                info@colombiacanta.org
               </a>
             </div>
           </div>
@@ -191,7 +191,7 @@ export default function Footer() {
                 </div>
                 <div className="footer-contacto-item">
                   <span>✉️</span>
-                  <a href="mailto:hola@colombiacanta.org">hola@colombiacanta.org</a>
+                  <a href="mailto:info@colombiacanta.org">info@colombiacanta.org</a>
                 </div>
               </div>
             </div>

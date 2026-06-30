@@ -56,6 +56,7 @@ export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
 
         {/* Imagen */}
         <div className="modal-imagen" style={{ background: producto.bg }}>
+          <button className="modal-cerrar modal-cerrar-flotante" onClick={onClose} aria-label="Cerrar">✕</button>
           {producto.imagen ? (
             <img
               src={`${import.meta.env.BASE_URL}${producto.imagen}`}

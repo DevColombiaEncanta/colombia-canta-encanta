@@ -209,7 +209,7 @@ export default function EventoDetalle({ evento }) {
               <p>¿Tienes preguntas?</p>
               <div className="compra-contacto-btns">
                 <a href={waLink} className="compra-contacto-btn compra-contacto-btn--wa"><WaIcon size={14} /> WhatsApp</a>
-                <a href="mailto:hola@colombiacanta.org" className="compra-contacto-btn">✉️ Email</a>
+                <a href="mailto:info@colombiacanta.org" className="compra-contacto-btn">✉️ Email</a>
               </div>
             </div>
           </div>

@@ -113,6 +113,25 @@
   color: var(--texto-principal);
 }
 
+/* Botón flotante sobre la imagen: solo se usa en mobile (ver
+   responsive), para no robarle espacio vertical a la info del
+   producto como pasaba con el de la cabecera. */
+.modal-cerrar-flotante {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+.modal-cerrar-flotante:hover {
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+}
+
 .modal-titulo {
   font-family: var(--font-titulo);
   font-size: 22px;
@@ -318,6 +337,16 @@
   font-size: 15px;
 }
 
+/* ---- Tablet y mobile: sin botón de cerrar en la cabecera de info ----
+   Ahí ocupaba mucho espacio vertical antes de mostrar nada de contenido.
+   En tablet no queda ningún botón (se cierra tocando fuera del modal);
+   en mobile se usa el botón flotante sobre la imagen (ver abajo). */
+@media (max-width: 1024px) {
+  .modal-info-header {
+    display: none;
+  }
+}
+
 /* ---- Responsive: drawer desde abajo solo en mobile ---- */
 @media (max-width: 599px) {
   .modal-overlay {
@@ -329,6 +358,10 @@
     max-width: 100%;
     max-height: 92vh;
     border-radius: 20px 20px 0 0;
+  }
+
+  .modal-cerrar-flotante {
+    display: flex;
   }
 
   .modal-emoji {

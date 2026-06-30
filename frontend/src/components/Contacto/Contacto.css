@@ -62,6 +62,33 @@
   }
 }
 
+/* En mobile "ÚNETE A NUESTRA COMUNIDAD" (mayúsculas + letter-spacing)
+   no entra en una sola línea sin desbordar — se ocultan las líneas
+   decorativas y se permite el salto de línea, centrado. */
+@media (max-width: 599px) {
+  .contacto-divider {
+    padding: 0 20px;
+    justify-content: center;
+  }
+
+  .contacto-divider::before,
+  .contacto-divider::after {
+    display: none;
+  }
+
+  .contacto-divider-titulo {
+    white-space: normal;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  .contacto-divider-titulo::before,
+  .contacto-divider-titulo::after {
+    display: none;
+  }
+}
+
 /* ── Redes sociales verticales (junto a la imagen) ── */
 .contacto-redes-verticales {
   position: absolute;

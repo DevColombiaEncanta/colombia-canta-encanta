@@ -13,5 +13,5 @@ export default defineConfig({
       svg:  { multipass: true },
     }),
   ],
-  base: '/colombia-canta/',
+  base: '/',
 })

@@ -44,8 +44,8 @@ const infoItems = [
     icono: MailIcon,
     label: "Envíanos un correo",
     detalle: (
-      <a href="mailto:hola@colombiacanta.org" className="contacto-info-link">
-        hola@colombiacanta.org
+      <a href="mailto:info@colombiacanta.org" className="contacto-info-link">
+        info@colombiacanta.org
       </a>
     ),
   },
