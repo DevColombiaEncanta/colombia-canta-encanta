@@ -30,6 +30,12 @@ export default function EventoDetalle({ evento }) {
   const inscripcionLabel = evento.cta ?? 'Inscribirme';
   const inscripcionLabelCorto = evento.cta ?? 'Inscribirme';
 
+  const esPasado = evento.fechaISO ? new Date(evento.fechaISO) < new Date() : false;
+  const [galIdx, setGalIdx] = useState(0);
+  const galTotal = evento.galeria?.length ?? 0;
+  const galPrev = () => setGalIdx(i => (i - 1 + galTotal) % galTotal);
+  const galNext = () => setGalIdx(i => (i + 1) % galTotal);
+
   const otrosEventos = [
     ...eventos.map(e => ({ ...e, _permanente: false })),
     ...eventosFijos.map(e => ({
@@ -83,44 +89,61 @@ export default function EventoDetalle({ evento }) {
       </div>
 
       {/* BLOQUE 2 — STICKY BAR */}
-      <div className={`sticky-cta-bar${stickyVisible ? ' visible' : ''}`}>
-        <span className="sticky-titulo">{evento.titulo}</span>
-        <span className="sticky-meta">
-          {evento.fecha ? `${evento.fecha} · ${evento.lugar}` : evento.ciudad}
-        </span>
-        {evento.precio && <span className="sticky-precio">{evento.precio}</span>}
-        {inscripcionLink ? (
-          <a href={inscripcionLink} target="_blank" rel="noopener noreferrer" className="sticky-btn sticky-btn--form">
-            <FormIcon size={15} /> {inscripcionLabelCorto}
-          </a>
-        ) : (
-          <a href={waLink} target="_blank" rel="noopener noreferrer" className="sticky-btn" style={{ background: ctaColor }}>
-            <WaIcon size={15} /> {waLabelCorto}
-          </a>
-        )}
-      </div>
+      {!esPasado && (
+        <div className={`sticky-cta-bar${stickyVisible ? ' visible' : ''}`}>
+          <span className="sticky-titulo">{evento.titulo}</span>
+          <span className="sticky-meta">
+            {evento.fecha ? `${evento.fecha} · ${evento.lugar}` : evento.ciudad}
+          </span>
+          {evento.precio && <span className="sticky-precio">{evento.precio}</span>}
+          {inscripcionLink ? (
+            <a href={inscripcionLink} target="_blank" rel="noopener noreferrer" className="sticky-btn sticky-btn--form">
+              <FormIcon size={15} /> {inscripcionLabelCorto}
+            </a>
+          ) : (
+            <a href={waLink} target="_blank" rel="noopener noreferrer" className="sticky-btn" style={{ background: ctaColor }}>
+              <WaIcon size={15} /> {waLabelCorto}
+            </a>
+          )}
+        </div>
+      )}
 
       {/* BLOQUE 3 — CUERPO */}
       <div className="evento-cuerpo">
         {/* Columna izquierda */}
         <div className="evento-col-izq">
+          {galTotal > 0 && (
+            <section className="evento-sec-galeria">
+              <h2>Galería</h2>
+              <div className="evento-galeria-carrusel">
+                <img
+                  src={evento.galeria[galIdx]}
+                  alt={`${evento.titulo} ${galIdx + 1}`}
+                  className="evento-galeria-img"
+                  loading="lazy"
+                  key={galIdx}
+                />
+                {galTotal > 1 && (
+                  <>
+                    <button className="gal-btn gal-btn-prev" onClick={galPrev} aria-label="Anterior">‹</button>
+                    <button className="gal-btn gal-btn-next" onClick={galNext} aria-label="Siguiente">›</button>
+                    <div className="gal-dots">
+                      {evento.galeria.map((_, i) => (
+                        <button key={i} className={`gal-dot${i === galIdx ? ' activo' : ''}`} onClick={() => setGalIdx(i)} aria-label={`Foto ${i + 1}`} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </section>
+          )}
+
           <section className="evento-sec-descripcion">
             <h2>Sobre el evento</h2>
             {String(evento.descripcionLarga).split('\n\n').map((p, i) => (
               <p key={i} className="evento-descripcion">{p}</p>
             ))}
           </section>
-
-          {evento.galeria?.length > 0 && (
-            <section className="evento-sec-galeria">
-              <h2>Galería</h2>
-              <div className="evento-galeria-grid">
-                {evento.galeria.map((img, i) => (
-                  <img key={i} src={img} alt={`${evento.titulo} ${i + 1}`} className="evento-galeria-img" loading="lazy" />
-                ))}
-              </div>
-            </section>
-          )}
 
           {evento.programa?.length > 0 && (
             <section>
@@ -176,8 +199,16 @@ export default function EventoDetalle({ evento }) {
           </div>
         </section>
 
-        {/* Columna derecha — card de compra */}
+        {/* Columna derecha — card de compra o aviso de finalizado */}
         <div className="compra-card-wrap">
+          {esPasado ? (
+            <div className="compra-card compra-card--finalizado">
+              <div className="compra-card-fin-icono">🎶</div>
+              <h3 className="compra-card-fin-titulo">Este evento ya finalizó</h3>
+              <p className="compra-card-fin-desc">Gracias a todos los que fueron parte de esta experiencia. Mantente atento a nuestros próximos eventos.</p>
+              <Link to="/eventos" className="btn btn-outline-oscuro compra-card-fin-btn">Ver próximos eventos →</Link>
+            </div>
+          ) : (
           <div className="compra-card">
             <div className="compra-card-header">
               <div className="compra-card-titulo">{evento.titulo}</div>
@@ -239,21 +270,10 @@ export default function EventoDetalle({ evento }) {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
 
-      {/* Mobile CTA fijo */}
-      <div className="mobile-cta-fixed">
-        {inscripcionLink ? (
-          <a href={inscripcionLink} target="_blank" rel="noopener noreferrer" className="compra-btn compra-btn--form">
-            <FormIcon /> {inscripcionLabelCorto}{evento.precio ? ` · ${evento.precio}` : ''}
-          </a>
-        ) : (
-          <a href={waLink} target="_blank" rel="noopener noreferrer" className="compra-btn" style={{ background: ctaColor }}>
-            <WaIcon /> {waLabelCorto}{evento.precio ? ` · ${evento.precio}` : ''}
-          </a>
-        )}
-      </div>
 
       {/* BLOQUE 4 — OTROS EVENTOS */}
       <section className="otros-eventos">
