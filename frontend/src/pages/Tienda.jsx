@@ -8,7 +8,7 @@ import { BASE_URL, OG_IMAGE } from '../utils/seo';
 import './Tienda.css';
 
 const PAGE_TITLE = 'Tienda | Colombia Canta y Encanta';
-const PAGE_DESC = 'Merch oficial de Colombia Canta y Encanta: poleras, hoodies, tote bags y más. Lleva un pedacito de la cultura colombiana contigo.';
+const PAGE_DESC = 'Merch oficial de Colombia Canta y Encanta: camisetas, hoodies, tote bags y más. Lleva un pedacito de la cultura colombiana contigo.';
 
 const coleccionesSuperiores = [
   { id: 'novedades', nombre: 'NOVEDADES', emoji: '⭐' },
@@ -17,21 +17,21 @@ const coleccionesSuperiores = [
   { id: 'kit', nombre: 'KIT ME ENAMORAS', emoji: '🤍' },
 ];
 
-const categorias = ['Todos', 'Poleras', 'Hoodies', 'Bags', 'Otros'];
+const categorias = ['Todos', 'Camisetas', 'Hoodies', 'Bags', 'Otros'];
 
 const productos = [
   {
-    id: 1, nombre: 'Polera Colombia Canta', categoria: 'Poleras', coleccion: 'drop1', precio: '$45.000',
+    id: 1, nombre: 'Camiseta Colombia Canta', categoria: 'Camisetas', coleccion: 'drop1', precio: '$45.000',
     tag: 'Popular',
     emoji: '👕', bg: 'linear-gradient(135deg, #1A56DB, #0F3A9E)',
     imagen: 'tienda-productos/polera-colombia-canta.webp',
-    descripcion: 'Polera de algodón 100% con el diseño oficial de Colombia Canta y Encanta. Tela suave y transpirable, perfecta para el día a día.',
+    descripcion: 'Camiseta de algodón 100% con el diseño oficial de Colombia Canta y Encanta. Tela suave y transpirable, perfecta para el día a día.',
     tallas: ['XS', 'S', 'M', 'L', 'XL'],
     colores: [{ nombre: 'Azul', hex: '#1A56DB' }, { nombre: 'Blanco', hex: '#F0F0F0' }, { nombre: 'Negro', hex: '#1a1a1a' }],
     stock: true,
   },
   {
-    id: 2, nombre: 'Polera Bambuco', categoria: 'Poleras', coleccion: 'drop1', precio: '$48.000',
+    id: 2, nombre: 'Camiseta Bambuco', categoria: 'Camisetas', coleccion: 'drop1', precio: '$48.000',
     tag: 'Artesanal',
     emoji: '👕', bg: 'linear-gradient(135deg, #E8341A, #A8240E)',
     imagen: 'tienda-productos/polera-bambuco.webp',
@@ -41,7 +41,7 @@ const productos = [
     stock: true,
   },
   {
-    id: 3, nombre: 'Polera Gira USA 2026', categoria: 'Poleras', coleccion: 'drop2', precio: '$52.000',
+    id: 3, nombre: 'Camiseta Gira USA 2026', categoria: 'Camisetas', coleccion: 'drop2', precio: '$52.000',
     tag: 'Edición Limitada',
     emoji: '👕', bg: 'linear-gradient(135deg, #F5C800, #B8960A)',
     descripcion: 'Edición limitada de la gira Colombia Canta y Encanta por Estados Unidos 2026. Pieza coleccionable del recorrido histórico.',

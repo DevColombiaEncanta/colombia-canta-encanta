@@ -85,10 +85,30 @@ export default function EventosFijos() {
           <div className="ef-pills">
             {salas.pills.map(p => (
               <span key={p.texto} className="ef-pill">
-                {p.icono} {p.texto}
+                {p.iconoSrc
+                  ? <img src={p.iconoSrc} alt="" aria-hidden="true" className="ef-pill-ico-img" />
+                  : p.icono}
+                {p.texto}
               </span>
             ))}
           </div>
+          {salas.fases && (
+            <div className="ef-fases">
+              {salas.fases.map((f, i) => (
+                <div key={i} className="ef-fase">
+                  <span className="ef-fase-ico">
+                    {f.iconoSrc
+                      ? <img src={f.iconoSrc} alt="" aria-hidden="true" className="ef-fase-ico-img" />
+                      : f.icono}
+                  </span>
+                  <div>
+                    <b className="ef-fase-titulo">{f.titulo}</b>
+                    <p className="ef-fase-desc">{f.descripcion}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="ef-prog">
             <span className="ef-prog-label">Programación · {salas.mes}</span>
             <div className="ef-prog-lista">
@@ -122,14 +142,21 @@ export default function EventosFijos() {
           <div className="ef-pills">
             {enamoras.pills.map(p => (
               <span key={p.texto} className="ef-pill">
-                {p.icono} {p.texto}
+                {p.iconoSrc
+                  ? <img src={p.iconoSrc} alt="" aria-hidden="true" className="ef-pill-ico-img" />
+                  : p.icono}
+                {p.texto}
               </span>
             ))}
           </div>
           <div className="ef-fases">
             {enamoras.fases.map((f, i) => (
               <div key={i} className="ef-fase">
-                <span className="ef-fase-ico">{f.icono}</span>
+                <span className="ef-fase-ico">
+                  {f.iconoSrc
+                    ? <img src={f.iconoSrc} alt="" aria-hidden="true" className="ef-fase-ico-img" />
+                    : f.icono}
+                </span>
                 <div>
                   <b className="ef-fase-titulo">{f.titulo}</b>
                   <p className="ef-fase-desc">{f.descripcion}</p>

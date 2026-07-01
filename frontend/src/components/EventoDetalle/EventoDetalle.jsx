@@ -116,23 +116,27 @@ export default function EventoDetalle({ evento }) {
             <section className="evento-sec-galeria">
               <h2>Galería</h2>
               <div className="evento-galeria-carrusel">
-                <img
-                  src={evento.galeria[galIdx]}
-                  alt={`${evento.titulo} ${galIdx + 1}`}
-                  className="evento-galeria-img"
-                  loading="lazy"
-                  key={galIdx}
-                />
+                <div className="evento-galeria-frame">
+                  <img
+                    src={evento.galeria[galIdx]}
+                    alt={`${evento.titulo} ${galIdx + 1}`}
+                    className="evento-galeria-img"
+                    loading="lazy"
+                    key={galIdx}
+                  />
+                  {galTotal > 1 && (
+                    <>
+                      <button className="gal-btn gal-btn-prev" onClick={galPrev} aria-label="Anterior">‹</button>
+                      <button className="gal-btn gal-btn-next" onClick={galNext} aria-label="Siguiente">›</button>
+                    </>
+                  )}
+                </div>
                 {galTotal > 1 && (
-                  <>
-                    <button className="gal-btn gal-btn-prev" onClick={galPrev} aria-label="Anterior">‹</button>
-                    <button className="gal-btn gal-btn-next" onClick={galNext} aria-label="Siguiente">›</button>
-                    <div className="gal-dots">
-                      {evento.galeria.map((_, i) => (
-                        <button key={i} className={`gal-dot${i === galIdx ? ' activo' : ''}`} onClick={() => setGalIdx(i)} aria-label={`Foto ${i + 1}`} />
-                      ))}
-                    </div>
-                  </>
+                  <div className="gal-dots">
+                    {evento.galeria.map((_, i) => (
+                      <button key={i} className={`gal-dot${i === galIdx ? ' activo' : ''}`} onClick={() => setGalIdx(i)} aria-label={`Foto ${i + 1}`} />
+                    ))}
+                  </div>
                 )}
               </div>
             </section>
@@ -164,7 +168,11 @@ export default function EventoDetalle({ evento }) {
                   <div key={i} className="evento-fase">
                     <div className="evento-fase-num-ico">
                       <div className="evento-fase-num">{String(i + 1).padStart(2, '0')}</div>
-                      <div className="evento-fase-ico">{f.icono}</div>
+                      <div className="evento-fase-ico">
+                      {f.iconoSrc
+                        ? <img src={f.iconoSrc} alt="" aria-hidden="true" className="evento-fase-ico-img" />
+                        : f.icono}
+                    </div>
                     </div>
                     <div className="evento-fase-contenido">
                       <h3 className="evento-fase-titulo">{f.titulo}</h3>

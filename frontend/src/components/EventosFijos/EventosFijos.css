@@ -373,6 +373,27 @@
   flex-shrink: 0;
 }
 
+.ef-fase-ico-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+[data-theme="dark"] .ef-fase-ico-img {
+  filter: brightness(0) invert(1);
+}
+
+.ef-pill-ico-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .ef-pill-ico-img {
+  filter: brightness(0) invert(1);
+}
+
 .ef-fase-titulo {
   display: block;
   font-family: var(--font-titulo);

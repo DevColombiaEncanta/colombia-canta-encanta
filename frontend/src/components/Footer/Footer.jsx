@@ -33,16 +33,15 @@ const cols = [
   {
     titulo: "Eventos",
     links: [
-      { label: "Todos los eventos", to: "/eventos" },
-      { label: "Gira USA 2026", to: "/eventos/gira-usa-miami" },
-      { label: "Sede Medellín", to: "/eventos/herencia-andina-medellin" },
-      { label: "Festival Nacional", to: "/eventos/festival-nacional" },
+      { label: "Salas Colombia canta", to: "/eventos/salas-colombia-canta" },
+      { label: "Colombia me enamoras", to: "/eventos/colombia-me-enamoras" },
+      { label: "Ver todos los eventos", to: "/eventos" },
     ],
   },
   {
     titulo: "Tienda",
     links: [
-      { label: "Poleras", to: "/tienda" },
+      { label: "Camisetas", to: "/tienda" },
       { label: "Hoodies", to: "/tienda" },
       { label: "Bags", to: "/tienda" },
       { label: "Otros", to: "/tienda" },

@@ -99,7 +99,11 @@ export default function EventosFijosHome({ variant = 'hero' }) {
                   <div className="efh-zigzag-fases">
                     {ev.fases.map(f => (
                       <div key={f.titulo} className="efh-zigzag-fase">
-                        <span className="efh-zigzag-fase-icono" style={{ background: `${ev.color}1a` }}>{f.icono}</span>
+                        <span className="efh-zigzag-fase-icono" style={{ background: `${ev.color}1a` }}>
+                          {f.iconoSrc
+                            ? <img src={f.iconoSrc} alt="" aria-hidden="true" className="efh-zigzag-fase-ico-img" />
+                            : f.icono}
+                        </span>
                         <span className="efh-zigzag-fase-titulo">{f.titulo}</span>
                       </div>
                     ))}
@@ -180,11 +184,13 @@ export default function EventosFijosHome({ variant = 'hero' }) {
           <div className="efh-bottom">
             <span className="efh-accent" style={{ background: ev.color }} />
             <h3 className="efh-titulo">{ev.titulo}</h3>
-            <p className="efh-desc">{ev.descripcionCorta}</p>
             <div className="efh-pills">
               {ev.pills.slice(0, 3).map(p => (
                 <span key={p.texto} className="efh-pill">
-                  {p.icono} {p.texto}
+                  {p.iconoSrc
+                    ? <img src={p.iconoSrc} alt="" aria-hidden="true" className="efh-pill-ico-img" />
+                    : p.icono}
+                  {p.texto}
                 </span>
               ))}
             </div>

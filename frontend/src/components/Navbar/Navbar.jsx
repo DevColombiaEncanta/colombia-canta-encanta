@@ -70,10 +70,10 @@ const IconoChevron = ({ abierto }) => (
 );
 
 const tiendaDropdown = [
-  { nombre: "Poleras", precio: "desde $45.000", emoji: "👕", bg: "linear-gradient(135deg, #1A56DB, #0F3A9E)" },
-  { nombre: "Hoodies", precio: "desde $75.000", emoji: "🧥", bg: "linear-gradient(135deg, #E8341A, #6B21A8)" },
-  { nombre: "Bags", precio: "desde $28.000", emoji: "👜", bg: "linear-gradient(135deg, #F5C800, #E8341A)" },
-  { nombre: "Otros", precio: "termos · café", emoji: "☕", bg: "linear-gradient(135deg, #16A34A, #1A56DB)" },
+  { nombre: "Camisetas", precio: "desde $45.000", emoji: "👕" },
+  { nombre: "Hoodies", precio: "desde $75.000", emoji: "🧥" },
+  { nombre: "Bags", precio: "desde $28.000", emoji: "👜" },
+  { nombre: "Otros", precio: "termos · café", emoji: "☕" },
 ];
 
 export default function Navbar() {
@@ -161,16 +161,15 @@ export default function Navbar() {
                       <div
                         className="evento-mini-bg"
                         style={ev.img ? {
-                          backgroundImage: `linear-gradient(135deg, ${ev.colorHero}cc, rgba(0,0,0,0.55)), url(${ev.img})`,
+                          backgroundImage: `linear-gradient(rgba(0,0,0,0.05), rgba(0,0,0,0.18)), url(${ev.img})`,
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
                         } : {
                           background: `linear-gradient(135deg, ${ev.color}, ${ev.colorHero})`,
                         }}
-                      >
-                        <span className="chip-tipo">{ev.tipo}</span>
-                      </div>
+                      />
                       <div className="evento-mini-info">
+                        <div className="evento-mini-tipo" style={{ color: ev.color }}>{ev.tipo}</div>
                         <div className="evento-mini-titulo">{ev.titulo}</div>
                         <div className="evento-mini-ciudad">{ev.ciudad}</div>
                       </div>
@@ -193,19 +192,13 @@ export default function Navbar() {
                   <h4>Merch oficial</h4>
                   <Link to="/tienda" className="dropdown-ver-todos">Ver todo →</Link>
                 </div>
-                <div className="dropdown-tienda-grid">
-                  {tiendaDropdown.map(item => (
-                    <Link to="/tienda" className="tienda-mini-card" key={item.nombre}>
-                      <div className="tienda-mini-bg" style={{ background: item.bg }}>
-                        <span>{item.emoji}</span>
-                      </div>
-                      <div className="tienda-mini-info">
-                        <span className="tienda-mini-nombre">{item.nombre}</span>
-                        <span className="tienda-mini-precio">{item.precio}</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                {tiendaDropdown.map(item => (
+                  <Link to="/tienda" className="tienda-lista-item" key={item.nombre}>
+                    <span className="tienda-lista-emoji">{item.emoji}</span>
+                    <span className="tienda-lista-nombre">{item.nombre}</span>
+                    <span className="tienda-lista-precio">{item.precio}</span>
+                  </Link>
+                ))}
               </div>
             </div>
 
@@ -305,9 +298,20 @@ export default function Navbar() {
             )}
           </div>
 
-          <Link to="/tienda" className="mobile-drawer-link">
-            <span className="mobile-drawer-link-left"><IconoTienda /> Tienda</span>
-          </Link>
+          <div className="mobile-drawer-group">
+            <button className="mobile-drawer-link mobile-drawer-link--toggle" onClick={() => toggleMobile('tienda')}>
+              <span className="mobile-drawer-link-left"><IconoTienda /> Tienda</span>
+              <IconoChevron abierto={mobileExpanded === 'tienda'} />
+            </button>
+            {mobileExpanded === 'tienda' && (
+              <div className="mobile-drawer-submenu">
+                {tiendaDropdown.map(item => (
+                  <Link to="/tienda" key={item.nombre}>{item.emoji} {item.nombre}</Link>
+                ))}
+                <Link to="/tienda">Ver todo →</Link>
+              </div>
+            )}
+          </div>
 
           <button className="mobile-drawer-link" onClick={() => { setMobileOpen(false); navigate('/tienda/carrito'); }}>
             <span className="mobile-drawer-link-left">

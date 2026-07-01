@@ -236,15 +236,23 @@
 
 /* Galería de fotos */
 .evento-galeria-carrusel {
-  position: relative;
   width: 100%;
 }
 
-.evento-galeria-img {
+.evento-galeria-frame {
+  position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
   border-radius: 12px;
+}
+
+.evento-galeria-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
@@ -344,6 +352,16 @@
   flex-shrink: 0;
 }
 
+.evento-fase-ico-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+[data-theme="dark"] .evento-fase-ico-img {
+  filter: brightness(0) invert(1);
+}
+
 .evento-fase-titulo {
   font-family: var(--font-titulo);
   font-size: 18px;
@@ -404,6 +422,7 @@
 .compra-card {
   position: sticky;
   top: 80px;
+  margin-top: 36px;
   background: var(--bg-card);
   border: 1px solid var(--border-sutil);
   border-radius: 16px;
@@ -713,7 +732,7 @@
     padding: 0 12px;
   }
 
-  .evento-galeria-carrusel {
+  .evento-galeria-frame {
     max-width: 520px;
     margin: 0 auto;
   }
@@ -802,7 +821,6 @@
   gap: 0;
   padding: 0;
   overflow: hidden;
-  margin-top: 36px;
 }
 
 .compra-card--finalizado::before {

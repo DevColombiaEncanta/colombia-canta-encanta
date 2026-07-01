@@ -588,6 +588,27 @@
   flex-shrink: 0;
 }
 
+.efh-zigzag-fase-ico-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+[data-theme="dark"] .efh-zigzag-fase-ico-img {
+  filter: brightness(0) invert(1);
+}
+
+.efh-pill-ico-img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .efh-pill-ico-img {
+  filter: brightness(0) invert(1);
+}
+
 .efh-zigzag-pill-texto,
 .efh-zigzag-fase-titulo {
   font-size: 12px;
@@ -611,12 +632,12 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 7px 15px;
+  padding: 9px 15px;
   border-radius: 100px;
   border: 1.5px solid rgba(52, 224, 161, 0.45);
   background: rgba(52, 224, 161, 0.08);
   color: var(--texto-principal);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
