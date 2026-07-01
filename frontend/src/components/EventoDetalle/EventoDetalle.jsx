@@ -26,9 +26,10 @@ export default function EventoDetalle({ evento }) {
 
   const waLink = evento.waLink ?? `https://wa.me/573015315119?text=Hola%2C+quiero+informaci%C3%B3n+sobre+${encodeURIComponent(evento.titulo)}.`;
 
-  const inscripcionLink  = evento.inscripcionLink ?? null;
-  const inscripcionLabel = evento.cta ?? 'Inscribirme';
+  const inscripcionLink    = evento.inscripcionLink ?? null;
+  const inscripcionLabel   = evento.cta ?? 'Inscribirme';
   const inscripcionLabelCorto = evento.cta ?? 'Inscribirme';
+  const inscripcionCerrada = evento.inscripcionCerrada ?? false;
 
   const esPasado = evento.fechaISO ? new Date(evento.fechaISO) < new Date() : false;
   const [galIdx, setGalIdx] = useState(0);
@@ -96,7 +97,9 @@ export default function EventoDetalle({ evento }) {
             {evento.fecha ? `${evento.fecha} · ${evento.lugar}` : evento.ciudad}
           </span>
           {evento.precio && <span className="sticky-precio">{evento.precio}</span>}
-          {inscripcionLink ? (
+          {inscripcionCerrada ? (
+            <button className="sticky-btn sticky-btn--cerrado" disabled>Inscripciones cerradas</button>
+          ) : inscripcionLink ? (
             <a href={inscripcionLink} target="_blank" rel="noopener noreferrer" className="sticky-btn sticky-btn--form">
               <FormIcon size={15} /> {inscripcionLabelCorto}
             </a>
@@ -241,7 +244,9 @@ export default function EventoDetalle({ evento }) {
               {evento.precioDetalle && (
                 <div className="compra-precio-detalle">{evento.precioDetalle}</div>
               )}
-              {inscripcionLink ? (
+              {inscripcionCerrada ? (
+                <button className="compra-btn compra-btn--cerrado" disabled>Inscripciones cerradas</button>
+              ) : inscripcionLink ? (
                 <a href={inscripcionLink} target="_blank" rel="noopener noreferrer" className="compra-btn compra-btn--form">
                   <FormIcon /> {inscripcionLabel}
                 </a>

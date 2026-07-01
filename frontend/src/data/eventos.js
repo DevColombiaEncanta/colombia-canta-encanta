@@ -141,6 +141,7 @@ export const eventos = [
     ctaWa: "Consultar por WhatsApp",
     bases: "https://drive.google.com/file/d/1PYz8Q9R22fkQrGevW8C8X9xbwwZG6Cww/view?usp=drivesdk",
     inscripcionLink: "https://docs.google.com/forms/d/1utg9c73C8L4yz2hbz4EVCd3bwiVaTfDtnazTmZJkh1A/viewform?edit_requested=true",
+    inscripcionCerrada: true,
     color: "#6B21A8",
     colorHero: "#3B0764",
     waLink: "https://wa.me/573015315119?text=Hola%2C+quiero+informaci%C3%B3n+sobre+el+Festival+Colombia+Canta+y+Encanta+2026+(23-26+de+julio+en+Medell%C3%ADn).",

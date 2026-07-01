@@ -156,6 +156,14 @@
   color: #ffffff;
 }
 
+.sticky-btn--cerrado {
+  background: var(--bg-hover);
+  color: var(--texto-secundario);
+  border: 1.5px solid var(--border-media);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 /* BLOQUE 3 — CUERPO */
 .evento-cuerpo {
   max-width: 1200px;
@@ -500,6 +508,14 @@
 
 [data-theme="dark"] .compra-btn--form {
   color: #ffffff;
+}
+
+.compra-btn--cerrado {
+  background: var(--bg-hover);
+  color: var(--texto-secundario);
+  border: 1.5px solid var(--border-media);
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .compra-bases-btn {
