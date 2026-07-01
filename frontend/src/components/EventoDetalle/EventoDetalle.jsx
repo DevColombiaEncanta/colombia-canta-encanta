@@ -206,7 +206,7 @@ export default function EventoDetalle({ evento }) {
               <div className="compra-card-fin-icono">🎶</div>
               <h3 className="compra-card-fin-titulo">Este evento ya finalizó</h3>
               <p className="compra-card-fin-desc">Gracias a todos los que fueron parte de esta experiencia. Mantente atento a nuestros próximos eventos.</p>
-              <Link to="/eventos" className="btn btn-outline-oscuro compra-card-fin-btn">Ver próximos eventos →</Link>
+              <Link to="/eventos" className="btn btn-azul compra-card-fin-btn">Ver próximos eventos →</Link>
             </div>
           ) : (
           <div className="compra-card">
