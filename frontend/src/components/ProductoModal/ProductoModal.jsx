@@ -11,6 +11,9 @@ export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
   const { agregar } = useCarrito();
   const precioBase = parseCOP(producto.precio);
 
+  const imagenes = producto.imagenes ?? (producto.imagen ? [producto.imagen] : []);
+
+  const [imgActiva, setImgActiva] = useState(0);
   const [tallaSeleccionada, setTallaSeleccionada] = useState(
     producto.tallas.length > 0 ? producto.tallas[0] : null
   );
@@ -54,17 +57,37 @@ export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-contenedor" onClick={e => e.stopPropagation()}>
 
-        {/* Imagen */}
+        {/* Imagen + galería */}
         <div className="modal-imagen" style={{ background: producto.bg }}>
           <button className="modal-cerrar modal-cerrar-flotante" onClick={onClose} aria-label="Cerrar">✕</button>
-          {producto.imagen ? (
+
+          {imagenes.length > 0 ? (
             <img
-              src={`${import.meta.env.BASE_URL}${producto.imagen}`}
-              alt={producto.nombre}
+              src={`${import.meta.env.BASE_URL}${imagenes[imgActiva]}`}
+              alt={`${producto.nombre} — imagen ${imgActiva + 1}`}
               className="modal-foto"
             />
           ) : (
             <span className="modal-emoji">{producto.emoji}</span>
+          )}
+
+          {imagenes.length > 1 && (
+            <div className="modal-thumbs">
+              {imagenes.map((img, i) => (
+                <button
+                  key={i}
+                  className={`modal-thumb${i === imgActiva ? ' activo' : ''}`}
+                  onClick={() => setImgActiva(i)}
+                  aria-label={`Ver imagen ${i + 1}`}
+                >
+                  <img
+                    src={`${import.meta.env.BASE_URL}${img}`}
+                    alt=""
+                    loading="lazy"
+                  />
+                </button>
+              ))}
+            </div>
           )}
         </div>
 

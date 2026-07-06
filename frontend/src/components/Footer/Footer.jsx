@@ -18,7 +18,6 @@ const cols = [
     links: [
       { label: "Página principal", to: "/" },
       { label: "Próximos eventos", to: "/eventos" },
-      { label: "Escuela de música", to: "/inscripciones" },
     ],
   },
   {
@@ -36,6 +35,14 @@ const cols = [
       { label: "Salas Colombia canta", to: "/eventos/salas-colombia-canta" },
       { label: "Colombia me enamoras", to: "/eventos/colombia-me-enamoras" },
       { label: "Ver todos los eventos", to: "/eventos" },
+    ],
+  },
+  {
+    titulo: "Escuela",
+    links: [
+      { label: "Inscripciones", to: "/inscripciones" },
+      { label: "Cómo inscribirse", to: "/inscripciones#como-inscribirse" },
+      { label: "Preguntas frecuentes", to: "/inscripciones#faq" },
     ],
   },
   {
@@ -93,7 +100,7 @@ export default function Footer() {
 
           {/* Banda de marca — full-width centrada */}
           <div className="footer-brand-top">
-            <p className="footer-tagline">"Música que une, cultura que trasciende."</p>
+            <p className="footer-tagline">"Música que une, cultura que trasciende".</p>
             <img
               src={`${import.meta.env.BASE_URL}Fondo_Footer.png`}
               alt="Colombia Canta y Encanta"
@@ -170,29 +177,9 @@ export default function Footer() {
               </div>
             ))}
             <div className="footer-col-acc">
-              <div
-                className="footer-col-acc-titulo"
-                onClick={() => toggleSection("contacto")}
-              >
+              <Link to="/contacto" className="footer-col-acc-titulo footer-col-acc-link">
                 <span>Contacto</span>
-                <span className="footer-toggle-icon">
-                  {openSection === "contacto" ? "−" : "+"}
-                </span>
-              </div>
-              <div className={`footer-contacto-acc${openSection === "contacto" ? " footer-open" : ""}`}>
-                <div className="footer-contacto-item">
-                  <span>📍</span>
-                  <span>Calle 49 76a-65, Sector Estadio, Medellín</span>
-                </div>
-                <div className="footer-contacto-item">
-                  <span>📱</span>
-                  <a href="https://wa.me/573015315119">3015315119</a>
-                </div>
-                <div className="footer-contacto-item">
-                  <span>✉️</span>
-                  <a href="mailto:info@colombiacanta.org">info@colombiacanta.org</a>
-                </div>
-              </div>
+              </Link>
             </div>
           </div>
 

@@ -3,7 +3,7 @@ export const cursos = [
     id: 1,
     nombre: 'Cursos Vocales',
     tagline: 'Para todas las edades',
-    emoji: '🎤',
+    icono: 'icono-vocales.webp',
     color: '#e03d6f',
     descripcion:
       'Nuestros cursos vocales están diseñados para desarrollar la voz como instrumento en todas sus dimensiones: técnica, expresión y repertorio colombiano. Desde clases personalizadas de alta intensidad hasta grupos corales familiares, cada modalidad está pensada para sacar lo mejor de cada voz. Incluye fundamentos de danza folclórica como parte integral de la formación artística.',
@@ -22,7 +22,7 @@ export const cursos = [
     id: 2,
     nombre: 'Teatro Musical',
     tagline: 'Para niños y jóvenes',
-    emoji: '🎭',
+    icono: 'icono-teatro.webp',
     color: '#15803d',
     descripcion:
       'El teatro musical combina actuación, canto y danza en un proceso formativo integral. Los estudiantes aprenden a contar historias con el cuerpo y la voz, desarrollando confianza escénica, trabajo en equipo y sensibilidad artística a través del repertorio del teatro musical colombiano e internacional. Cada semestre culmina en una presentación en vivo ante público.',
@@ -40,7 +40,7 @@ export const cursos = [
     id: 3,
     nombre: 'Instrumento Personalizado',
     tagline: 'Clases individuales',
-    emoji: '🎸',
+    icono: 'icono-instrumento.webp',
     color: '#b8960a',
     descripcion:
       'Las clases de instrumento personalizado ofrecen una formación uno a uno adaptada al ritmo, los objetivos y el estilo de cada estudiante. Con énfasis en el repertorio colombiano y latinoamericano, nuestros docentes guían al estudiante desde los primeros acordes hasta niveles avanzados de interpretación. Disponible en una amplia variedad de instrumentos.',
@@ -58,7 +58,7 @@ export const cursos = [
     id: 4,
     nombre: 'Iniciación Musical',
     tagline: 'Para los más pequeños',
-    emoji: '🌟',
+    icono: 'icono-iniciacion.webp',
     color: '#1a56db',
     descripcion:
       'El programa de iniciación musical está diseñado para niños de 3 a 5 años con metodologías lúdicas que introducen el ritmo, el movimiento y los primeros conceptos musicales a través del juego. Una experiencia que siembra el amor por la música desde los primeros años de vida, con grupos pequeños y docentes especializados en primera infancia.',

@@ -418,16 +418,17 @@
   }
 }
 
-/* ── Mobile only (≤599px): CTAs apiladas a ancho completo ── */
+/* ── Mobile only (≤599px): CTAs apiladas, 30% más pequeñas ── */
 @media (max-width: 599px) {
   .hero-ctas {
     flex-direction: column;
-    width: 100%;
+    align-items: center;
   }
 
   .hero-btn-primario,
   .hero-btn-secundario {
     justify-content: center;
-    width: 100%;
+    padding: 8px 15px;
+    font-size: 11px;
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ProductoModal from '../components/ProductoModal/ProductoModal';
@@ -21,86 +21,269 @@ const categorias = ['Todos', 'Camisetas', 'Hoodies', 'Bags', 'Otros'];
 
 const productos = [
   {
-    id: 1, nombre: 'Camiseta Colombia Canta', categoria: 'Camisetas', coleccion: 'drop1', precio: '$45.000',
-    tag: 'Popular',
-    emoji: '👕', bg: 'linear-gradient(135deg, #1A56DB, #0F3A9E)',
-    imagen: 'tienda-productos/polera-colombia-canta.webp',
-    descripcion: 'Camiseta de algodón 100% con el diseño oficial de Colombia Canta y Encanta. Tela suave y transpirable, perfecta para el día a día.',
-    tallas: ['XS', 'S', 'M', 'L', 'XL'],
-    colores: [{ nombre: 'Azul', hex: '#1A56DB' }, { nombre: 'Blanco', hex: '#F0F0F0' }, { nombre: 'Negro', hex: '#1a1a1a' }],
-    stock: true,
-  },
-  {
-    id: 2, nombre: 'Camiseta Bambuco', categoria: 'Camisetas', coleccion: 'drop1', precio: '$48.000',
-    tag: 'Artesanal',
-    emoji: '👕', bg: 'linear-gradient(135deg, #E8341A, #A8240E)',
-    imagen: 'tienda-productos/polera-bambuco.webp',
-    descripcion: 'Diseño artístico inspirado en el ritmo del bambuco, símbolo del folclor andino colombiano. Algodón premium de alta calidad.',
-    tallas: ['XS', 'S', 'M', 'L', 'XL'],
-    colores: [{ nombre: 'Rojo', hex: '#E8341A' }, { nombre: 'Blanco', hex: '#F0F0F0' }],
-    stock: true,
-  },
-  {
-    id: 3, nombre: 'Camiseta Gira USA 2026', categoria: 'Camisetas', coleccion: 'drop2', precio: '$52.000',
-    tag: 'Edición Limitada',
-    emoji: '👕', bg: 'linear-gradient(135deg, #F5C800, #B8960A)',
-    descripcion: 'Edición limitada de la gira Colombia Canta y Encanta por Estados Unidos 2026. Pieza coleccionable del recorrido histórico.',
-    tallas: ['S', 'M', 'L', 'XL'],
-    colores: [{ nombre: 'Amarillo', hex: '#F5C800' }, { nombre: 'Negro', hex: '#1a1a1a' }],
-    stock: true,
-  },
-  {
-    id: 4, nombre: 'Hoodie Colombia Canta', categoria: 'Hoodies', coleccion: 'drop2', precio: '$75.000',
-    tag: 'Best Seller',
-    emoji: '🧥', bg: 'linear-gradient(135deg, #E8341A, #6B21A8)',
-    descripcion: 'Hoodie de felpa con capucha y bolsillo canguro. Cálido y cómodo, con el sello inconfundible de Colombia Canta y Encanta.',
-    tallas: ['S', 'M', 'L', 'XL', 'XXL'],
-    colores: [{ nombre: 'Rojo', hex: '#E8341A' }, { nombre: 'Morado', hex: '#6B21A8' }, { nombre: 'Negro', hex: '#1a1a1a' }],
-    stock: true,
-  },
-  {
-    id: 5, nombre: 'Hoodie Tricolor', categoria: 'Hoodies', coleccion: 'drop2', precio: '$80.000',
-    tag: null,
-    emoji: '🧥', bg: 'linear-gradient(135deg, #0F3A9E, #6B21A8)',
-    descripcion: 'Hoodie con bordado tricolor inspirado en los colores de la bandera colombiana. Edición especial de identidad nacional.',
-    tallas: ['S', 'M', 'L', 'XL'],
-    colores: [{ nombre: 'Azul', hex: '#0F3A9E' }, { nombre: 'Morado', hex: '#6B21A8' }],
-    stock: false,
-  },
-  {
-    id: 6, nombre: 'Tote Bag Colombia', categoria: 'Bags', coleccion: 'novedades', precio: '$28.000',
+    id: 10, nombre: 'Camiseta Colombia Canta y Encanta', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
     tag: 'Nuevo',
-    emoji: '👜', bg: 'linear-gradient(135deg, #F5C800, #E8341A)',
-    descripcion: 'Bolso tote de algodón con serigrafía del logo oficial. Resistente, lavable y con amplio espacio interior para el día a día.',
-    tallas: [],
-    colores: [{ nombre: 'Natural', hex: '#F5ECD7' }, { nombre: 'Negro', hex: '#1a1a1a' }],
+    emoji: '👕', bg: 'linear-gradient(135deg, #E8341A, #1A56DB)',
+    imagenes: ['tienda-productos/camiseta-colombia-canta-y-encanta-1.webp', 'tienda-productos/camiseta-colombia-canta-y-encanta-2.webp', 'tienda-productos/camiseta-colombia-canta-y-encanta-3.webp'],
+    descripcion: 'El diseño insignia de Colombia Canta y Encanta. Algodón premium con estampado artístico que celebra nuestra identidad musical.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    colores: [{ nombre: 'Multicolor', hex: '#E8341A' }],
     stock: true,
   },
   {
-    id: 7, nombre: 'Mochila Artesanal', categoria: 'Bags', coleccion: 'drop1', precio: '$65.000',
-    tag: 'Artesanal',
-    emoji: '🎒', bg: 'linear-gradient(135deg, #B8960A, #E8341A)',
-    descripcion: 'Mochila elaborada por artesanos de Medellín con técnicas tradicionales. Única en diseño, resistente y con múltiples compartimentos.',
+    id: 11, nombre: 'Camiseta Amor Colcanta', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: 'Nuevo',
+    emoji: '👕', bg: 'linear-gradient(135deg, #cc3333, #8B0000)',
+    imagenes: ['tienda-productos/camiseta-amor-colcanta-1.webp', 'tienda-productos/camiseta-amor-colcanta-2.webp'],
+    descripcion: 'Camiseta unisex que lleva el amor por Colombia en cada detalle. Tela suave y transpirable, perfecta para el día a día.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    colores: [{ nombre: 'Multicolor', hex: '#cc3333' }],
+    stock: true,
+  },
+  {
+    id: 12, nombre: 'Tula Colombia Canta y Encanta', categoria: 'Bags', coleccion: 'drop1', precio: '$XX.000',
+    tag: 'Nuevo',
+    emoji: '🎒', bg: 'linear-gradient(135deg, #F5C800, #E8341A)',
+    imagenes: ['tienda-productos/tula-colombia-canta-y-encanta-1.webp', 'tienda-productos/tula-colombia-canta-y-encanta-2.webp', 'tienda-productos/tula-colombia-canta-y-encanta-3.webp'],
+    descripcion: 'Tula con el sello oficial de Colombia Canta y Encanta. Espaciosa, resistente y con diseño exclusivo que va contigo a todas partes.',
     tallas: [],
     colores: [{ nombre: 'Multicolor', hex: '#F5C800' }],
     stock: true,
   },
   {
-    id: 8, nombre: 'Termo Colombia Canta', categoria: 'Otros', coleccion: 'novedades', precio: '$35.000',
+    id: 13, nombre: 'Gorra Colombia Canta y Encanta', categoria: 'Otros', coleccion: 'drop1', precio: '$XX.000',
     tag: 'Nuevo',
-    emoji: '🍵', bg: 'linear-gradient(135deg, #16A34A, #1A56DB)',
-    descripcion: 'Termo de acero inoxidable de 500 ml con el logo oficial. Mantiene bebidas frías hasta 24 h y calientes hasta 12 h.',
-    tallas: [],
-    colores: [{ nombre: 'Verde', hex: '#16A34A' }, { nombre: 'Azul', hex: '#1A56DB' }],
+    emoji: '🧢', bg: 'linear-gradient(135deg, #1A56DB, #0F3A9E)',
+    imagenes: ['tienda-productos/gorra-colombia-canta-y-encanta-1.webp', 'tienda-productos/gorra-colombia-canta-y-encanta-2.webp'],
+    descripcion: 'Gorra structured con bordado del logo oficial. Talla única ajustable, ideal para llevar tu identidad colombiana a donde vayas.',
+    tallas: ['Único'],
+    colores: [{ nombre: 'Azul marino', hex: '#1A56DB' }],
     stock: true,
   },
   {
-    id: 9, nombre: 'Café Colombia Canta', categoria: 'Otros', coleccion: 'kit', precio: '$22.000',
-    tag: 'Exclusivo',
-    emoji: '☕', bg: 'linear-gradient(135deg, #92400E, #B8960A)',
-    descripcion: 'Café de origen colombiano seleccionado de fincas del Eje Cafetero. Tostado medio, con notas de chocolate y caramelo. 250 g.',
+    id: 14, nombre: 'Termo Colombia Canta y Encanta', categoria: 'Otros', coleccion: 'drop1', precio: '$XX.000',
+    tag: 'Nuevo',
+    emoji: '🍵', bg: 'linear-gradient(135deg, #1A56DB, #16A34A)',
+    imagenes: ['tienda-productos/termo-colombia-canta-y-encanta-1.webp', 'tienda-productos/termo-colombia-canta-y-encanta-2.webp'],
+    descripcion: 'Termo de acero inoxidable con el logo de Colombia Canta y Encanta. Mantiene bebidas frías 24 h y calientes 12 h.',
     tallas: [],
     colores: [],
+    stock: true,
+  },
+
+  // DROP 1
+  {
+    id: 15, nombre: 'Camiseta Corazón de Oro — Blanco', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👕', bg: 'linear-gradient(135deg, #d4a853, #8B6914)',
+    imagenes: ['tienda-productos/camiseta-corazon-de-oro-1-blanco.webp', 'tienda-productos/camiseta-corazon-de-oro-2-blanco.webp', 'tienda-productos/camiseta-corazon-de-oro-3-blanco.webp'],
+    descripcion: 'Camiseta Corazón de Oro en blanco. Diseño dorado símbolo de la música y la calidez colombiana. Algodón de alta calidad.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    colores: [{ nombre: 'Blanco', hex: '#F5F5F5' }],
+    stock: true,
+  },
+  {
+    id: 16, nombre: 'Camiseta Corazón de Oro — Negro', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👕', bg: 'linear-gradient(135deg, #2a2a2a, #d4a853)',
+    imagenes: ['tienda-productos/camiseta-corazon-de-oro-1-negro.webp', 'tienda-productos/camiseta-corazon-de-oro-2-negro.webp', 'tienda-productos/camiseta-corazon-de-oro-3-negro.webp'],
+    descripcion: 'Camiseta Corazón de Oro en negro. Contraste elegante entre el fondo oscuro y el diseño dorado inspirado en el folclor colombiano.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    colores: [{ nombre: 'Negro', hex: '#1a1a1a' }],
+    stock: true,
+  },
+  {
+    id: 17, nombre: 'Camiseta Sonidos de un País', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👕', bg: 'linear-gradient(135deg, #E8341A, #F5C800)',
+    imagenes: ['tienda-productos/camiseta-sonidos-de-un-pais-1.webp', 'tienda-productos/camiseta-sonidos-de-un-pais-2.webp'],
+    descripcion: 'Los sonidos de Colombia estampados en algodón. Un tributo visual a la riqueza musical de nuestro país.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    colores: [{ nombre: 'Multicolor', hex: '#E8341A' }],
+    stock: true,
+  },
+  {
+    id: 18, nombre: 'Camiseta Vive con Libertad', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👕', bg: 'linear-gradient(135deg, #1A56DB, #16A34A)',
+    imagenes: ['tienda-productos/camiseta-vive-con-libertad-1.webp', 'tienda-productos/camiseta-vive-con-libertad-2.webp'],
+    descripcion: 'Vive con libertad, vive con Colombia. Camiseta de corte clásico con estampado que inspira a ser auténtico.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    colores: [{ nombre: 'Multicolor', hex: '#1A56DB' }],
+    stock: true,
+  },
+  {
+    id: 19, nombre: 'Buzo Música, Familia y Vida', categoria: 'Hoodies', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '🧥', bg: 'linear-gradient(135deg, #3a1a6e, #E8341A)',
+    imagenes: ['tienda-productos/buzo-musica-familia-y-vida-1.webp', 'tienda-productos/buzo-musica-familia-y-vida-2.webp', 'tienda-productos/buzo-musica-familia-y-vida-3.webp'],
+    descripcion: 'Buzo que celebra los tres pilares de Colombia Canta y Encanta: la música, la familia y la vida. Felpa suave y abrigo perfecto.',
+    tallas: ['S', 'M', 'L', 'XL', 'XXL'],
+    colores: [{ nombre: 'Multicolor', hex: '#3a1a6e' }],
+    stock: true,
+  },
+  {
+    id: 20, nombre: 'Hoodie Un Gran Poder', categoria: 'Hoodies', coleccion: 'drop1', precio: '$XX.000',
+    tag: 'Popular',
+    emoji: '🧥', bg: 'linear-gradient(135deg, #1a1a1a, #E8341A)',
+    imagenes: ['tienda-productos/hoodie-un-gran-poder-1.webp', 'tienda-productos/hoodie-un-gran-poder-2.webp', 'tienda-productos/hoodie-un-gran-poder-3.webp'],
+    descripcion: 'Un gran poder, una gran responsabilidad con la cultura. Hoodie con capucha y bolsillo canguro, en felpa premium.',
+    tallas: ['S', 'M', 'L', 'XL', 'XXL'],
+    colores: [{ nombre: 'Negro', hex: '#1a1a1a' }],
+    stock: true,
+  },
+  {
+    id: 21, nombre: 'Camiseta Oversize Colombia', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👕', bg: 'linear-gradient(135deg, #F5C800, #E8341A)',
+    imagenes: ['tienda-productos/camiseta-oversize-colombia-1.webp', 'tienda-productos/camiseta-oversize-colombia-2.webp', 'tienda-productos/camiseta-oversize-colombia-3.webp'],
+    descripcion: 'Corte oversize para un estilo relajado con identidad. Algodón suave con estampado Colombia vibrante.',
+    tallas: ['S', 'M', 'L', 'XL', 'XXL'],
+    colores: [{ nombre: 'Multicolor', hex: '#F5C800' }],
+    stock: true,
+  },
+
+  // DROP 2
+  {
+    id: 22, nombre: 'Camiseta Deportiva Colocanta', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👕', bg: 'linear-gradient(135deg, #1A56DB, #0F3A9E)',
+    imagenes: ['tienda-productos/camiseta-deportiva-colocanta-1.webp', 'tienda-productos/camiseta-deportiva-colocanta-2.webp', 'tienda-productos/camiseta-deportiva-colocanta-3.webp'],
+    descripcion: 'Camiseta deportiva oficial de Colombia Canta y Encanta. Tela técnica transpirable, ideal para entrenar con orgullo.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL'],
+    colores: [{ nombre: 'Azul', hex: '#1A56DB' }],
+    stock: true,
+  },
+  {
+    id: 23, nombre: 'Camiseta Deportiva de Colombia', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👕', bg: 'linear-gradient(135deg, #F5C800, #0F3A9E)',
+    imagenes: ['tienda-productos/camiseta-deportiva-de-colombia-1.webp', 'tienda-productos/camiseta-deportiva-de-colombia-2.webp', 'tienda-productos/camiseta-deportiva-de-colombia-3.webp'],
+    descripcion: 'Camiseta deportiva con los colores de Colombia. Rendimiento y orgullo en cada movimiento.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL'],
+    colores: [{ nombre: 'Tricolor', hex: '#F5C800' }],
+    stock: true,
+  },
+  {
+    id: 24, nombre: 'Camiseta Encanto Caribeño', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👕', bg: 'linear-gradient(135deg, #0891b2, #F5C800)',
+    imagenes: ['tienda-productos/camiseta-encanto-caribeno-1.webp', 'tienda-productos/camiseta-encanto-caribeno-2.webp', 'tienda-productos/camiseta-encanto-caribeno-3.webp'],
+    descripcion: 'El encanto del Caribe colombiano en una camiseta. Colores vibrantes y diseño tropical que celebra la costa.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    colores: [{ nombre: 'Caribe', hex: '#0891b2' }],
+    stock: true,
+  },
+  {
+    id: 25, nombre: 'Camiseta Manga Sisa Colcanta — Blanco', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👕', bg: 'linear-gradient(135deg, #e5e5e5, #aaaaaa)',
+    imagenes: ['tienda-productos/camiseta-manga-sisa-colcanta-1-blanco.webp', 'tienda-productos/camiseta-manga-sisa-colcanta-2-blanco.webp', 'tienda-productos/camiseta-manga-sisa-colcanta-3-blanco.webp'],
+    descripcion: 'Camiseta manga sisa en blanco, corte cómodo y fresco. Ideal para los días calurosos con estilo Colcanta.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL'],
+    colores: [{ nombre: 'Blanco', hex: '#F5F5F5' }],
+    stock: true,
+  },
+  {
+    id: 26, nombre: 'Camiseta Manga Sisa Colcanta — Negro', categoria: 'Camisetas', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👕', bg: 'linear-gradient(135deg, #1a1a1a, #444444)',
+    imagenes: ['tienda-productos/camiseta-manga-sisa-colcanta-1-negro.webp', 'tienda-productos/camiseta-manga-sisa-colcanta-2-negro.webp', 'tienda-productos/camiseta-manga-sisa-colcanta-3-negro.webp'],
+    descripcion: 'Camiseta manga sisa en negro, versión oscura y elegante del clásico Colcanta. Tela ligera para el día a día activo.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL'],
+    colores: [{ nombre: 'Negro', hex: '#1a1a1a' }],
+    stock: true,
+  },
+  {
+    id: 27, nombre: 'Top Deportivo El Ritmo de Tu Vida — Blanco', categoria: 'Otros', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '🎽', bg: 'linear-gradient(135deg, #e5e5e5, #1A56DB)',
+    imagenes: ['tienda-productos/top-deportivo-el-ritmo-de-tu-vida-1-blanco.webp', 'tienda-productos/top-deportivo-el-ritmo-de-tu-vida-2-blanco.webp', 'tienda-productos/top-deportivo-el-ritmo-de-tu-vida-3-blanco.webp'],
+    descripcion: 'Top deportivo en blanco que te invita a moverte al ritmo de tu vida. Tela técnica con excelente soporte y ventilación.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL'],
+    colores: [{ nombre: 'Blanco', hex: '#F5F5F5' }],
+    stock: true,
+  },
+  {
+    id: 28, nombre: 'Top Deportivo El Ritmo de Tu Vida — Negro', categoria: 'Otros', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '🎽', bg: 'linear-gradient(135deg, #1a1a1a, #E8341A)',
+    imagenes: ['tienda-productos/top-deportivo-el-ritmo-de-tu-vida-1-negro.webp', 'tienda-productos/top-deportivo-el-ritmo-de-tu-vida-2-negro.webp', 'tienda-productos/top-deportivo-el-ritmo-de-tu-vida-3-negro.webp'],
+    descripcion: 'Top deportivo en negro, el ritmo de tu vida en su versión más elegante. Soporte y estilo para cada entrenamiento.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL'],
+    colores: [{ nombre: 'Negro', hex: '#1a1a1a' }],
+    stock: true,
+  },
+  {
+    id: 29, nombre: 'Pantalón Deportivo Colombia Canta', categoria: 'Otros', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👖', bg: 'linear-gradient(135deg, #1A56DB, #1a1a1a)',
+    imagenes: ['tienda-productos/pantalon-deportivo-colombia-canta-1.webp', 'tienda-productos/pantalon-deportivo-colombia-canta-2.webp', 'tienda-productos/pantalon-deportivo-colombia-canta-3.webp'],
+    descripcion: 'Pantalón deportivo con el sello Colombia Canta. Tela elástica y cómoda para entrenar, correr o vivir tu día activo.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL'],
+    colores: [{ nombre: 'Azul/Negro', hex: '#1A56DB' }],
+    stock: true,
+  },
+  {
+    id: 30, nombre: 'Set Deportivo de Corazón', categoria: 'Otros', coleccion: 'drop1', precio: '$XX.000',
+    tag: 'Popular',
+    emoji: '🏃', bg: 'linear-gradient(135deg, #E8341A, #1A56DB)',
+    imagenes: ['tienda-productos/set-deportivo-de-corazon-1.webp', 'tienda-productos/set-deportivo-de-corazon-2.webp', 'tienda-productos/set-deportivo-de-corazon-3.webp'],
+    descripcion: 'Set deportivo completo de corazón colombiano. Conjunto top + pantalón para lucir y rendir al máximo con identidad.',
+    tallas: ['XS', 'S', 'M', 'L', 'XL'],
+    colores: [{ nombre: 'Multicolor', hex: '#E8341A' }],
+    stock: true,
+  },
+
+  // KIT ME ENAMORAS
+  {
+    id: 31, nombre: 'Tote Bag Colcana', categoria: 'Bags', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👜', bg: 'linear-gradient(135deg, #F5C800, #B8960A)',
+    imagenes: ['tienda-productos/tote-bag-colcana-1.webp', 'tienda-productos/tote-bag-colcana-2.webp', 'tienda-productos/tote-bag-colcana-3.webp'],
+    descripcion: 'Tote Bag Colcana, el complemento perfecto para llevar tu amor por Colombia. Algodón resistente con diseño exclusivo.',
+    tallas: [],
+    colores: [{ nombre: 'Natural', hex: '#F5ECD7' }],
+    stock: true,
+  },
+  {
+    id: 32, nombre: 'Tote Bag Colombia Canta y Encanta', categoria: 'Bags', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👜', bg: 'linear-gradient(135deg, #E8341A, #F5C800)',
+    imagenes: ['tienda-productos/tote-bag-colombia-canta-y-encanta-1.webp', 'tienda-productos/tote-bag-colombia-canta-y-encanta-2.webp', 'tienda-productos/tote-bag-colombia-canta-y-encanta-3.webp'],
+    descripcion: 'La tote bag oficial de Colombia Canta y Encanta. Espaciosa, lavable y con estampado del logo que la hace inconfundible.',
+    tallas: [],
+    colores: [{ nombre: 'Natural', hex: '#F5ECD7' }],
+    stock: true,
+  },
+  {
+    id: 33, nombre: 'Tote Bag Colombia Encanta', categoria: 'Bags', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👜', bg: 'linear-gradient(135deg, #F5C800, #E8341A)',
+    imagenes: ['tienda-productos/tote-bag-colombia-encanta-1.webp', 'tienda-productos/tote-bag-colombia-encanta-2.webp', 'tienda-productos/tote-bag-colombia-encanta-3.webp'],
+    descripcion: 'Colombia encanta, y esta tote bag lo demuestra. Diseño limpio y elegante con mensaje positivo de identidad colombiana.',
+    tallas: [],
+    colores: [{ nombre: 'Natural', hex: '#F5ECD7' }],
+    stock: true,
+  },
+  {
+    id: 34, nombre: 'Tote Bag Te Llevo en Mi Corazón', categoria: 'Bags', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👜', bg: 'linear-gradient(135deg, #cc3333, #F5C800)',
+    imagenes: ['tienda-productos/tote-bag-te-llevo-en-mi-corazon-1.webp', 'tienda-productos/tote-bag-te-llevo-en-mi-corazon-2.webp', 'tienda-productos/tote-bag-te-llevo-en-mi-corazon-3.webp'],
+    descripcion: 'Te llevo en mi corazón, Colombia. Una tote bag con mensaje que lleva el cariño por el país a donde vayas.',
+    tallas: [],
+    colores: [{ nombre: 'Natural', hex: '#F5ECD7' }],
+    stock: true,
+  },
+  {
+    id: 35, nombre: 'Tote Bag Vibras', categoria: 'Bags', coleccion: 'drop1', precio: '$XX.000',
+    tag: null,
+    emoji: '👜', bg: 'linear-gradient(135deg, #6B21A8, #E8341A)',
+    imagenes: ['tienda-productos/tote-bag-vibras-1.webp', 'tienda-productos/tote-bag-vibras-2.webp', 'tienda-productos/tote-bag-vibras-3.webp'],
+    descripcion: 'Las vibras de Colombia en una sola bolsa. Estampado colorido y enérgico para quienes llevan la música en el alma.',
+    tallas: [],
+    colores: [{ nombre: 'Natural', hex: '#F5ECD7' }],
     stock: true,
   },
 ];
@@ -109,17 +292,28 @@ const parsePrecio = (precio) => parseInt(precio.replace(/\D/g, ''), 10);
 
 const heroSlides = [
   {
-    img: 'tienda-hero/sonidos-que-nos-unen.jpg',
+    img: 'tienda-hero/sonidos-que-nos-unen.webp',
     tagline: 'SONIDOS QUE NOS UNEN',
     parrafo: 'Piezas que cuentan historias, inspiradas en lo que somos, en nuestra gente y en la música que nos mueve.',
     cta: 'VER COLECCIÓN',
   },
   {
-    img: 'tienda-hero/viste-lo-que-sientes.jpg',
+    img: 'tienda-hero/viste-lo-que-sientes-1.webp',
     tagline: 'VISTE LO QUE SIENTES',
     parrafo: 'Diseños únicos para llevar contigo tu orgullo, a donde quiera que vayas.',
     cta: 'COMPRAR AHORA',
   },
+  {
+    img: 'tienda-hero/viste-lo-que-sientes-2.webp',
+    tagline: 'VISTE LO QUE SIENTES',
+    parrafo: 'Diseños únicos para llevar contigo tu orgullo, a donde quiera que vayas.',
+    cta: 'COMPRAR AHORA',
+  },
+];
+
+const visteImgs = [
+  'tienda-hero/viste-lo-que-sientes-1.webp',
+  'tienda-hero/viste-lo-que-sientes-2.webp',
 ];
 
 export default function Tienda() {
@@ -129,10 +323,18 @@ export default function Tienda() {
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [toast, setToast] = useState(null);
   const [heroSlideActivo, setHeroSlideActivo] = useState(0);
+  const [visteActivo, setVisteActivo] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => {
       setHeroSlideActivo(i => (i + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVisteActivo(i => (i + 1) % visteImgs.length);
     }, 5000);
     return () => clearInterval(id);
   }, []);
@@ -156,22 +358,6 @@ export default function Tienda() {
   return (
     <main className="tienda-layout-raiz">
 
-      {/* ── Overlay "Próximamente" ── */}
-      <div className="tienda-pronto-overlay">
-        <div className="tienda-pronto-card">
-          <span className="tienda-pronto-emoji">🎶</span>
-          <span className="tienda-pronto-label">Tienda oficial</span>
-          <h2 className="tienda-pronto-titulo">Próximamente</h2>
-          <p className="tienda-pronto-desc">
-            Estamos preparando algo especial para ti.<br />
-            Pronto podrás llevar un pedacito de Colombia contigo.
-          </p>
-          <Link to="/" className="btn btn-azul tienda-pronto-btn">
-            ← Regresar al inicio
-          </Link>
-        </div>
-      </div>
-
       <Helmet>
         <title>{PAGE_TITLE}</title>
         <meta name="description" content={PAGE_DESC} />
@@ -192,7 +378,7 @@ export default function Tienda() {
       <section className="tienda-editorial-hero">
         <div
           className="hero-col-izq"
-          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.65) 15%, transparent 60%), url(${BASE_URL}tienda-hero/sonidos-que-nos-unen.jpg)` }}
+          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.65) 15%, transparent 60%), url(${import.meta.env.BASE_URL}tienda-hero/sonidos-que-nos-unen.webp)` }}
         >
           <div className="hero-editorial-contenido">
             <h2 className="hero-ed-tagline">SONIDOS QUE NOS UNEN</h2>
@@ -200,10 +386,17 @@ export default function Tienda() {
             <button className="hero-ed-btn">VER COLECCIÓN</button>
           </div>
         </div>
-        <div
-          className="hero-col-der"
-          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.65) 15%, transparent 60%), url(${BASE_URL}tienda-hero/viste-lo-que-sientes.jpg)` }}
-        >
+        <div className="hero-col-der">
+          {visteImgs.map((img, i) => (
+            <div
+              key={i}
+              className="hero-col-der-bg"
+              style={{
+                backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.65) 15%, transparent 60%), url(${import.meta.env.BASE_URL}${img})`,
+                opacity: i === visteActivo ? 1 : 0,
+              }}
+            />
+          ))}
           <div className="hero-editorial-contenido">
             <h2 className="hero-ed-tagline">VISTE LO QUE SIENTES</h2>
             <p className="hero-ed-parrafo">Diseños únicos para llevar contigo tu orgullo, a donde quiera que vayas.</p>
@@ -216,7 +409,7 @@ export default function Tienda() {
       <section className="tienda-hero-carrusel">
         <div
           className="hero-carrusel-slide"
-          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.65) 15%, transparent 60%), url(${BASE_URL}${heroSlides[heroSlideActivo].img})` }}
+          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.65) 15%, transparent 60%), url(${import.meta.env.BASE_URL}${heroSlides[heroSlideActivo].img})` }}
         >
           <div className="hero-editorial-contenido">
             <h2 className="hero-ed-tagline">{heroSlides[heroSlideActivo].tagline}</h2>
@@ -315,9 +508,9 @@ export default function Tienda() {
                 <div className="producto-card-imagen" style={{ background: prod.bg }}>
                   {prod.tag && <span className="producto-card-badge">{prod.tag}</span>}
                   {!prod.stock && <span className="producto-card-agotado">Agotado</span>}
-                  {prod.imagen ? (
+                  {(prod.imagenes?.[0] ?? prod.imagen) ? (
                     <img
-                      src={`${import.meta.env.BASE_URL}${prod.imagen}`}
+                      src={`${import.meta.env.BASE_URL}${prod.imagenes?.[0] ?? prod.imagen}`}
                       alt={prod.nombre}
                       className="producto-card-foto"
                       loading="lazy"
@@ -360,7 +553,7 @@ export default function Tienda() {
           <div className="grid-paneles-dobles">
             <div
               className="panel-inferior-item hecho-en-colombia"
-              style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.6) 10%, transparent 65%), url(${BASE_URL}tienda-paneles/hecho-en-colombia.jpg)` }}
+              style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.6) 10%, transparent 65%), url(${import.meta.env.BASE_URL}tienda-paneles/hecho-en-colombia.webp)` }}
             >
               <div className="panel-inf-contenido">
                 <h2 className="panel-inf-titulo">❤️ HECHO EN COLOMBIA</h2>
@@ -369,7 +562,7 @@ export default function Tienda() {
             </div>
             <div
               className="panel-inferior-item accesorios-destacados"
-              style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.6) 10%, transparent 65%), url(${BASE_URL}tienda-paneles/accesorios.jpg)` }}
+              style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.6) 10%, transparent 65%), url(${import.meta.env.BASE_URL}tienda-paneles/accesorios.webp)` }}
             >
               <div className="panel-inf-contenido">
                 <h2 className="panel-inf-titulo">✨ ACCESORIOS</h2>

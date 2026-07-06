@@ -2314,6 +2314,15 @@ h5 {
   color: rgba(255, 255, 255, 0.65);
 }
 
+.inscr-seccion-foto .label-seccion {
+  color: #fff;
+}
+
+#cursos .inscr-titulo,
+#cursos .inscr-subtitulo {
+  text-align: center;
+}
+
 /* ── Grid de cursos ── */
 .inscr-cursos-grid {
   display: grid;
@@ -2352,9 +2361,15 @@ h5 {
   text-align: center;
 }
 
-.inscr-card-emoji {
-  font-size: 44px;
-  line-height: 1;
+.inscr-card-icono {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  filter: brightness(0);
+}
+
+[data-theme="dark"] .inscr-card-icono {
+  filter: brightness(0) invert(1);
 }
 
 .inscr-card-tagline {
@@ -2362,8 +2377,8 @@ h5 {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--texto-secundario);
-  background: var(--bg-chip);
+  color: #fff;
+  background: var(--coral);
   padding: 3px 10px;
   border-radius: 100px;
 }
@@ -2424,47 +2439,54 @@ h5 {
 
 .inscr-card-btn {
   flex: 1;
-  padding: 10px 0;
-  border-radius: 100px;
+  padding: 11px 20px;
+  border-radius: 10px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   font-family: var(--font-titulo);
+  letter-spacing: 0.02em;
   cursor: pointer;
-  background: var(--bg-card);
+  background: transparent;
   color: var(--texto-principal);
-  border: 1.5px solid var(--border-media);
-  transition: background 0.15s ease, transform 0.15s ease;
+  border: 1.5px solid var(--coral);
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .inscr-card-btn:hover {
-  transform: translateY(-1px);
-  background: var(--bg-hover);
+  transform: translateY(-2px);
+  background: var(--coral);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(255, 92, 141, 0.28);
 }
 
 .inscr-card-btn-solido {
-  background: var(--texto-principal);
-  color: var(--bg-card);
-  border: none;
+  background: var(--coral);
+  color: var(--texto-principal);
+  border-color: var(--coral);
+  box-shadow: 0 2px 10px rgba(255, 92, 141, 0.22);
 }
 
 .inscr-card-btn-solido:hover {
-  filter: brightness(1.15);
-  background: var(--texto-principal);
+  background: var(--coral-oscuro);
+  border-color: var(--coral-oscuro);
+  box-shadow: 0 4px 16px rgba(255, 92, 141, 0.38);
+  filter: none;
 }
 
 .inscr-card-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
 .inscr-card-btn:disabled:hover {
   transform: none;
-  filter: none;
-  background: var(--bg-card);
+  background: transparent;
+  color: var(--coral);
 }
 
 .inscr-card-btn-solido:disabled:hover {
-  background: var(--texto-principal);
+  background: var(--coral);
+  border-color: var(--coral);
 }
 
 /* ── Detalle de curso (panel didáctico) ── */
@@ -2491,7 +2513,9 @@ h5 {
 .inscr-detalle-header {
   position: relative;
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 14px;
   padding: 22px 24px 18px;
   flex-shrink: 0;
@@ -2517,6 +2541,18 @@ h5 {
 
 .inscr-detalle-cerrar:hover {
   background: var(--bg-hover);
+}
+
+.inscr-detalle-icono {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: brightness(0);
+}
+
+[data-theme="dark"] .inscr-detalle-icono {
+  filter: brightness(0) invert(1);
 }
 
 .inscr-detalle-emoji {
@@ -2560,7 +2596,10 @@ h5 {
   font-size: 14px;
   color: var(--texto-secundario);
   line-height: 1.8;
-  margin: 0;
+  margin: 0 auto;
+  text-align: justify;
+  max-width: 440px;
+  padding: 0 14px;
 }
 
 .inscr-detalle-grupo {
@@ -2574,13 +2613,15 @@ h5 {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--texto-secundario);
+  color: var(--texto-principal);
+  text-align: center;
 }
 
 .inscr-detalle-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  justify-content: center;
 }
 
 .inscr-detalle-chip {
@@ -2592,6 +2633,7 @@ h5 {
   border: 1px solid transparent;
   color: var(--texto-principal);
 }
+
 
 .inscr-detalle-chip-outline {
   background: transparent;
@@ -2643,6 +2685,8 @@ h5 {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  text-align: center;
+  align-items: center;
 }
 
 .inscr-detalle-meta-label {
@@ -2669,6 +2713,58 @@ h5 {
 .inscr-detalle-acciones .btn {
   flex: 1;
   justify-content: center;
+}
+
+/* ── Navegación entre cursos (flechas al lado del modal) ── */
+.inscr-detalle-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.inscr-nav-curso {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.inscr-nav-curso:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.inscr-nav-curso:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.inscr-nav-mobile-row {
+  display: none;
+}
+
+@media (max-width: 599px) {
+  .inscr-nav-lateral {
+    display: none;
+  }
+  .inscr-detalle-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+  .inscr-nav-mobile-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+  }
 }
 
 /* ── Formulario de inscripción ── */
@@ -2888,6 +2984,85 @@ h5 {
   margin-top: 0;
 }
 
+/* Carrusel de pasos (tablet/mobile) */
+.inscr-pasos-carrusel {
+  display: none;
+  position: relative;
+  padding: 0 48px;
+}
+
+.inscr-pasos-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  padding: 36px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.inscr-pasos-card .inscr-paso-desc {
+  text-align: justify;
+  padding: 0 16px;
+}
+
+.inscr-pasos-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.inscr-pasos-nav:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.inscr-pasos-nav:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.inscr-pasos-nav-prev { left: 0; }
+.inscr-pasos-nav-next { right: 0; }
+
+.inscr-pasos-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.inscr-pasos-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.2s ease, width 0.2s ease, border-radius 0.2s ease;
+}
+
+.inscr-pasos-dot.activo {
+  background: var(--coral);
+  width: 18px;
+  border-radius: 3px;
+}
+
 .inscr-paso {
   text-align: center;
 }
@@ -3022,54 +3197,72 @@ h5 {
   #cursos .inscr-titulo,
   #cursos .inscr-subtitulo,
   #faq .inscr-titulo,
-  #faq .inscr-subtitulo {
+  #faq .inscr-subtitulo,
+  #como-inscribirse .inscr-titulo,
+  #como-inscribirse .inscr-subtitulo {
     text-align: center;
   }
+
+  #como-inscribirse .label-seccion {
+    display: block;
+    text-align: center;
+  }
+
+  .inscr-pasos { display: none; }
+  .inscr-pasos-carrusel { display: block; }
 
   #faq .label-seccion {
     display: block;
     text-align: center;
   }
 
-  .inscr-detalle-header {
+  .inscr-card-header {
+    align-items: center;
+  }
+
+  .inscr-card-body {
+    align-items: center;
+    text-align: center;
+  }
+
+  .inscr-card-lista {
+    text-align: left;
+    align-self: center;
+  }
+
+  .inscr-card-acciones {
     flex-direction: column;
-    align-items: center;
+    width: 100%;
+  }
+
+  .inscr-card-btn {
+    width: 100%;
     text-align: center;
+    padding: 12px 20px;
   }
 
-  .inscr-detalle-desc {
-    text-align: justify;
-    max-width: 440px;
-    margin: 0 auto;
-    padding: 0 14px;
-  }
-
-  .inscr-detalle-chip:not(.inscr-detalle-chip-outline) {
-    background: var(--coral);
-    color: #0a0f1e;
-    border: none;
-  }
-
-  [data-theme="dark"] .inscr-detalle-chip:not(.inscr-detalle-chip-outline) {
-    color: #ffffff;
-  }
-
-  .inscr-detalle-grupo-niveles {
-    align-items: center;
-    text-align: center;
-  }
-
-  .inscr-detalle-grupo-niveles .inscr-detalle-chips {
-    justify-content: center;
-  }
 }
 
 @media (max-width: 599px) {
+  .page-header h1 {
+    font-size: 36px;
+  }
+
   .inscr-cursos-grid {
     grid-template-columns: 1fr;
   }
 
   .inscr-titulo {
     font-size: 32px;
+  }
+
+  .inscr-card-acciones {
+    align-items: center;
+  }
+
+  .inscr-card-btn {
+    width: 50%;
+    padding: 10px 14px;
+    font-size: 12px;
   }
 }

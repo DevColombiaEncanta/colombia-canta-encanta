@@ -282,7 +282,13 @@ a.footer-contact-item:hover {
 
 @media (max-width: 599px) {
   .footer {
-    padding: 48px 0 0;
+    margin-top: 0;
+    padding: 0;
+    background: #000000;
+  }
+
+  .footer-bandera {
+    margin-top: 0;
   }
 
   .footer-brand-top {
@@ -326,6 +332,12 @@ a.footer-contact-item:hover {
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.4);
     transition: background 0.15s ease;
+  }
+
+  .footer-col-acc-link {
+    display: block;
+    cursor: pointer;
+    text-decoration: none;
   }
 
   .footer-col-acc-titulo:active {

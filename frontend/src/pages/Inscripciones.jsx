@@ -10,6 +10,7 @@ const PAGE_DESC =
   "Inscríbete en la escuela de música de Colombia Canta y Encanta. Cursos vocales, teatro musical, instrumento personalizado e iniciación musical en Medellín.";
 
 const WHATSAPP_NUMERO = "573015315119";
+const BASE = import.meta.env.BASE_URL;
 
 const pasos = [
   {
@@ -97,6 +98,7 @@ const WAIcon = () => (
 
 export default function Inscripciones() {
   const [openFaq, setOpenFaq] = useState(null);
+  const [pasoIdx, setPasoIdx] = useState(0);
 
   // ── Flujo de inscripción: ver detalles de un curso, o llenar el formulario ──
   const [vistaDetalle, setVistaDetalle] = useState(null);
@@ -106,6 +108,7 @@ export default function Inscripciones() {
   const [formData, setFormData] = useState(FORM_DATA_INICIAL);
 
   const esMenor = Number(formData.estudianteEdad) < 18;
+  const cursoIdx = vistaDetalle ? cursos.findIndex((c) => c.id === vistaDetalle.id) : -1;
 
   const scrollAComoInscribirse = () => {
     document.getElementById("como-inscribirse")?.scrollIntoView({ behavior: "smooth" });
@@ -207,7 +210,7 @@ export default function Inscripciones() {
             {cursos.map((c) => (
               <div key={c.id} className="inscr-card">
                 <div className="inscr-card-header">
-                  <span className="inscr-card-emoji">{c.emoji}</span>
+                  <img src={`${BASE}iconos-inscripciones/${c.icono}`} alt="" aria-hidden="true" className="inscr-card-icono" />
                   <span className="inscr-card-tagline">{c.tagline}</span>
                 </div>
 
@@ -263,6 +266,7 @@ export default function Inscripciones() {
               <p className="inscr-subtitulo inscr-subtitulo-claro">
                 Cuatro pasos simples para comenzar tu formación musical.
               </p>
+              {/* Desktop: grid de 4 columnas */}
               <div className="grid-4col inscr-pasos">
                 {pasos.map((p) => (
                   <div key={p.num} className="inscr-paso">
@@ -272,92 +276,181 @@ export default function Inscripciones() {
                   </div>
                 ))}
               </div>
+
+              {/* Tablet/Mobile: carrusel */}
+              <div className="inscr-pasos-carrusel">
+                <button
+                  className="inscr-pasos-nav inscr-pasos-nav-prev"
+                  onClick={() => setPasoIdx(i => Math.max(0, i - 1))}
+                  disabled={pasoIdx === 0}
+                  aria-label="Paso anterior"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                    <path d="M15 18l-6-6 6-6"/>
+                  </svg>
+                </button>
+
+                <div className="inscr-pasos-card">
+                  <div className="inscr-paso-num">{pasos[pasoIdx].num}</div>
+                  <h3 className="inscr-paso-titulo">{pasos[pasoIdx].titulo}</h3>
+                  <p className="inscr-paso-desc">{pasos[pasoIdx].desc}</p>
+                </div>
+
+                <button
+                  className="inscr-pasos-nav inscr-pasos-nav-next"
+                  onClick={() => setPasoIdx(i => Math.min(pasos.length - 1, i + 1))}
+                  disabled={pasoIdx === pasos.length - 1}
+                  aria-label="Paso siguiente"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </button>
+
+                <div className="inscr-pasos-dots">
+                  {pasos.map((_, i) => (
+                    <button
+                      key={i}
+                      className={`inscr-pasos-dot${i === pasoIdx ? ' activo' : ''}`}
+                      onClick={() => setPasoIdx(i)}
+                      aria-label={`Paso ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
             </>
           )}
 
           {vistaDetalle && !formInscripcion && (
-            <div className="inscr-detalle">
-              <div className="inscr-detalle-header">
-                <button
-                  className="inscr-detalle-cerrar"
-                  onClick={() => setVistaDetalle(null)}
-                  aria-label="Cerrar detalle"
-                >
-                  ✕
-                </button>
-                <span className="inscr-detalle-emoji">{vistaDetalle.emoji}</span>
-                <div className="inscr-detalle-header-texto">
-                  <span className="inscr-detalle-tagline">{vistaDetalle.tagline}</span>
-                  <h3 className="inscr-detalle-nombre">{vistaDetalle.nombre}</h3>
+            <div className="inscr-detalle-wrapper">
+              <button
+                className="inscr-nav-curso inscr-nav-lateral"
+                onClick={() => setVistaDetalle(cursos[cursoIdx - 1])}
+                disabled={cursoIdx <= 0}
+                aria-label="Curso anterior"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+              </button>
+
+              <div className="inscr-detalle">
+                <div className="inscr-detalle-header">
+                  <button
+                    className="inscr-detalle-cerrar"
+                    onClick={() => setVistaDetalle(null)}
+                    aria-label="Cerrar detalle"
+                  >
+                    ✕
+                  </button>
+                  <img src={`${BASE}iconos-inscripciones/${vistaDetalle.icono}`} alt="" aria-hidden="true" className="inscr-detalle-icono" />
+                  <div className="inscr-detalle-header-texto">
+                    <span className="inscr-detalle-tagline">{vistaDetalle.tagline}</span>
+                    <h3 className="inscr-detalle-nombre">{vistaDetalle.nombre}</h3>
+                  </div>
+                </div>
+
+                <div className="inscr-detalle-body">
+                  <p className="inscr-detalle-desc">{vistaDetalle.descripcion}</p>
+
+                  <div className="inscr-detalle-grupo">
+                    <span className="inscr-detalle-grupo-label">Modalidades</span>
+                    <div className="inscr-detalle-chips">
+                      {vistaDetalle.instrumentos.map((i) => (
+                        <span key={i} className="inscr-detalle-chip inscr-detalle-chip-outline">
+                          {i}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="inscr-detalle-grupo inscr-detalle-grupo-niveles">
+                    <span className="inscr-detalle-grupo-label">Niveles disponibles</span>
+                    <div className="inscr-detalle-chips">
+                      {vistaDetalle.niveles.map((n) => (
+                        <span key={n} className="inscr-detalle-chip inscr-detalle-chip-outline">
+                          {n}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="inscr-detalle-grupo">
+                    <span className="inscr-detalle-grupo-label">Horarios</span>
+                    <div className="inscr-detalle-horarios">
+                      {vistaDetalle.horarios.map((h, i) => (
+                        <div key={i} className="inscr-detalle-horario-fila">
+                          <span className="inscr-detalle-dia">{h.dia}</span>
+                          <span className="inscr-detalle-hora">{h.hora}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="inscr-detalle-meta">
+                    <div className="inscr-detalle-meta-item">
+                      <span className="inscr-detalle-meta-label">Duración</span>
+                      <span className="inscr-detalle-meta-valor">{vistaDetalle.duracion}</span>
+                    </div>
+                    <div className="inscr-detalle-meta-item">
+                      <span className="inscr-detalle-meta-label">Inversión</span>
+                      <span className="inscr-detalle-meta-valor">{vistaDetalle.precio}</span>
+                    </div>
+                  </div>
+
+                  <div className="inscr-detalle-acciones">
+                    <a
+                      href={urlWhatsAppConsulta(vistaDetalle.nombre)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-outline-oscuro"
+                    >
+                      <WAIcon /> Preguntar por WhatsApp
+                    </a>
+                    <button
+                      type="button"
+                      className="btn btn-solido-oscuro"
+                      onClick={() => iniciarInscripcion(vistaDetalle)}
+                      disabled
+                    >
+                      Inscribirme ahora →
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="inscr-detalle-body">
-                <p className="inscr-detalle-desc">{vistaDetalle.descripcion}</p>
+              <button
+                className="inscr-nav-curso inscr-nav-lateral"
+                onClick={() => setVistaDetalle(cursos[cursoIdx + 1])}
+                disabled={cursoIdx >= cursos.length - 1}
+                aria-label="Siguiente curso"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
 
-                <div className="inscr-detalle-grupo">
-                  <span className="inscr-detalle-grupo-label">Modalidades</span>
-                  <div className="inscr-detalle-chips">
-                    {vistaDetalle.instrumentos.map((i) => (
-                      <span key={i} className="inscr-detalle-chip">
-                        {i}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="inscr-detalle-grupo inscr-detalle-grupo-niveles">
-                  <span className="inscr-detalle-grupo-label">Niveles disponibles</span>
-                  <div className="inscr-detalle-chips">
-                    {vistaDetalle.niveles.map((n) => (
-                      <span key={n} className="inscr-detalle-chip inscr-detalle-chip-outline">
-                        {n}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="inscr-detalle-grupo">
-                  <span className="inscr-detalle-grupo-label">Horarios</span>
-                  <div className="inscr-detalle-horarios">
-                    {vistaDetalle.horarios.map((h, i) => (
-                      <div key={i} className="inscr-detalle-horario-fila">
-                        <span className="inscr-detalle-dia">{h.dia}</span>
-                        <span className="inscr-detalle-hora">{h.hora}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="inscr-detalle-meta">
-                  <div className="inscr-detalle-meta-item">
-                    <span className="inscr-detalle-meta-label">Duración</span>
-                    <span className="inscr-detalle-meta-valor">{vistaDetalle.duracion}</span>
-                  </div>
-                  <div className="inscr-detalle-meta-item">
-                    <span className="inscr-detalle-meta-label">Inversión</span>
-                    <span className="inscr-detalle-meta-valor">{vistaDetalle.precio}</span>
-                  </div>
-                </div>
-
-                <div className="inscr-detalle-acciones">
-                  <a
-                    href={urlWhatsAppConsulta(vistaDetalle.nombre)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-outline-oscuro"
-                  >
-                    <WAIcon /> Preguntar por WhatsApp
-                  </a>
-                  <button
-                    type="button"
-                    className="btn btn-solido-oscuro"
-                    onClick={() => iniciarInscripcion(vistaDetalle)}
-                    disabled
-                  >
-                    Inscribirme ahora →
-                  </button>
-                </div>
+              <div className="inscr-nav-mobile-row">
+                <button
+                  className="inscr-nav-curso"
+                  onClick={() => setVistaDetalle(cursos[cursoIdx - 1])}
+                  disabled={cursoIdx <= 0}
+                  aria-label="Curso anterior"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+                    <path d="M15 18l-6-6 6-6"/>
+                  </svg>
+                </button>
+                <button
+                  className="inscr-nav-curso"
+                  onClick={() => setVistaDetalle(cursos[cursoIdx + 1])}
+                  disabled={cursoIdx >= cursos.length - 1}
+                  aria-label="Siguiente curso"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </button>
               </div>
             </div>
           )}

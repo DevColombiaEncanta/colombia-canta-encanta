@@ -72,6 +72,48 @@
   object-fit: cover;
 }
 
+/* ---- Galería de miniaturas ---- */
+.modal-thumbs {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
+  z-index: 3;
+}
+
+.modal-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 7px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  padding: 0;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.modal-thumb.activo {
+  border-color: #ffffff;
+  transform: scale(1.08);
+}
+
+.modal-thumb:hover:not(.activo) {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.modal-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 /* ---- Columna info ---- */
 .modal-info {
   padding: 28px 32px 32px;

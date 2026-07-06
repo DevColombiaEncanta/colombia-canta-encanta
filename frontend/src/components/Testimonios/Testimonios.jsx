@@ -1,39 +1,72 @@
+import { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import './Testimonios.css';
 
 const BASE = import.meta.env.BASE_URL;
 
 const testimonios = [
   {
-    texto: 'Llevo dos años en la escuela de canto y ha sido una experiencia transformadora. Los profesores no solo enseñan técnica, te conectan con la música colombiana de una manera muy especial.',
-    nombre: 'María Fernanda',
-    rol: 'Alumna de Canto',
-    img: `${BASE}testimonios-retratos/testimonio-maria-fernanda.webp`,
-    color: 'var(--coral)',
+    src: `${BASE}testimonios-videos/testimonio-1.mp4`,
+    nombre: 'Nombre Apellido',
+    rol: 'Rol / Participante',
+    cita: 'La experiencia Colombia Canta y Encanta fue magnífica, no solo por el espectáculo que presentan, sino por los aprendizajes que nos dan. Nos llegan a nuestros corazones y a nuestro conocimiento. Es algo que no se pueden perder. De verdad es algo que nos eriza la piel.',
   },
   {
-    texto: 'Enseñar aquí es un privilegio. Cada estudiante llega con ilusión y se va con amor por el folclor. Ver ese proceso es lo que me hace volver cada día con más energía.',
-    nombre: 'Luis Armando',
-    rol: 'Profesor de Guitarra',
-    img: `${BASE}testimonios-retratos/testimonio-luis-armando.webp`,
-    color: 'var(--azul)',
+    src: `${BASE}testimonios-videos/testimonio-2.mp4`,
+    nombre: 'María Eugenia',
+    rol: 'Rol / Participante',
+    cita: 'Estoy sorprendida de esta muestra tan espectacular que hicieron. Sobre todo porque muestran algo que a diario lo evidenciamos las personas que vivimos en Medellín o en Colombia. Es nuestra rutina del día a día. Ver a todos estos artistas manifestando cada situación o cada momento es espectacular. (...) Espectacular. Digno de mostrar no solo acá sino de exportar. Hay que venir.',
   },
   {
-    texto: 'Mi hijo entró sin saber nada de música y hoy toca piano con una seguridad que nos sorprende a todos. El ambiente es cálido, familiar y muy profesional al mismo tiempo.',
-    nombre: 'Sandra Milena',
-    rol: 'Madre de Alumno',
-    img: `${BASE}testimonios-retratos/testimonio-sandra-milena.webp`,
-    color: 'var(--amarillo)',
+    src: `${BASE}testimonios-videos/testimonio-3.mp4`,
+    nombre: 'Nombre Apellido',
+    rol: 'Rol / Participante',
+    cita: 'Muy feliz. Este show sin duda alguna es de otro mundo. Figuramos y gozamos con la cultura colombiana. Gozamos con toda esa muestra de talento que tienen estos artistas. Grandes en calidad. (...) La invitación es a que vengan.',
   },
   {
-    texto: 'La danza folclórica me enseñó a conocer mi propia cultura. Cada ensayo es una celebración. Nunca pensé que aprender danza me daría tanto orgullo por ser colombiano.',
-    nombre: 'Sebastián Torres',
-    rol: 'Alumno de Danza',
-    img: `${BASE}testimonios-retratos/testimonio-sebastian-torres.webp`,
-    color: 'var(--rojo)',
+    src: `${BASE}testimonios-videos/testimonio-4.mp4`,
+    nombre: 'Nombre Apellido',
+    rol: 'Rol / Participante',
+    cita: 'Realmente es un show de exportación. […] Se nota el compromiso, la dedicación, el amor. La música brota y nos hacen sentir que esa Colombia querida, la tenemos que querer cada día más y más porque definitivamente vale la pena.',
+  },
+  {
+    src: `${BASE}testimonios-videos/testimonio-5.mp4`,
+    nombre: 'Nombre Apellido',
+    rol: 'Rol / Participante',
+    cita: 'Estuvo súper chévere. Me gustaría invitar a más jóvenes para que vengan y se enamoren de Colombia. Estos escenarios son muy espectaculares.',
   },
 ];
 
 export default function Testimonios() {
+  const videoRef    = useRef(null);
+  const [idx, setIdx]             = useState(0);
+  const [slideClass, setSlideClass] = useState('');
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const goTo = (newIdx) => {
+    if (newIdx < 0 || newIdx >= testimonios.length || newIdx === idx) return;
+    const dir = newIdx > idx ? 'next' : 'prev';
+
+    setSlideClass(`saliendo-${dir}`);
+
+    setTimeout(() => {
+      videoRef.current?.pause();
+      setIsPlaying(false);
+      setIdx(newIdx);
+      setSlideClass(`entrando-${dir}`);
+      setTimeout(() => setSlideClass(''), 360);
+    }, 260);
+  };
+
+  const togglePlay = () => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    if (vid.paused) { vid.play(); setIsPlaying(true); }
+    else            { vid.pause(); setIsPlaying(false); }
+  };
+
+  const t = testimonios[idx];
+
   return (
     <section className="testimonios-section">
       <div className="container">
@@ -42,19 +75,65 @@ export default function Testimonios() {
           <h2 className="testimonios-divider-titulo">Nuestra Comunidad</h2>
         </div>
 
-        <div className="testimonios-grid">
-          {testimonios.map((t, i) => (
-            <div key={i} className="testimonio-card">
-              <div className="testimonio-avatar" style={{ borderColor: t.color }}>
-                <img src={t.img} alt={t.nombre} className="testimonio-avatar-img" loading="lazy" decoding="async" />
+        <div className="tc-wrapper">
+          <div className="tc-slide-wrap">
+
+            <button className="tc-nav tc-nav-prev" onClick={() => goTo(idx - 1)} disabled={idx === 0} aria-label="Testimonio anterior">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="17" height="17">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+
+            <div className={`tc-slide${slideClass ? ` ${slideClass}` : ''}`}>
+
+              <div className="tc-video-col" onClick={togglePlay}>
+                <video
+                  key={idx}
+                  ref={videoRef}
+                  src={t.src}
+                  className="tc-video"
+                  playsInline
+                  preload="metadata"
+                  onEnded={() => setIsPlaying(false)}
+                />
+                <div className={`tc-play-btn${isPlaying ? ' oculto' : ''}`} aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                </div>
               </div>
-              <div className="testimonio-contenido">
-                <p className="testimonio-nombre">{t.nombre}</p>
-                <p className="testimonio-rol">{t.rol}</p>
-                <p className="testimonio-texto">{t.texto}</p>
+
+              <div className="tc-content-col">
+                <div className="tc-identidad">
+                  <p className="tc-nombre">{t.nombre}</p>
+                  <p className="tc-rol">{t.rol}</p>
+                </div>
+
+                <blockquote className="tc-cita">{t.cita}</blockquote>
+
+                <Link to="/eventos" className="tc-cta-btn">
+                  Ver próximos eventos
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </Link>
               </div>
+
             </div>
-          ))}
+
+            <button className="tc-nav tc-nav-next" onClick={() => goTo(idx + 1)} disabled={idx === testimonios.length - 1} aria-label="Testimonio siguiente">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="17" height="17">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </button>
+
+          </div>
+
+          <div className="tc-dots">
+            {testimonios.map((_, i) => (
+              <button key={i} className={`tc-dot${i === idx ? ' activo' : ''}`} onClick={() => goTo(i)} aria-label={`Testimonio ${i + 1}`} />
+            ))}
+          </div>
         </div>
 
       </div>

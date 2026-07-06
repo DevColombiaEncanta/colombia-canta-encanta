@@ -138,6 +138,15 @@
 .hero-col-izq { background-color: #1c1a17; }
 .hero-col-der { background-color: #2b2824; }
 
+.hero-col-der-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.9s ease;
+  z-index: 0;
+}
+
 /* ── 1b. Hero como carrusel único — solo tablet/mobile ── */
 .tienda-hero-carrusel {
   display: none;

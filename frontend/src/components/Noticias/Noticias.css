@@ -214,6 +214,17 @@
 }
 
 @media (max-width: 599px) {
+  .noticias-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .noticias-ver-todas {
+    position: static;
+  }
+
   .noticias-titulo {
     font-size: 28px;
   }

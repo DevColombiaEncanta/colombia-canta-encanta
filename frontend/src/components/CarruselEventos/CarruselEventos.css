@@ -323,6 +323,19 @@
   }
 }
 
+@media (max-width: 599px) {
+  .eventos-ac-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .eventos-ac-ver-todos {
+    position: static;
+  }
+}
+
 /* ==========================================
    EVENT CARD (usado en /eventos)
    ========================================== */
