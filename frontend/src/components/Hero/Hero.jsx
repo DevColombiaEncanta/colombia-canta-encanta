@@ -18,7 +18,7 @@ const slides = [
       "Somos una comunidad artística que preserva y proyecta el folclor colombiano a través de la formación, los escenarios y experiencias que conectan generaciones alrededor del mundo.",
     ctas: [
       { label: "Contáctanos", to: "/contacto", primario: true },
-      { label: "Descubrir más", to: "/nosotros", primario: false },
+      { label: "Descúbrenos", to: "/nosotros", primario: false },
     ],
     imagen: "hero-slides/bienvenida.webp",
   },
@@ -44,8 +44,8 @@ const slides = [
     label: "Nuestra historia",
     titulo: (
       <>
-        La historia detrás de un{" "}
-        <span className="hero-titulo-acento">legado</span> que sigue creciendo
+        La historia detrás de un legado que{" "}
+        <span className="hero-titulo-acento">sigue creciendo</span>
       </>
     ),
     descripcion:
@@ -77,12 +77,12 @@ const slides = [
     label: "Tienda",
     titulo: (
       <>
-        Tejiendo <br /> <span className="hero-titulo-acento">música</span>
+        Descubre nuestra <span className="hero-titulo-acento">tienda</span>
       </>
     ),
     descripcion:
-      "Estamos creando un espacio donde el arte, la tradición y la identidad colombiana se transforman en piezas únicas.",
-    ctas: [{ label: "Descubre próximamente", to: "/tienda", primario: true }],
+      "Hemos creado un espacio donde la identidad Colombia Canta y Encanta se refleja en cada una de nuestras piezas.",
+    ctas: [{ label: "Descubre la colección", to: "/tienda", primario: true }],
     imagen: "hero-slides/tienda.webp",
   },
   {
