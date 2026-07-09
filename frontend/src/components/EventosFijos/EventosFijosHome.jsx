@@ -184,16 +184,6 @@ export default function EventosFijosHome({ variant = 'hero' }) {
           <div className="efh-bottom">
             <span className="efh-accent" style={{ background: ev.color }} />
             <h3 className="efh-titulo">{ev.titulo}</h3>
-            <div className="efh-pills">
-              {ev.pills.slice(0, 3).map(p => (
-                <span key={p.texto} className="efh-pill">
-                  {p.iconoSrc
-                    ? <img src={p.iconoSrc} alt="" aria-hidden="true" className="efh-pill-ico-img" />
-                    : p.icono}
-                  {p.texto}
-                </span>
-              ))}
-            </div>
             <span className="efh-cta">
               {ev.cta} <span className="efh-arrow">→</span>
             </span>
