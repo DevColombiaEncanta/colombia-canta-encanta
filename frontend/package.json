@@ -29,7 +29,7 @@
     "gh-pages": "^6.3.0",
     "globals": "^17.4.0",
     "sharp": "^0.34.5",
-    "svgo": "^4.0.1",
+    "svgo": "^4.0.2",
     "vite": "^8.0.1",
     "vite-plugin-image-optimizer": "^2.0.3"
   }
