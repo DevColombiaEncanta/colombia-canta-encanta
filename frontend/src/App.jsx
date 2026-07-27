@@ -16,6 +16,8 @@ import Contacto from './pages/Contacto';
 import Elenco from './pages/Elenco';
 import NoticiasPage from './pages/Noticias';
 import NoticiaDetallePage from './pages/NoticiaDetallePage';
+import PagoConfirmacion from './pages/PagoConfirmacion';
+import PagoCancelado from './pages/PagoCancelado';
 import NotFound from './pages/NotFound';
 import './styles/main.css';
 
@@ -39,6 +41,8 @@ export default function App() {
               <Route path="/contacto" element={<Contacto />} />
               <Route path="/noticias" element={<NoticiasPage />} />
               <Route path="/noticias/:slug" element={<NoticiaDetallePage />} />
+              <Route path="/confirmacion" element={<PagoConfirmacion />} />
+              <Route path="/pago-cancelado" element={<PagoCancelado />} />
               <Route path="/404" element={<NotFound />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

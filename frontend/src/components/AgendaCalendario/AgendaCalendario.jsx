@@ -61,7 +61,7 @@ export default function AgendaCalendario() {
           nombre: p.nombre,
           tipo: ef.titulo,
           color: ef.color,
-          link: `/eventos/${ef.slug}`,
+          link: `/eventos/${ef.slug}${p.fechaISO ? `?fecha=${p.fechaISO}` : ''}`,
           lugar: ef.lugar,
           img: ef.img,
           descripcion: ef.descripcionCorta,

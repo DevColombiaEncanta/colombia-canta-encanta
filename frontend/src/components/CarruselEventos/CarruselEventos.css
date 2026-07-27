@@ -70,11 +70,16 @@
   position: relative;
   cursor: pointer;
   text-decoration: none;
-  transition: flex 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: flex 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
 }
 
 .evento-ac-card:hover {
   flex: 5;
+  opacity: 1;
+}
+
+.eventos-ac-acordeon:has(.evento-ac-card:hover) .evento-ac-card:not(:hover) {
+  opacity: 0.55;
 }
 
 /* ── Collapsed ── */

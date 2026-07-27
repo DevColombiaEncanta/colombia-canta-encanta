@@ -39,9 +39,13 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--texto-secundario);
+  color: #000;
   margin: 0;
   white-space: nowrap;
+}
+
+[data-theme="dark"] .contacto-divider-titulo {
+  color: #fff;
 }
 
 .contacto-divider-titulo::before,
@@ -50,7 +54,6 @@
   font-size: 7px;
   vertical-align: middle;
   color: var(--coral);
-  opacity: 0.75;
 }
 
 .contacto-divider-titulo::before { margin-right: 12px; }

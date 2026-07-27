@@ -25,7 +25,6 @@ export default function NoticiaDetalle({ noticia }) {
             <p className="noticia-hero-fecha">{noticia.fechaCompleta}</p>
           </div>
         </div>
-        <div className="noticia-hero-emoji">{noticia.emoji}</div>
         <div className="franja-bandera" />
       </div>
 
@@ -33,6 +32,17 @@ export default function NoticiaDetalle({ noticia }) {
       <div className="noticia-cuerpo container">
         <div className="noticia-articulo">
           <p className="noticia-lead">{noticia.desc}</p>
+          {(noticia.banner || noticia.img) && (
+            <div className="noticia-imagen-principal">
+              <img
+                src={noticia.banner ?? noticia.img}
+                alt={noticia.titulo}
+                className="noticia-imagen-principal-img"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          )}
           {noticia.contenido.map((parrafo, i) => (
             <p key={i} className="noticia-parrafo">{parrafo}</p>
           ))}

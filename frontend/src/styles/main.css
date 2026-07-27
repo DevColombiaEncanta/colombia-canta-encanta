@@ -1200,25 +1200,10 @@ h5 {
    Imagen de bailarina como fondo con overlay
    ========================================== */
 @media (max-width: 1024px) {
-  /* Negro puro para fundir con el gradiente del footer */
-  .contacto-section {
-    background: #000000;
-  }
-
   .contacto-centrado {
     grid-template-columns: 1fr;
     position: relative;
     z-index: 2;
-  }
-
-  /* Overlay negro puro — coincide con el footer-bandera */
-  .contacto-section::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 1;
-    pointer-events: none;
   }
 
   /* La imagen pasa a ser fondo absoluto */
@@ -1236,8 +1221,12 @@ h5 {
     height: 100%;
     object-fit: contain;
     object-position: center center;
-    opacity: 0.25;
+    opacity: 0.28;
     margin: 0;
+  }
+
+  [data-theme="dark"] .contacto-foto {
+    opacity: 0.12;
   }
 
   /* Decorativos: ocultos en mobile/tablet */
@@ -1247,7 +1236,6 @@ h5 {
     display: none;
   }
 
-  /* Texto sobre fondo oscuro */
   .contacto-content {
     padding: 64px 24px 80px;
     text-align: center;
@@ -1258,7 +1246,7 @@ h5 {
 
   .contacto-content .frase-principal {
     font-size: 28px;
-    color: #ffffff;
+    color: var(--texto-principal);
   }
 
   .contacto-content .frase-principal span {
@@ -1266,28 +1254,15 @@ h5 {
   }
 
   .contacto-content .subtitulo {
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--texto-secundario);
   }
 
   .contacto-content .label-seccion {
     align-self: center;
-    color: rgba(255, 255, 255, 0.6) !important;
   }
 
   .contacto-btns {
     justify-content: center;
-  }
-
-  /* Botón outline adaptado al fondo oscuro */
-  .contacto-section .btn-outline-oscuro {
-    border-color: rgba(255, 255, 255, 0.5);
-    color: #ffffff;
-    background: transparent;
-  }
-
-  .contacto-section .btn-outline-oscuro:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
   }
 
   .page-header-inner {
@@ -2069,14 +2044,73 @@ h5 {
   color: var(--texto-secundario);
 }
 
+/* ── Paginador ── */
+.noticias-paginador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 48px;
+}
+
+.noticias-paginador-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: transparent;
+  color: var(--texto-principal);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-cuerpo);
+  font-variant-numeric: tabular-nums;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.noticias-paginador-btn:hover {
+  border-color: var(--amarillo);
+  background: var(--amarillo);
+  color: #000000;
+}
+
+.noticias-paginador-btn.active {
+  background: var(--amarillo);
+  border-color: var(--amarillo);
+  color: #000000;
+}
+
+.noticias-paginador-sep {
+  color: var(--texto-secundario);
+  font-size: 14px;
+  padding: 0 2px;
+  user-select: none;
+}
+
 /* ── Responsive ── */
 @media (max-width: 1024px) {
   .noticias-page-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .noticias-header-sub {
+    text-align: center;
+  }
+
+  .noticias-page-controls {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 599px) {
+  .noticias-page-section {
+    padding-top: 28px;
+  }
+
   .noticias-page-controls {
     flex-direction: column;
     align-items: stretch;
@@ -2084,6 +2118,14 @@ h5 {
 
   .noticias-page-busqueda {
     max-width: 100%;
+  }
+
+  .noticias-page-filtros {
+    justify-content: center;
+  }
+
+  .noticias-header-sub {
+    text-align: center;
   }
 
   .noticias-page-grid {

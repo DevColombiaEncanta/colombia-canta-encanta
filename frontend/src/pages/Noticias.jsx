@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { noticias } from '../data/noticias';
@@ -12,6 +12,19 @@ const PAGE_DESC = 'Últimas noticias, crónicas y novedades de Colombia Canta y 
 
 const CATEGORIAS = ['Todos', ...new Set(noticias.map(n => n.categoria))];
 
+function getCardsPorPagina() {
+  if (window.innerWidth <= 599) return 2;
+  if (window.innerWidth <= 1024) return 4;
+  return 6;
+}
+
+function generarPaginas(actual, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  if (actual <= 4) return [1, 2, 3, 4, 5, '…', total];
+  if (actual >= total - 3) return [1, '…', total - 4, total - 3, total - 2, total - 1, total];
+  return [1, '…', actual - 1, actual, actual + 1, '…', total];
+}
+
 const SearchIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8" />
@@ -22,6 +35,14 @@ const SearchIcon = () => (
 export default function NoticiasPage() {
   const [filtro, setFiltro] = useState('Todos');
   const [busqueda, setBusqueda] = useState('');
+  const [pagina, setPagina] = useState(1);
+  const [cardsPorPagina, setCardsPorPagina] = useState(getCardsPorPagina);
+
+  useEffect(() => {
+    const update = () => setCardsPorPagina(getCardsPorPagina());
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
   const filtradas = useMemo(() =>
     noticias.filter(n => {
@@ -35,6 +56,19 @@ export default function NoticiasPage() {
     }),
     [filtro, busqueda]
   );
+
+  useEffect(() => { setPagina(1); }, [filtro, busqueda]);
+  useEffect(() => { setPagina(1); }, [cardsPorPagina]);
+
+  const totalPaginas = Math.ceil(filtradas.length / cardsPorPagina);
+  const paginaEfectiva = Math.min(pagina, totalPaginas || 1);
+  const paginadas = filtradas.slice((paginaEfectiva - 1) * cardsPorPagina, paginaEfectiva * cardsPorPagina);
+  const paginas = generarPaginas(paginaEfectiva, totalPaginas);
+
+  const irAPagina = (p) => {
+    setPagina(p);
+    document.querySelector('.noticias-page-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <main>
@@ -62,7 +96,7 @@ export default function NoticiasPage() {
             <h1>Noticias</h1>
           </div>
           <div className="page-header-divisor" />
-          <p className="page-header-sub">Últimas novedades de Colombia Canta y Encanta</p>
+          <p className="page-header-sub noticias-header-sub">Últimas novedades de Colombia Canta y Encanta</p>
         </div>
       </div>
 
@@ -105,25 +139,47 @@ export default function NoticiasPage() {
 
           {/* Resultado */}
           {filtradas.length > 0 ? (
-            <div className="noticias-page-grid">
-              {filtradas.map(n => (
-                <Link to={`/noticias/${n.slug}`} key={n.id} className="noticias-page-card">
-                  <div className="noticias-page-card-img" style={{ background: n.gradiente }}>
-                    {n.banner && (
-                      <img src={n.banner} alt={n.titulo} className="noticias-page-card-banner" loading="lazy" decoding="async" />
-                    )}
-                    {!n.banner && <span className="noticias-page-card-emoji">{n.emoji}</span>}
-                    <span className="noticias-page-card-cat">{n.categoria}</span>
-                  </div>
-                  <div className="noticias-page-card-body">
-                    <span className="noticias-page-card-fecha">{n.fechaCompleta}</span>
-                    <h3 className="noticias-page-card-titulo">{n.titulo}</h3>
-                    <p className="noticias-page-card-desc">{n.desc}</p>
-                  </div>
-                  <div className="noticias-page-card-linea" />
-                </Link>
-              ))}
-            </div>
+            <>
+              <div className="noticias-page-grid">
+                {paginadas.map(n => (
+                  <Link to={`/noticias/${n.slug}`} key={n.id} className="noticias-page-card">
+                    <div className="noticias-page-card-img" style={{ background: n.gradiente }}>
+                      {n.banner && (
+                        <img src={n.banner} alt={n.titulo} className="noticias-page-card-banner" loading="lazy" decoding="async" />
+                      )}
+                      {!n.banner && <span className="noticias-page-card-emoji">{n.emoji}</span>}
+                      <span className="noticias-page-card-cat">{n.categoria}</span>
+                    </div>
+                    <div className="noticias-page-card-body">
+                      <span className="noticias-page-card-fecha">{n.fechaCompleta}</span>
+                      <h3 className="noticias-page-card-titulo">{n.titulo}</h3>
+                      <p className="noticias-page-card-desc">{n.desc}</p>
+                    </div>
+                    <div className="noticias-page-card-linea" />
+                  </Link>
+                ))}
+              </div>
+
+              {totalPaginas > 1 && (
+                <nav className="noticias-paginador" aria-label="Paginación de noticias">
+                  {paginas.map((p, i) =>
+                    p === '…' ? (
+                      <span key={`sep-${i}`} className="noticias-paginador-sep">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        className={`noticias-paginador-btn${paginaEfectiva === p ? ' active' : ''}`}
+                        onClick={() => irAPagina(p)}
+                        aria-label={`Página ${p}`}
+                        aria-current={paginaEfectiva === p ? 'page' : undefined}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+                </nav>
+              )}
+            </>
           ) : (
             <div className="noticias-page-empty">
               <p>No se encontraron noticias para <strong>"{busqueda}"</strong></p>
