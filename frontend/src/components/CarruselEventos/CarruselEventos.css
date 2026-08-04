@@ -208,6 +208,14 @@
   margin: 12px 0 28px;
 }
 
+/* ── Estado de carga / error / vacío ── */
+.eventos-ac-estado {
+  padding: 24px 12px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--texto-secundario);
+}
+
 .eventos-ac-destacados-header::before,
 .eventos-ac-destacados-header::after {
   content: '';

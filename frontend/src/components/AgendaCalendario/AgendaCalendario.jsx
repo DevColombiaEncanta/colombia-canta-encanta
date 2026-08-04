@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { eventos } from '../../data/eventos';
-import { eventosFijos } from '../../data/eventosFijos';
+import { useEventos } from '../../hooks/useEventos';
+import { useEventosFijos } from '../../hooks/useEventosFijos';
 import './AgendaCalendario.css';
 
 const DIAS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
@@ -38,6 +38,10 @@ function agruparPorMes(lista) {
 }
 
 export default function AgendaCalendario() {
+  const { eventos, cargando: cargandoEventos, error: errorEventos } = useEventos();
+  const { eventosFijos, cargando: cargandoFijos, error: errorFijos } = useEventosFijos();
+  const cargando = cargandoEventos || cargandoFijos;
+  const error = errorEventos || errorFijos;
   const [abierto, setAbierto] = useState(null);
 
   const hoy = useMemo(() => {
@@ -100,16 +104,23 @@ export default function AgendaCalendario() {
       gruposPasados:  agruparPorMes(pasados),
       proximoKey: proximos.length > 0 ? proximos[proximos.length - 1].key : null,
     };
-  }, [hoy]);
+  }, [hoy, eventos, eventosFijos]);
 
   const toggle = (key) => setAbierto(prev => prev === key ? null : key);
 
   const mesActualKey = `${hoy.getFullYear()}-${hoy.getMonth()}`;
-  const [mesesAbiertos, setMesesAbiertos] = useState(() => {
-    const keys = new Set([mesActualKey]);
-    gruposProximos.forEach(g => keys.add(g.key));
-    return keys;
-  });
+  const [mesesAbiertos, setMesesAbiertos] = useState(() => new Set([mesActualKey]));
+
+  // Los grupos "próximos" llegan async — no pueden leerse en el useState inicial
+  // (correría antes de que el fetch resuelva), así que se sincronizan acá para que
+  // los meses reales lleguen expandidos por defecto, igual que con los datos estáticos.
+  useEffect(() => {
+    setMesesAbiertos(prev => {
+      const next = new Set(prev);
+      gruposProximos.forEach(g => next.add(g.key));
+      return next;
+    });
+  }, [gruposProximos]);
   const toggleMes = (key) => setMesesAbiertos(prev => {
     const next = new Set(prev);
     if (next.has(key)) next.delete(key);
@@ -276,6 +287,24 @@ export default function AgendaCalendario() {
       </div>
     );
   };
+
+  if (cargando) {
+    return (
+      <div className="agenda-vacio">
+        <span className="agenda-vacio-ico">📅</span>
+        <p>Cargando agenda…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="agenda-vacio">
+        <span className="agenda-vacio-ico">📅</span>
+        <p>No se pudo cargar la agenda. Intenta de nuevo más tarde.</p>
+      </div>
+    );
+  }
 
   if (gruposProximos.length === 0 && gruposPasados.length === 0) {
     return (

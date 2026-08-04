@@ -1,12 +1,41 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { BASE_URL, OG_IMAGE } from '../utils/seo';
-import { eventos } from '../data/eventos';
-import { eventosFijos } from '../data/eventosFijos';
+import { useEventos } from '../hooks/useEventos';
+import { useEventosFijos } from '../hooks/useEventosFijos';
 import EventoDetalle from '../components/EventoDetalle/EventoDetalle';
 
 export default function EventoDetallePage() {
   const { slug } = useParams();
+  const { eventos, cargando: cargandoEventos, error: errorEventos } = useEventos();
+  const { eventosFijos, cargando: cargandoFijos, error: errorFijos } = useEventosFijos();
+  const cargando = cargandoEventos || cargandoFijos;
+  const error = errorEventos || errorFijos;
+
+  if (cargando) {
+    return (
+      <main>
+        <div className="container">
+          <div className="noticias-page-empty">
+            <p>Cargando evento…</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main>
+        <div className="container">
+          <div className="noticias-page-empty">
+            <p>No se pudo cargar el evento. Intenta de nuevo más tarde.</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   const evento = [...eventos, ...eventosFijos].find(e => e.slug === slug);
   if (!evento) return <Navigate to="/404" />;
 
@@ -33,7 +62,7 @@ export default function EventoDetallePage() {
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={OG_IMAGE} />
       </Helmet>
-      <EventoDetalle evento={evento} />
+      <EventoDetalle evento={evento} eventos={eventos} eventosFijos={eventosFijos} />
     </>
   );
 }

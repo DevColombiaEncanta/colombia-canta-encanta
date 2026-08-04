@@ -9,6 +9,13 @@
   gap: 64px;
 }
 
+.ef-estado {
+  padding: 48px 12px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--texto-secundario);
+}
+
 /* ── Item (cada evento fijo) ── */
 .ef-item {
   display: flex;

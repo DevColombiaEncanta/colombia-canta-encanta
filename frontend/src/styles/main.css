@@ -1954,12 +1954,6 @@ h5 {
   overflow: hidden;
 }
 
-.noticias-page-card-emoji {
-  font-size: 40px;
-  opacity: 0.5;
-  user-select: none;
-}
-
 .noticias-page-card-banner {
   position: absolute;
   inset: 0;
@@ -2363,6 +2357,14 @@ h5 {
 #cursos .inscr-titulo,
 #cursos .inscr-subtitulo {
   text-align: center;
+}
+
+/* ── Estado de carga / error / vacío ── */
+.inscr-estado {
+  padding: 40px 12px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--texto-secundario);
 }
 
 /* ── Grid de cursos ── */
@@ -2933,6 +2935,15 @@ h5 {
 .inscr-checkbox-label input {
   margin-top: 2px;
   flex-shrink: 0;
+}
+
+.inscr-form-error {
+  font-size: 13px;
+  color: #E8341A;
+  background: rgba(232, 52, 26, 0.1);
+  border: 1px solid rgba(232, 52, 26, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
 }
 
 .inscr-form-acciones {

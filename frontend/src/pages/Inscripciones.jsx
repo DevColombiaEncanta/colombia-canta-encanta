@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { cursos } from "../data/cursos";
+import { useCursos } from "../hooks/useCursos";
 import Footer from "../components/Footer/Footer";
 import "../styles/main.css";
 import { BASE_URL, OG_IMAGE } from "../utils/seo";
+import { apiFetch } from "../utils/api";
 
 const PAGE_TITLE = "Inscripciones | Colombia Canta y Encanta";
 const PAGE_DESC =
   "Inscríbete en la escuela de música de Colombia Canta y Encanta. Cursos vocales, teatro musical, instrumento personalizado e iniciación musical en Medellín.";
 
 const WHATSAPP_NUMERO = "573015315119";
-const BASE = import.meta.env.BASE_URL;
 
 const pasos = [
   {
@@ -82,9 +82,12 @@ const FORM_DATA_INICIAL = {
   estudianteNombre: "",
   estudianteDocumento: "",
   estudianteEdad: "",
+  estudianteEmail: "",
+  estudianteTelefono: "",
   acudienteNombre: "",
   acudienteContacto: "",
   acudienteParentesco: "",
+  acudienteEmail: "",
   horarioPreferencia: "",
   barrio: "",
   aceptaTerminos: false,
@@ -97,6 +100,7 @@ const WAIcon = () => (
 );
 
 export default function Inscripciones() {
+  const { cursos, cargando, error } = useCursos();
   const [openFaq, setOpenFaq] = useState(null);
   const [pasoIdx, setPasoIdx] = useState(0);
 
@@ -105,6 +109,8 @@ export default function Inscripciones() {
   const [formInscripcion, setFormInscripcion] = useState(null);
   const [pasoForm, setPasoForm] = useState(1);
   const [enviado, setEnviado] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [errorEnvio, setErrorEnvio] = useState(null);
   const [formData, setFormData] = useState(FORM_DATA_INICIAL);
 
   const esMenor = Number(formData.estudianteEdad) < 18;
@@ -132,6 +138,7 @@ export default function Inscripciones() {
   const cancelarFormulario = () => {
     setFormInscripcion(null);
     setFormData(FORM_DATA_INICIAL);
+    setErrorEnvio(null);
   };
 
   const handleChange = (e) => {
@@ -147,9 +154,37 @@ export default function Inscripciones() {
     setPasoForm((prev) => (prev === 3 && !esMenor ? 1 : prev - 1));
   };
 
-  const manejarEnvio = (e) => {
+  const manejarEnvio = async (e) => {
     e.preventDefault();
-    setEnviado(true);
+    setErrorEnvio(null);
+    setEnviando(true);
+
+    const payload = {
+      curso_id: formData.cursoId,
+      estudiante_nombre: formData.estudianteNombre,
+      estudiante_documento: formData.estudianteDocumento,
+      estudiante_edad: Number(formData.estudianteEdad),
+      horario_preferencia: formData.horarioPreferencia,
+      acepta_terminos: formData.aceptaTerminos,
+    };
+    if (formData.estudianteEmail) payload.estudiante_email = formData.estudianteEmail;
+    if (formData.estudianteTelefono) payload.estudiante_telefono = formData.estudianteTelefono;
+    if (formData.barrio) payload.barrio = formData.barrio;
+    if (esMenor) {
+      payload.acudiente_nombre = formData.acudienteNombre;
+      payload.acudiente_contacto = formData.acudienteContacto;
+      payload.acudiente_parentesco = formData.acudienteParentesco;
+      if (formData.acudienteEmail) payload.acudiente_email = formData.acudienteEmail;
+    }
+
+    try {
+      await apiFetch("/api/inscripciones", { method: "POST", body: payload });
+      setEnviado(true);
+    } catch (err) {
+      setErrorEnvio(err.message);
+    } finally {
+      setEnviando(false);
+    }
   };
 
   const urlWhatsAppConsulta = (cursoNombre) => {
@@ -206,11 +241,18 @@ export default function Inscripciones() {
             Formación musical para todas las edades y niveles.
           </p>
 
+          {cargando && <p className="inscr-estado">Cargando cursos…</p>}
+          {!cargando && error && <p className="inscr-estado">No se pudieron cargar los cursos. Intenta de nuevo más tarde.</p>}
+          {!cargando && !error && cursos.length === 0 && (
+            <p className="inscr-estado">Aún no hay cursos publicados. Vuelve pronto.</p>
+          )}
+
+          {!cargando && !error && cursos.length > 0 && (
           <div className="inscr-cursos-grid">
             {cursos.map((c) => (
               <div key={c.id} className="inscr-card">
                 <div className="inscr-card-header">
-                  <img src={`${BASE}iconos-inscripciones/${c.icono}`} alt="" aria-hidden="true" className="inscr-card-icono" />
+                  <img src={c.icono} alt="" aria-hidden="true" className="inscr-card-icono" />
                   <span className="inscr-card-tagline">{c.tagline}</span>
                 </div>
 
@@ -238,7 +280,6 @@ export default function Inscripciones() {
                       type="button"
                       className="inscr-card-btn inscr-card-btn-solido"
                       onClick={() => iniciarInscripcion(c)}
-                      disabled
                     >
                       Inscribirme
                     </button>
@@ -247,6 +288,7 @@ export default function Inscripciones() {
               </div>
             ))}
           </div>
+          )}
         </div>
       </section>
 
@@ -343,7 +385,7 @@ export default function Inscripciones() {
                   >
                     ✕
                   </button>
-                  <img src={`${BASE}iconos-inscripciones/${vistaDetalle.icono}`} alt="" aria-hidden="true" className="inscr-detalle-icono" />
+                  <img src={vistaDetalle.icono} alt="" aria-hidden="true" className="inscr-detalle-icono" />
                   <div className="inscr-detalle-header-texto">
                     <span className="inscr-detalle-tagline">{vistaDetalle.tagline}</span>
                     <h3 className="inscr-detalle-nombre">{vistaDetalle.nombre}</h3>
@@ -367,9 +409,9 @@ export default function Inscripciones() {
                   <div className="inscr-detalle-grupo inscr-detalle-grupo-niveles">
                     <span className="inscr-detalle-grupo-label">Niveles disponibles</span>
                     <div className="inscr-detalle-chips">
-                      {vistaDetalle.niveles.map((n) => (
-                        <span key={n} className="inscr-detalle-chip inscr-detalle-chip-outline">
-                          {n}
+                      {[...vistaDetalle.niveles].sort((a, b) => a.orden - b.orden).map((n) => (
+                        <span key={n.id} className="inscr-detalle-chip inscr-detalle-chip-outline">
+                          {n.nombre}
                         </span>
                       ))}
                     </div>
@@ -411,7 +453,6 @@ export default function Inscripciones() {
                       type="button"
                       className="btn btn-solido-oscuro"
                       onClick={() => iniciarInscripcion(vistaDetalle)}
-                      disabled
                     >
                       Inscribirme ahora →
                     </button>
@@ -518,6 +559,27 @@ export default function Inscripciones() {
                           />
                         </div>
                       </div>
+                      <div className="inscr-form-fila">
+                        <div className="inscr-form-grupo">
+                          <label>Email</label>
+                          <input
+                            type="email"
+                            name="estudianteEmail"
+                            value={formData.estudianteEmail}
+                            onChange={handleChange}
+                            placeholder="correo@ejemplo.com"
+                          />
+                        </div>
+                        <div className="inscr-form-grupo">
+                          <label>Teléfono</label>
+                          <input
+                            type="tel"
+                            name="estudianteTelefono"
+                            value={formData.estudianteTelefono}
+                            onChange={handleChange}
+                          />
+                        </div>
+                      </div>
                       <div className="inscr-form-acciones">
                         <button
                           type="button"
@@ -569,6 +631,16 @@ export default function Inscripciones() {
                             <option value="Tutor legal">Tutor legal</option>
                           </select>
                         </div>
+                      </div>
+                      <div className="inscr-form-grupo">
+                        <label>Email del acudiente</label>
+                        <input
+                          type="email"
+                          name="acudienteEmail"
+                          value={formData.acudienteEmail}
+                          onChange={handleChange}
+                          placeholder="correo@ejemplo.com"
+                        />
                       </div>
                       <div className="inscr-form-acciones">
                         <button type="button" className="btn btn-outline-oscuro" onClick={anteriorPaso}>
@@ -626,16 +698,20 @@ export default function Inscripciones() {
                         Acepto los términos y la política de datos personales.
                       </label>
 
+                      {errorEnvio && (
+                        <p className="inscr-form-error">{errorEnvio}</p>
+                      )}
+
                       <div className="inscr-form-acciones">
-                        <button type="button" className="btn btn-outline-oscuro" onClick={anteriorPaso}>
+                        <button type="button" className="btn btn-outline-oscuro" onClick={anteriorPaso} disabled={enviando}>
                           ← Atrás
                         </button>
                         <button
                           type="submit"
                           className="btn btn-solido-oscuro"
-                          disabled={!formData.horarioPreferencia || !formData.aceptaTerminos}
+                          disabled={!formData.horarioPreferencia || !formData.aceptaTerminos || enviando}
                         >
-                          Finalizar inscripción ✓
+                          {enviando ? "Enviando…" : "Finalizar inscripción ✓"}
                         </button>
                       </div>
                     </div>

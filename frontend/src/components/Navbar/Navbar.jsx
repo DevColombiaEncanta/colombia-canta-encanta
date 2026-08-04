@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
 import { useCarrito } from '../../context/CarritoContext';
-import { eventosFijos } from '../../data/eventosFijos';
+import { useEventosFijos } from '../../hooks/useEventosFijos';
 import './Navbar.css';
 
 const IconoBase = ({ children }) => (
@@ -84,6 +84,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
   const { totalItems } = useCarrito();
+  const { eventosFijos } = useEventosFijos();
 
   const isHome = location.pathname === '/';
 

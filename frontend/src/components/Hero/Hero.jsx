@@ -1,144 +1,51 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useHero } from "../../hooks/useHero";
+import { useEventos } from "../../hooks/useEventos";
 import "./Hero.css";
 
-const base = import.meta.env.BASE_URL;
-
-const slides = [
-  {
-    id: "bienvenida",
-    label: "Inicio",
-    titulo: (
-      <>
-        Donde Colombia canta, baila y{" "}
-        <span className="hero-titulo-acento">encanta</span>
-      </>
-    ),
-    descripcion:
-      "Somos una comunidad artística que preserva y proyecta el folclor colombiano a través de la formación, los escenarios y experiencias que conectan generaciones alrededor del mundo.",
-    ctas: [
-      { label: "Contáctanos", to: "/contacto", primario: true },
-      { label: "Descúbrenos", to: "/nosotros", primario: false },
-    ],
-    imagen: "hero-slides/bienvenida.webp",
-  },
-  {
-    id: "quienes-somos",
-    label: "Escuela",
-    titulo: (
-      <>
-        Tu camino artístico <span className="hero-titulo-acento">comienza</span>{" "}
-        aquí
-      </>
-    ),
-    descripcion:
-      "No importa si estás empezando o quieres fortalecer tu talento. Aquí encontrarás un espacio para aprender, crecer y disfrutar la música colombiana.",
-    ctas: [
-      { label: "Inscríbete ahora", to: "/inscripciones", primario: true },
-      { label: "Ver programas", to: "/inscripciones", primario: false },
-    ],
-    imagen: "hero-slides/quienes-somos.webp",
-  },
-  {
-    id: "eventos",
-    label: "Nuestra historia",
-    titulo: (
-      <>
-        La historia detrás de un legado que{" "}
-        <span className="hero-titulo-acento">sigue creciendo</span>
-      </>
-    ),
-    descripcion:
-      "Silvia Zapata transformó su pasión por el folclor en una experiencia que conecta talento, tradición e identidad.",
-    ctas: [
-      { label: "Conoce nuestra historia", to: "/nosotros", primario: true },
-    ],
-    imagen: "hero-slides/eventos.webp",
-  },
-  {
-    id: "escuela",
-    label: "Eventos",
-    titulo: (
-      <>
-        Vive la magia de nuestros{" "}
-        <span className="hero-titulo-acento">eventos</span>
-      </>
-    ),
-    descripcion:
-      "Festivales, galas y presentaciones que llevan la esencia de Colombia a los escenarios más importantes del país y el mundo.",
-    ctas: [
-      { label: "Explorar eventos", to: "/eventos", primario: true },
-      { label: "Conocer elenco", to: "/elenco", primario: false },
-    ],
-    imagen: "hero-slides/escuela.webp",
-  },
-  {
-    id: "tienda",
-    label: "Tienda",
-    titulo: (
-      <>
-        Descubre nuestra <span className="hero-titulo-acento">tienda</span>
-      </>
-    ),
-    descripcion:
-      "Hemos creado un espacio donde la identidad Colombia Canta y Encanta se refleja en cada una de nuestras piezas.",
-    ctas: [{ label: "Descubre la colección", to: "/tienda", primario: true }],
-    imagen: "hero-slides/tienda.webp",
-  },
-  {
-    id: "noticias",
-    label: "Festival",
-    titulo: (
-      <>
-        Una celebración que nos{" "}
-        <span className="hero-titulo-acento">conecta</span>
-      </>
-    ),
-    descripcion:
-      "El Festival Nacional Colombia Canta y Encanta reúne generaciones alrededor de la música colombiana, creando escenarios para compartir, aprender y celebrar nuestro talento.",
-    ctas: [
-      {
-        label: "Ver Festival",
-        to: "/eventos/festival-nacional",
-        primario: true,
-      },
-      { label: "Escríbenos", to: "/contacto", primario: false },
-    ],
-    imagen: "hero-slides/noticias.webp",
-  },
-  {
-    id: "contacto",
-    label: "Medellín",
-    titulo: (
-      <>
-        Una experiencia cultural imperdible en tu visita a{" "}
-        <span className="hero-titulo-acento">Medellín</span>
-      </>
-    ),
-    descripcion:
-      "Recorre espacios llenos de encanto y vive un show cultural que ha llevado nuestra esencia a escenarios internacionales.",
-    ctas: [
-      {
-        label: "Explora la experiencia",
-        to: "/eventos/colombia-me-enamoras",
-        primario: true,
-      },
-    ],
-    imagen: "hero-slides/contacto.webp",
-  },
-];
-
 export default function Hero() {
+  const { slides, cargando, error } = useHero();
+  const { eventos } = useEventos();
   const [active, setActive] = useState(0);
 
   const goTo = (idx) => setActive(idx);
-  const next = () => setActive((a) => (a + 1) % slides.length);
-  const prev = () => setActive((a) => (a - 1 + slides.length) % slides.length);
+  const next = () => setActive((a) => (slides.length ? (a + 1) % slides.length : 0));
+  const prev = () => setActive((a) => (slides.length ? (a - 1 + slides.length) % slides.length : 0));
 
   useEffect(() => {
-    const id = setInterval(next, 8000);
+    if (slides.length === 0) return;
+    const id = setInterval(() => {
+      setActive((a) => (a + 1) % slides.length);
+    }, 8000);
     return () => clearInterval(id);
-  }, [active]);
+  }, [slides.length]);
+
+  const eventoDestacado = eventos.find((e) => e.destacadoHero);
+
+  if (cargando) {
+    return (
+      <section className="hero-carousel hero-carousel--estado">
+        <p className="hero-estado-mensaje">Cargando…</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="hero-carousel hero-carousel--estado">
+        <p className="hero-estado-mensaje">No se pudo cargar el contenido. Intenta de nuevo más tarde.</p>
+      </section>
+    );
+  }
+
+  if (slides.length === 0) {
+    return (
+      <section className="hero-carousel hero-carousel--estado">
+        <p className="hero-estado-mensaje">Muy pronto, contenido nuevo.</p>
+      </section>
+    );
+  }
 
   const activeSlide = slides[active];
 
@@ -152,9 +59,9 @@ export default function Hero() {
             className={`hero-bg${active === i ? " hero-bg--activo" : ""}`}
           >
             <img
-              src={`${base}${slide.imagen}`}
+              src={slide.imagen}
               alt=""
-              className={`hero-bg-img hero-img--${slide.id}`}
+              className="hero-bg-img"
               loading={i === 0 ? "eager" : "lazy"}
               decoding="async"
             />
@@ -167,7 +74,7 @@ export default function Hero() {
         <h1 className="hero-titulo">{activeSlide.titulo}</h1>
         <p className="hero-desc">{activeSlide.descripcion}</p>
         <div className="hero-ctas">
-          {activeSlide.ctas.map((cta) => (
+          {activeSlide.ctas?.map((cta) => (
             <Link
               key={cta.label}
               to={cta.to}
@@ -233,19 +140,19 @@ export default function Hero() {
         </button>
       </div>
 
-      {/* ── Franja próximo evento — siempre visible ── */}
-      <div className="hero-anuncio-evento">
-        <span className="hero-anuncio-label">Próximo gran evento</span>
-        <span className="hero-anuncio-diamante">◆</span>
-        <span className="hero-anuncio-nombre">
-          Festival Colombia Canta y Encanta
-        </span>
-        <span className="hero-anuncio-sep">·</span>
-        <span className="hero-anuncio-fecha">23-26 Jul 2026 · Medellín</span>
-        <Link to="/eventos/festival-nacional" className="hero-anuncio-cta">
-          Inscríbete →
-        </Link>
-      </div>
+      {/* ── Franja próximo evento — solo si hay un evento real marcado como destacado ── */}
+      {eventoDestacado && (
+        <div className="hero-anuncio-evento">
+          <span className="hero-anuncio-label">Próximo gran evento</span>
+          <span className="hero-anuncio-diamante">◆</span>
+          <span className="hero-anuncio-nombre">{eventoDestacado.titulo}</span>
+          <span className="hero-anuncio-sep">·</span>
+          <span className="hero-anuncio-fecha">{eventoDestacado.fecha} · {eventoDestacado.ciudad}</span>
+          <Link to={`/eventos/${eventoDestacado.slug}`} className="hero-anuncio-cta">
+            {eventoDestacado.cta || "Ver evento"} →
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

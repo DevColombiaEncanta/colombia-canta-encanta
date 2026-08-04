@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { eventosFijos } from '../../data/eventosFijos';
+import { useEventosFijos } from '../../hooks/useEventosFijos';
 import './EventosFijosHome.css';
 
 function TripAdvisorBadge({ link }) {
@@ -78,6 +78,12 @@ function MediaCarousel({ images, alt, color, colorHero }) {
 }
 
 export default function EventosFijosHome({ variant = 'hero' }) {
+  const { eventosFijos, cargando, error } = useEventosFijos();
+
+  if (cargando || error || eventosFijos.length === 0) {
+    return null;
+  }
+
   if (variant === 'zigzag') {
     return (
       <div className="efh-grid efh-grid--zigzag">

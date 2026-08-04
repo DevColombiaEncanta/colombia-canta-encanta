@@ -1,16 +1,14 @@
 import { Link } from 'react-router-dom';
-import { noticias } from '../../data/noticias';
+import { formatearFecha, gradienteDiagonal } from '../../utils/formato';
 import ContactoSection from '../Contacto/Contacto';
 import Footer from '../Footer/Footer';
 import './NoticiaDetalle.css';
 
-export default function NoticiaDetalle({ noticia }) {
-  const otras = noticias.filter(n => n.id !== noticia.id);
-
+export default function NoticiaDetalle({ noticia, otras }) {
   return (
     <>
       {/* HERO */}
-      <div className="noticia-hero" style={{ background: noticia.gradiente }}>
+      <div className="noticia-hero" style={{ background: gradienteDiagonal(noticia.colorInicio, noticia.colorFin) }}>
         <div className="noticia-hero-overlay" />
         <div className="noticia-hero-content container">
           <Link to="/noticias" className="noticia-volver">
@@ -22,7 +20,7 @@ export default function NoticiaDetalle({ noticia }) {
           <h1 className="noticia-hero-titulo">{noticia.titulo}</h1>
           <div className="noticia-hero-meta">
             <span className="noticia-hero-chip">{noticia.categoria}</span>
-            <p className="noticia-hero-fecha">{noticia.fechaCompleta}</p>
+            <p className="noticia-hero-fecha">{formatearFecha(noticia.fechaPublicacion).larga}</p>
           </div>
         </div>
         <div className="franja-bandera" />
@@ -31,18 +29,16 @@ export default function NoticiaDetalle({ noticia }) {
       {/* CUERPO */}
       <div className="noticia-cuerpo container">
         <div className="noticia-articulo">
-          <p className="noticia-lead">{noticia.desc}</p>
-          {(noticia.banner || noticia.img) && (
-            <div className="noticia-imagen-principal">
-              <img
-                src={noticia.banner ?? noticia.img}
-                alt={noticia.titulo}
-                className="noticia-imagen-principal-img"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-          )}
+          <p className="noticia-lead">{noticia.resumen}</p>
+          <div className="noticia-imagen-principal">
+            <img
+              src={noticia.banner ?? noticia.img}
+              alt={noticia.titulo}
+              className="noticia-imagen-principal-img"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
           {noticia.contenido.map((parrafo, i) => (
             <p key={i} className="noticia-parrafo">{parrafo}</p>
           ))}
@@ -55,7 +51,7 @@ export default function NoticiaDetalle({ noticia }) {
           </div>
           <div className="noticia-aside-card">
             <p className="noticia-aside-label">Fecha</p>
-            <p className="noticia-aside-valor">{noticia.fechaCompleta}</p>
+            <p className="noticia-aside-valor">{formatearFecha(noticia.fechaPublicacion).larga}</p>
           </div>
           <div className="noticia-aside-card">
             <p className="noticia-aside-label">Compartir</p>
@@ -86,16 +82,13 @@ export default function NoticiaDetalle({ noticia }) {
           <div className="noticia-otras-grid">
             {otras.map(n => (
               <Link to={`/noticias/${n.slug}`} key={n.id} className="noticia-mini-card">
-                <div className="noticia-mini-icono" style={{ background: n.gradiente }}>
-                  {n.img
-                    ? <img src={n.img} alt={n.titulo} className="noticia-mini-img" loading="lazy" decoding="async" />
-                    : <span>{n.emoji}</span>
-                  }
+                <div className="noticia-mini-icono" style={{ background: gradienteDiagonal(n.colorInicio, n.colorFin) }}>
+                  <img src={n.img} alt={n.titulo} className="noticia-mini-img" loading="lazy" decoding="async" />
                 </div>
                 <div className="noticia-mini-body">
                   <span className="noticia-mini-chip">{n.categoria}</span>
                   <p className="noticia-mini-titulo">{n.titulo}</p>
-                  <p className="noticia-mini-fecha">{n.fechaCompleta}</p>
+                  <p className="noticia-mini-fecha">{formatearFecha(n.fechaPublicacion).larga}</p>
                 </div>
               </Link>
             ))}

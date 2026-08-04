@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { noticias } from '../../data/noticias';
+import { useNoticias } from '../../hooks/useNoticias';
+import { formatearFecha, gradienteDiagonal } from '../../utils/formato';
 import InstagramWidget from '../InstagramWidget/InstagramWidget';
 import './Noticias.css';
 
@@ -10,6 +11,8 @@ const ArrowIcon = () => (
 );
 
 export default function Noticias() {
+  const { noticias, cargando, error } = useNoticias();
+
   return (
     <section id="noticias" className="noticias-section">
       <div className="container">
@@ -24,20 +27,22 @@ export default function Noticias() {
 
         <div className="noticias-con-ig">
           <div className="noticias-lista">
-            {noticias.map((n) => (
+            {cargando && <p className="noticias-estado">Cargando noticias…</p>}
+            {!cargando && error && <p className="noticias-estado">No se pudieron cargar las noticias.</p>}
+            {!cargando && !error && noticias.length === 0 && (
+              <p className="noticias-estado">Aún no hay noticias publicadas.</p>
+            )}
+            {!cargando && !error && noticias.map((n) => (
               <Link to={`/noticias/${n.slug}`} key={n.id} className="noticias-fila">
                 <div className="noticias-fila-contenido">
                   <div className="noticias-fila-meta">
-                    <span className="noticias-fila-fecha">{n.fecha}</span>
+                    <span className="noticias-fila-fecha">{formatearFecha(n.fechaPublicacion).corta}</span>
                     <span className="noticias-fila-chip">{n.categoria}</span>
                   </div>
                   <h3 className="noticias-fila-titulo">{n.titulo}</h3>
                 </div>
-                <div className="noticias-fila-thumb" style={{ background: n.gradiente }}>
-                  {n.img
-                    ? <img src={n.img} alt={n.titulo} className="noticias-fila-img" loading="lazy" decoding="async" />
-                    : <span className="noticias-fila-emoji">{n.emoji}</span>
-                  }
+                <div className="noticias-fila-thumb" style={{ background: gradienteDiagonal(n.colorInicio, n.colorFin) }}>
+                  <img src={n.img} alt={n.titulo} className="noticias-fila-img" loading="lazy" decoding="async" />
                 </div>
               </Link>
             ))}

@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { noticias } from '../data/noticias';
+import { useNoticias } from '../hooks/useNoticias';
+import { formatearFecha, gradienteDiagonal } from '../utils/formato';
 import ContactoSection from '../components/Contacto/Contacto';
 import Footer from '../components/Footer/Footer';
 import '../styles/main.css';
@@ -9,8 +10,6 @@ import { BASE_URL, OG_IMAGE } from '../utils/seo';
 
 const PAGE_TITLE = 'Noticias | Colombia Canta y Encanta';
 const PAGE_DESC = 'Últimas noticias, crónicas y novedades de Colombia Canta y Encanta. Entérate de todo lo que sucede en nuestra escuela y en el mundo de la música tradicional colombiana.';
-
-const CATEGORIAS = ['Todos', ...new Set(noticias.map(n => n.categoria))];
 
 function getCardsPorPagina() {
   if (window.innerWidth <= 599) return 2;
@@ -33,6 +32,7 @@ const SearchIcon = () => (
 );
 
 export default function NoticiasPage() {
+  const { noticias, cargando, error } = useNoticias();
   const [filtro, setFiltro] = useState('Todos');
   const [busqueda, setBusqueda] = useState('');
   const [pagina, setPagina] = useState(1);
@@ -44,6 +44,11 @@ export default function NoticiasPage() {
     return () => window.removeEventListener('resize', update);
   }, []);
 
+  const CATEGORIAS = useMemo(
+    () => ['Todos', ...new Set(noticias.map(n => n.categoria))],
+    [noticias]
+  );
+
   const filtradas = useMemo(() =>
     noticias.filter(n => {
       const matchCat = filtro === 'Todos' || n.categoria === filtro;
@@ -51,10 +56,10 @@ export default function NoticiasPage() {
       const matchSearch =
         !query ||
         n.titulo.toLowerCase().includes(query) ||
-        n.desc.toLowerCase().includes(query);
+        n.resumen.toLowerCase().includes(query);
       return matchCat && matchSearch;
     }),
-    [filtro, busqueda]
+    [noticias, filtro, busqueda]
   );
 
   useEffect(() => { setPagina(1); }, [filtro, busqueda]);
@@ -103,6 +108,26 @@ export default function NoticiasPage() {
       <section className="noticias-page-section">
         <div className="container">
 
+          {cargando && (
+            <div className="noticias-page-empty">
+              <p>Cargando noticias…</p>
+            </div>
+          )}
+
+          {!cargando && error && (
+            <div className="noticias-page-empty">
+              <p>No se pudieron cargar las noticias. Intenta de nuevo más tarde.</p>
+            </div>
+          )}
+
+          {!cargando && !error && noticias.length === 0 && (
+            <div className="noticias-page-empty">
+              <p>Aún no hay noticias publicadas. Vuelve pronto.</p>
+            </div>
+          )}
+
+          {!cargando && !error && noticias.length > 0 && (
+          <>
           {/* Controles: búsqueda + filtros */}
           <div className="noticias-page-controls">
             <div className="noticias-page-busqueda">
@@ -143,17 +168,16 @@ export default function NoticiasPage() {
               <div className="noticias-page-grid">
                 {paginadas.map(n => (
                   <Link to={`/noticias/${n.slug}`} key={n.id} className="noticias-page-card">
-                    <div className="noticias-page-card-img" style={{ background: n.gradiente }}>
+                    <div className="noticias-page-card-img" style={{ background: gradienteDiagonal(n.colorInicio, n.colorFin) }}>
                       {n.banner && (
                         <img src={n.banner} alt={n.titulo} className="noticias-page-card-banner" loading="lazy" decoding="async" />
                       )}
-                      {!n.banner && <span className="noticias-page-card-emoji">{n.emoji}</span>}
                       <span className="noticias-page-card-cat">{n.categoria}</span>
                     </div>
                     <div className="noticias-page-card-body">
-                      <span className="noticias-page-card-fecha">{n.fechaCompleta}</span>
+                      <span className="noticias-page-card-fecha">{formatearFecha(n.fechaPublicacion).larga}</span>
                       <h3 className="noticias-page-card-titulo">{n.titulo}</h3>
-                      <p className="noticias-page-card-desc">{n.desc}</p>
+                      <p className="noticias-page-card-desc">{n.resumen}</p>
                     </div>
                     <div className="noticias-page-card-linea" />
                   </Link>
@@ -187,6 +211,8 @@ export default function NoticiasPage() {
                 Ver todas
               </button>
             </div>
+          )}
+          </>
           )}
 
         </div>

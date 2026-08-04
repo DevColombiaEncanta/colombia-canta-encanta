@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { eventosFijos } from '../../data/eventosFijos';
+import { useEventosFijos } from '../../hooks/useEventosFijos';
 import './EventosFijos.css';
 
 function EfCard({ evento }) {
@@ -71,7 +71,17 @@ function EfCardPlaceholder({ evento }) {
 }
 
 export default function EventosFijos() {
-  const [salas, enamoras] = eventosFijos;
+  const { eventosFijos, cargando, error } = useEventosFijos();
+  const salas = eventosFijos.find(e => e.slug === 'salas-colombia-canta');
+  const enamoras = eventosFijos.find(e => e.slug === 'colombia-me-enamoras');
+
+  if (cargando) {
+    return <p className="ef-estado">Cargando…</p>;
+  }
+
+  if (error || !salas || !enamoras) {
+    return <p className="ef-estado">No se pudo cargar el contenido. Intenta de nuevo más tarde.</p>;
+  }
 
   return (
     <div className="ef-section">

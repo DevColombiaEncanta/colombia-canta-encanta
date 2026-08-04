@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { eventos } from '../../data/eventos';
-import { eventosFijos } from '../../data/eventosFijos';
 import EventCard from '../CarruselEventos/EventCard';
 import ContactoSection from '../Contacto/Contacto';
 import Footer from '../Footer/Footer';
@@ -9,7 +7,7 @@ import ReservaModal from '../ReservaModal/ReservaModal';
 import './EventoDetalle.css';
 import '../CarruselEventos/CarruselEventos.css';
 
-export default function EventoDetalle({ evento }) {
+export default function EventoDetalle({ evento, eventos, eventosFijos }) {
   const [searchParams] = useSearchParams();
   const [stickyVisible, setStickyVisible] = useState(false);
   const [galIdx, setGalIdx] = useState(0);

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { eventos } from '../../data/eventos';
+import { useEventos } from '../../hooks/useEventos';
 import EventosFijosHome from '../EventosFijos/EventosFijosHome';
 import './CarruselEventos.css';
 
@@ -10,6 +10,8 @@ function parseFecha(iso) {
 }
 
 export default function CarruselEventos() {
+  const { eventos, cargando, error } = useEventos();
+
   const ventana = useMemo(() => {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
@@ -38,7 +40,7 @@ export default function CarruselEventos() {
       ...ev,
       pasado: parseFecha(ev.fechaISO).getTime() < hoyTs,
     }));
-  }, []);
+  }, [eventos]);
 
   return (
     <section className="eventos-ac-section">
@@ -60,6 +62,13 @@ export default function CarruselEventos() {
           <h2 className="eventos-ac-destacados-titulo">Eventos destacados</h2>
         </div>
 
+        {cargando && <p className="eventos-ac-estado">Cargando eventos…</p>}
+        {!cargando && error && <p className="eventos-ac-estado">No se pudieron cargar los eventos.</p>}
+        {!cargando && !error && ventana.length === 0 && (
+          <p className="eventos-ac-estado">Próximamente anunciaremos nuevos eventos.</p>
+        )}
+
+        {!cargando && !error && ventana.length > 0 && (
         <div className="eventos-ac-acordeon">
           {ventana.map(ev => (
             <Link
@@ -97,6 +106,7 @@ export default function CarruselEventos() {
             </Link>
           ))}
         </div>
+        )}
       </div>
     </section>
   );
