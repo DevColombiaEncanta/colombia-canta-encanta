@@ -5,6 +5,7 @@ import { requireCsrf } from '../middleware/requireCsrf.js';
 import { limiterEstricto } from '../middleware/rateLimiters.js';
 import { logAudit } from '../lib/auditLog.js';
 import { stripUndefined } from '../lib/zodMultipart.js';
+import { errorGenerico } from '../lib/errores.js';
 
 const ESTADOS = ['pendiente', 'pagada', 'cancelada', 'libre'];
 
@@ -21,9 +22,7 @@ function traducirError(error) {
     err.status = 400;
     return err;
   }
-  const err = new Error(error.message);
-  err.status = 400;
-  return err;
+  return errorGenerico(error, 'reservas.js traducirError');
 }
 
 async function obtenerReservaCompleta(id) {
@@ -194,9 +193,7 @@ router.get('/', async (req, res, next) => {
     .order('creado_en', { ascending: false });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/admin/reservas'));
   }
 
   res.json({ ok: true, data });
@@ -265,9 +262,7 @@ router.delete('/:id', requireCsrf, async (req, res, next) => {
 
   const { error } = await supabase.from('reservas').delete().eq('id', id);
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'DELETE /api/admin/reservas/:id'));
   }
 
   await logAudit({

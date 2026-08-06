@@ -5,6 +5,7 @@ import { requireCsrf } from '../middleware/requireCsrf.js';
 import { logAudit } from './auditLog.js';
 import { booleanFromString, stripUndefined } from './zodMultipart.js';
 import { toCamelCase } from './camelCase.js';
+import { errorGenerico } from './errores.js';
 
 function zodError(result) {
   const err = new Error(result.error.issues.map((i) => i.message).join(', '));
@@ -27,9 +28,7 @@ function traducirError(error, etiqueta, esBorrado = false) {
     err.status = 409;
     return err;
   }
-  const err = new Error(error.message);
-  err.status = 400;
-  return err;
+  return errorGenerico(error, `tablaSimpleRouter (${etiqueta}) traducirError`);
 }
 
 // Fábrica de CRUD para tablas "de catálogo simple": nombre único + activo,
@@ -53,9 +52,7 @@ export function crearRouterTablaSimple(tabla, { conEmoji = false, conOrden = fal
 
     const { data, error } = await query;
     if (error) {
-      const err = new Error(error.message);
-      err.status = 400;
-      return next(err);
+      return next(errorGenerico(error, `GET /api/admin/${tabla}`));
     }
 
     res.json({ ok: true, data });
@@ -150,9 +147,7 @@ export function crearRouterTablaSimple(tabla, { conEmoji = false, conOrden = fal
 
     const { data, error } = await query;
     if (error) {
-      const err = new Error(error.message);
-      err.status = 400;
-      return next(err);
+      return next(errorGenerico(error, `GET /api/${tabla}`));
     }
 
     res.json({ ok: true, data: toCamelCase(data) });

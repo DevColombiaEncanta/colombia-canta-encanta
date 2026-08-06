@@ -6,6 +6,7 @@ import { logAudit } from '../lib/auditLog.js';
 import { uploadMiddleware, validarWebpReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
 import { jsonArrayField } from '../lib/zodMultipart.js';
 import { toCamelCase } from '../lib/camelCase.js';
+import { errorGenerico } from '../lib/errores.js';
 
 const router = Router();
 const CARPETA_GALERIA = 'eventos-fijos/galeria';
@@ -48,9 +49,7 @@ router.get('/', async (req, res, next) => {
     .order('creado_en', { ascending: true });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/admin/eventos-fijos'));
   }
 
   res.json({ ok: true, data });
@@ -126,9 +125,7 @@ router.patch('/:id', requireCsrf, uploadImagenes, async (req, res, next) => {
       if (updates.galeria) {
         for (const url of updates.galeria) await borrarImagenPorUrl(url);
       }
-      const err = new Error(error.message);
-      err.status = 400;
-      return next(err);
+      return next(errorGenerico(error, 'PATCH /api/admin/eventos-fijos/:id'));
     }
 
     if (galeriaVieja) {
@@ -161,9 +158,7 @@ eventosFijosPublicoRouter.get('/', async (req, res, next) => {
     .order('creado_en', { ascending: true });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/eventos-fijos'));
   }
 
   res.json({ ok: true, data: toCamelCase(data) });

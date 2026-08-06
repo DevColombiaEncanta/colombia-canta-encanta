@@ -6,6 +6,7 @@ import { logAudit } from '../lib/auditLog.js';
 import { uploadMiddleware, validarWebpReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
 import { booleanFromString, jsonArrayField, stripUndefined } from '../lib/zodMultipart.js';
 import { toCamelCase } from '../lib/camelCase.js';
+import { errorGenerico } from '../lib/errores.js';
 
 const router = Router();
 const CARPETA = 'hero-slides';
@@ -43,9 +44,7 @@ router.get('/', async (req, res, next) => {
     .order('orden', { ascending: true });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/admin/hero'));
   }
 
   res.json({ ok: true, slides: data });
@@ -82,9 +81,7 @@ router.post('/', requireCsrf, uploadMiddleware.single('imagen'), async (req, res
     .single();
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'POST /api/admin/hero'));
   }
 
   await logAudit({
@@ -142,9 +139,7 @@ router.patch('/:id', requireCsrf, uploadMiddleware.single('imagen'), async (req,
         // la imagen nueva ya se subió — si el update falla, no dejarla huérfana
         await borrarImagenPorUrl(updates.imagen);
       }
-      const err = new Error(error.message);
-      err.status = 400;
-      return next(err);
+      return next(errorGenerico(error, 'PATCH /api/admin/hero/:id'));
     }
 
     if (imagenVieja) {
@@ -183,9 +178,7 @@ router.delete('/:id', requireCsrf, async (req, res, next) => {
   const { error } = await supabase.from('hero_slides').delete().eq('id', id);
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'DELETE /api/admin/hero/:id'));
   }
 
   await borrarImagenPorUrl(actual.imagen);
@@ -213,9 +206,7 @@ heroPublicoRouter.get('/', async (req, res, next) => {
     .order('orden', { ascending: true });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/hero'));
   }
 
   res.json({ ok: true, slides: toCamelCase(data) });

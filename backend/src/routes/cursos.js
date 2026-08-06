@@ -6,6 +6,7 @@ import { logAudit } from '../lib/auditLog.js';
 import { uploadMiddleware, validarWebpReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
 import { booleanFromString, jsonArrayField, stripUndefined } from '../lib/zodMultipart.js';
 import { toCamelCase } from '../lib/camelCase.js';
+import { errorGenerico } from '../lib/errores.js';
 
 const router = Router();
 const CARPETA = 'cursos';
@@ -59,9 +60,7 @@ function traducirErrorCurso(error, esBorrado = false) {
     err.status = 400;
     return err;
   }
-  const err = new Error(error.message);
-  err.status = 400;
-  return err;
+  return errorGenerico(error, 'cursos.js traducirErrorCurso');
 }
 
 // Se confirma que todos los nivel_id existan ANTES de tocar curso_niveles — si se
@@ -72,9 +71,7 @@ async function validarNivelesExisten(niveles) {
   if (!niveles || niveles.length === 0) return;
   const { data, error } = await supabase.from('niveles').select('id').in('id', niveles);
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    throw err;
+    throw errorGenerico(error, 'cursos.js validarNivelesExisten');
   }
   if (data.length !== niveles.length) {
     const err = new Error('Uno de los niveles no existe');
@@ -106,9 +103,7 @@ router.get('/', async (req, res, next) => {
     .order('orden', { ascending: true });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/admin/cursos'));
   }
 
   res.json({ ok: true, data: data.map(aplanarNiveles) });
@@ -201,9 +196,7 @@ router.patch('/:id', requireCsrf, uploadMiddleware.single('icono'), async (req, 
     const { error: deleteError } = await supabase.from('curso_niveles').delete().eq('curso_id', id);
     if (deleteError) {
       if (camposCurso.icono) await borrarImagenPorUrl(camposCurso.icono);
-      const err = new Error(deleteError.message);
-      err.status = 400;
-      return next(err);
+      return next(errorGenerico(deleteError, 'PATCH /api/admin/cursos/:id (curso_niveles delete)'));
     }
 
     if (niveles.length > 0) {
@@ -282,9 +275,7 @@ cursosPublicoRouter.get('/', async (req, res, next) => {
     .order('orden', { ascending: true });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/cursos'));
   }
 
   const resultado = data.map((curso) => {

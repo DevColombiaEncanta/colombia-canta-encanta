@@ -7,6 +7,7 @@ import { uploadMiddleware, validarWebpReal, procesarYSubirImagen, borrarImagenPo
 import { booleanFromString, jsonArrayField, stripUndefined } from '../lib/zodMultipart.js';
 import { generarSlugUnico } from '../lib/slug.js';
 import { toCamelCase } from '../lib/camelCase.js';
+import { errorGenerico } from '../lib/errores.js';
 
 const router = Router();
 const CARPETA_IMG = 'noticias/img';
@@ -52,9 +53,7 @@ router.get('/', async (req, res, next) => {
     .order('fecha_publicacion', { ascending: false });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/admin/noticias'));
   }
 
   res.json({ ok: true, noticias: data });
@@ -111,9 +110,7 @@ router.post('/', requireCsrf, uploadFields, async (req, res, next) => {
     // cleanup de auth.users en POST /api/admin/admins, Fase 2).
     await borrarImagenPorUrl(imgUrl);
     if (bannerUrl) await borrarImagenPorUrl(bannerUrl);
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'POST /api/admin/noticias'));
   }
 
   await logAudit({
@@ -185,9 +182,7 @@ router.patch('/:id', requireCsrf, uploadFields, async (req, res, next) => {
       // esa subida — no dejar el archivo nuevo huérfano si la fila no terminó de guardarse.
       if (imgNuevaUrl) await borrarImagenPorUrl(imgNuevaUrl);
       if (bannerNuevaUrl) await borrarImagenPorUrl(bannerNuevaUrl);
-      const err = new Error(error.message);
-      err.status = 400;
-      return next(err);
+      return next(errorGenerico(error, 'PATCH /api/admin/noticias/:id'));
     }
 
     if (imgVieja) await borrarImagenPorUrl(imgVieja);
@@ -225,9 +220,7 @@ router.delete('/:id', requireCsrf, async (req, res, next) => {
   const { error } = await supabase.from('noticias').delete().eq('id', id);
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'DELETE /api/admin/noticias/:id'));
   }
 
   await borrarImagenPorUrl(actual.img);
@@ -256,9 +249,7 @@ noticiasPublicoRouter.get('/', async (req, res, next) => {
     .order('fecha_publicacion', { ascending: false });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/noticias'));
   }
 
   res.json({ ok: true, noticias: toCamelCase(data) });

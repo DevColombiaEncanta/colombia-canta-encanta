@@ -7,6 +7,7 @@ import { uploadMiddleware, validarWebpReal, procesarYSubirImagen, borrarImagenPo
 import { booleanFromString, jsonArrayField, stripUndefined } from '../lib/zodMultipart.js';
 import { generarSlugUnico } from '../lib/slug.js';
 import { toCamelCase } from '../lib/camelCase.js';
+import { errorGenerico } from '../lib/errores.js';
 
 const router = Router();
 const CARPETA_IMG = 'eventos/img';
@@ -89,9 +90,7 @@ async function limpiarOtrosDestacados(idExcluido) {
   if (idExcluido) query = query.neq('id', idExcluido);
   const { error } = await query;
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    throw err;
+    throw errorGenerico(error, 'eventos.js limpiarOtrosDestacados');
   }
 }
 
@@ -103,9 +102,7 @@ router.get('/', async (req, res, next) => {
     .order('fecha_iso', { ascending: false });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/admin/eventos'));
   }
 
   res.json({ ok: true, data });
@@ -155,9 +152,7 @@ router.post('/', requireCsrf, uploadFields, async (req, res, next) => {
   if (eventoError) {
     await borrarImagenPorUrl(imgUrl);
     for (const url of galeriaUrls) await borrarImagenPorUrl(url);
-    const err = new Error(eventoError.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(eventoError, 'POST /api/admin/eventos'));
   }
 
   if (destacado_hero) {
@@ -227,9 +222,7 @@ router.patch('/:id', requireCsrf, uploadFields, async (req, res, next) => {
     if (updateError) {
       if (camposEvento.img) await borrarImagenPorUrl(camposEvento.img);
       if (camposEvento.galeria) for (const url of camposEvento.galeria) await borrarImagenPorUrl(url);
-      const err = new Error(updateError.message);
-      err.status = 400;
-      return next(err);
+      return next(errorGenerico(updateError, 'PATCH /api/admin/eventos/:id'));
     }
 
     if (imgVieja) await borrarImagenPorUrl(imgVieja);
@@ -275,9 +268,7 @@ router.delete('/:id', requireCsrf, async (req, res, next) => {
 
   const { error } = await supabase.from('eventos').delete().eq('id', id);
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'DELETE /api/admin/eventos/:id'));
   }
 
   await borrarImagenPorUrl(actual.img);
@@ -308,9 +299,7 @@ eventosPublicoRouter.get('/', async (req, res, next) => {
     .order('fecha_iso', { ascending: false });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/eventos'));
   }
 
   res.json({ ok: true, data: toCamelCase(data) });

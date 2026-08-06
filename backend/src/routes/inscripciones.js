@@ -5,6 +5,7 @@ import { requireCsrf } from '../middleware/requireCsrf.js';
 import { limiterEstricto } from '../middleware/rateLimiters.js';
 import { logAudit } from '../lib/auditLog.js';
 import { stripUndefined } from '../lib/zodMultipart.js';
+import { errorGenerico } from '../lib/errores.js';
 
 const ESTADOS = ['pendiente', 'confirmada', 'cancelada'];
 const fechaISO = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'fecha_pago debe tener formato YYYY-MM-DD');
@@ -22,9 +23,7 @@ function traducirError(error) {
     err.status = 400;
     return err;
   }
-  const err = new Error(error.message);
-  err.status = 400;
-  return err;
+  return errorGenerico(error, 'inscripciones.js traducirError');
 }
 
 async function obtenerInscripcionCompleta(id) {
@@ -134,9 +133,7 @@ router.get('/', async (req, res, next) => {
     .order('creado_en', { ascending: false });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/admin/inscripciones'));
   }
 
   res.json({ ok: true, data });
@@ -205,9 +202,7 @@ router.delete('/:id', requireCsrf, async (req, res, next) => {
 
   const { error } = await supabase.from('inscripciones').delete().eq('id', id);
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'DELETE /api/admin/inscripciones/:id'));
   }
 
   await logAudit({

@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import { fileTypeFromBuffer } from 'file-type';
 import { randomUUID } from 'crypto';
 import { supabase } from '../config/supabaseClient.js';
+import { errorGenerico } from './errores.js';
 
 const BUCKET = 'sitio-imagenes';
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // tope de subida en crudo, antes de recomprimir
@@ -66,9 +67,7 @@ export async function procesarYSubirImagen(buffer, carpeta) {
     .upload(path, comprimida, { contentType: 'image/webp', upsert: false });
 
   if (uploadError) {
-    const err = new Error(uploadError.message);
-    err.status = 500;
-    throw err;
+    throw errorGenerico(uploadError, 'procesarYSubirImagen (Storage upload)', 500);
   }
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);

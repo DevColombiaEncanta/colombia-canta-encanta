@@ -6,6 +6,7 @@ import { logAudit } from '../lib/auditLog.js';
 import { uploadMiddleware, validarWebpReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
 import { booleanFromString, jsonArrayField, stripUndefined } from '../lib/zodMultipart.js';
 import { toCamelCase } from '../lib/camelCase.js';
+import { errorGenerico } from '../lib/errores.js';
 
 const router = Router();
 const CARPETA = 'productos';
@@ -64,9 +65,7 @@ function traducirErrorProducto(error) {
     err.status = 400;
     return err;
   }
-  const err = new Error(error.message);
-  err.status = 400;
-  return err;
+  return errorGenerico(error, 'productos.js traducirErrorProducto');
 }
 
 function calcularEnStock(producto) {
@@ -90,9 +89,7 @@ router.get('/', async (req, res, next) => {
     .order('creado_en', { ascending: false });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/admin/productos'));
   }
 
   res.json({ ok: true, data: data.map(calcularEnStock) });
@@ -140,9 +137,7 @@ router.post('/', requireCsrf, uploadMiddleware.array('imagenes', MAX_IMAGENES), 
       // auth.users huérfano en Fase 2.
       await supabase.from('productos').delete().eq('id', producto.id);
       for (const url of urls) await borrarImagenPorUrl(url);
-      const err = new Error(variantesError.message);
-      err.status = 400;
-      return next(err);
+      return next(errorGenerico(variantesError, 'POST /api/admin/productos (variantes)'));
     }
   }
 
@@ -203,9 +198,7 @@ router.patch('/:id', requireCsrf, uploadMiddleware.array('imagenes', MAX_IMAGENE
       if (camposProducto.imagenes) {
         for (const url of camposProducto.imagenes) await borrarImagenPorUrl(url);
       }
-      const err = new Error(deleteError.message);
-      err.status = 400;
-      return next(err);
+      return next(errorGenerico(deleteError, 'PATCH /api/admin/productos/:id (variantes delete)'));
     }
 
     if (variantes.length > 0) {
@@ -215,9 +208,7 @@ router.patch('/:id', requireCsrf, uploadMiddleware.array('imagenes', MAX_IMAGENE
         if (camposProducto.imagenes) {
           for (const url of camposProducto.imagenes) await borrarImagenPorUrl(url);
         }
-        const err = new Error(insertError.message);
-        err.status = 400;
-        return next(err);
+        return next(errorGenerico(insertError, 'PATCH /api/admin/productos/:id (variantes insert)'));
       }
     }
   }
@@ -255,9 +246,7 @@ router.delete('/:id', requireCsrf, async (req, res, next) => {
 
   const { error } = await supabase.from('productos').delete().eq('id', id);
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'DELETE /api/admin/productos/:id'));
   }
 
   if (actual.imagenes) {
@@ -288,9 +277,7 @@ productosPublicoRouter.get('/', async (req, res, next) => {
     .order('creado_en', { ascending: false });
 
   if (error) {
-    const err = new Error(error.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(error, 'GET /api/productos'));
   }
 
   res.json({ ok: true, data: toCamelCase(data.map(calcularEnStock)) });

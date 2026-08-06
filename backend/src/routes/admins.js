@@ -5,6 +5,7 @@ import { requireRole } from '../middleware/requireRole.js';
 import { limiterEstricto } from '../middleware/rateLimiters.js';
 import { logAudit } from '../lib/auditLog.js';
 import { generateTempPassword } from '../lib/tempPassword.js';
+import { errorGenerico } from '../lib/errores.js';
 
 const router = Router();
 
@@ -29,9 +30,7 @@ router.post('/', requireCsrf, requireRole('admin_maestro'), limiterEstricto, asy
   });
 
   if (createUserError) {
-    const err = new Error(createUserError.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(createUserError, 'POST /api/admin/admins (createUser)'));
   }
 
   const { data: adminRow, error: insertError } = await supabase
@@ -53,9 +52,7 @@ router.post('/', requireCsrf, requireRole('admin_maestro'), limiterEstricto, asy
         newUser.user.id
       );
     }
-    const err = new Error(insertError.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(insertError, 'POST /api/admin/admins (insert admins)'));
   }
 
   await logAudit({
@@ -107,9 +104,7 @@ router.patch('/:id', requireCsrf, requireRole('admin_maestro'), limiterEstricto,
     .single();
 
   if (updateError) {
-    const err = new Error(updateError.message);
-    err.status = 400;
-    return next(err);
+    return next(errorGenerico(updateError, 'PATCH /api/admin/admins/:id'));
   }
 
   await logAudit({
