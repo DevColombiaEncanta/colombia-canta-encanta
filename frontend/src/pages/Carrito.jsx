@@ -2,18 +2,16 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useCarrito } from '../context/CarritoContext';
 import Footer from '../components/Footer/Footer';
+import { formatCOP as formatPrecio } from '../utils/formato';
 import { BASE_URL, OG_IMAGE } from '../utils/seo';
 import './Carrito.css';
 
 const PAGE_TITLE = 'Carrito | Colombia Canta y Encanta';
 const PAGE_DESC = 'Revisa tu pedido y procede al pago de los productos oficiales de Colombia Canta y Encanta.';
 
-const parsePrecio = (precio) => parseInt(precio.replace(/\D/g, ''), 10);
-const formatPrecio = (num) => '$' + num.toLocaleString('es-CO');
-
 export default function Carrito() {
   const { items, actualizarCantidad, eliminar } = useCarrito();
-  const subtotal = items.reduce((sum, item) => sum + parsePrecio(item.precio) * item.cantidad, 0);
+  const subtotal = items.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
 
   return (
     <main>
@@ -115,13 +113,16 @@ export default function Carrito() {
                       height: '80px',
                       borderRadius: '10px',
                       background: item.bg,
+                      backgroundImage: item.imagenes?.[0] ? `url(${item.imagenes[0]})` : undefined,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '32px',
                       flexShrink: 0
                     }}>
-                      {item.emoji}
+                      {!item.imagenes?.[0] && item.emoji}
                     </div>
 
                     <div>
@@ -139,10 +140,10 @@ export default function Carrito() {
                         color: 'var(--texto-secundario)',
                         marginBottom: '12px'
                       }}>
-                        {item.categoria}
+                        {item.categoriaNombre}
                         {item.talla && ` · Talla: ${item.talla}`}
-                        {item.color && ` · ${item.color.nombre}`}
-                        {` · ${item.precio} c/u`}
+                        {item.colorNombre && ` · ${item.colorNombre}`}
+                        {` · ${formatPrecio(item.precio)} c/u`}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button
@@ -207,7 +208,7 @@ export default function Carrito() {
                         fontWeight: '700',
                         color: 'var(--coral)'
                       }}>
-                        {formatPrecio(parsePrecio(item.precio) * item.cantidad)}
+                        {formatPrecio(item.precio * item.cantidad)}
                       </span>
                       <button
                         onClick={() => eliminar(item.id)}

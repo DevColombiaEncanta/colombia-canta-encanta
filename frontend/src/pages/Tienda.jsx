@@ -4,16 +4,17 @@ import { Helmet } from 'react-helmet-async';
 import ProductoModal from '../components/ProductoModal/ProductoModal';
 import ContactoSection from '../components/Contacto/Contacto';
 import Footer from '../components/Footer/Footer';
-import { coleccionesSuperiores, productos } from '../data/productos';
+import { useProductos } from '../hooks/useProductos';
+import { useColecciones } from '../hooks/useColecciones';
+import { useCategoriasProducto } from '../hooks/useCategoriasProducto';
+import { formatCOP } from '../utils/formato';
 import { BASE_URL, OG_IMAGE } from '../utils/seo';
 import './Tienda.css';
 
 const PAGE_TITLE = 'Tienda | Colombia Canta y Encanta';
 const PAGE_DESC = 'Merch oficial de Colombia Canta y Encanta: camisetas, hoodies, tote bags y más. Lleva un pedacito de la cultura colombiana contigo.';
 
-const categorias = ['Todos', 'Camisetas', 'Hoodies', 'Bags', 'Otros'];
-
-const parsePrecio = (precio) => parseInt(precio.replace(/\D/g, ''), 10);
+const CATEGORIA_TODOS = 'Todos';
 
 const heroSlides = [
   {
@@ -42,13 +43,28 @@ const visteImgs = [
 ];
 
 export default function Tienda() {
-  const [coleccionActiva, setColeccionActiva] = useState('novedades');
-  const [categoriaActiva, setCategoriaActiva] = useState('Todos');
+  const { productos, cargando: cargandoProductos, error: errorProductos } = useProductos();
+  const { colecciones, cargando: cargandoColecciones, error: errorColecciones } = useColecciones();
+  const { categorias, cargando: cargandoCategorias, error: errorCategorias } = useCategoriasProducto();
+
+  const [coleccionActiva, setColeccionActiva] = useState(null);
+  const [categoriaActiva, setCategoriaActiva] = useState(CATEGORIA_TODOS);
   const [ordenarPor, setOrdenarPor] = useState('relevancia');
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [toast, setToast] = useState(null);
   const [heroSlideActivo, setHeroSlideActivo] = useState(0);
   const [visteActivo, setVisteActivo] = useState(0);
+
+  const cargando = cargandoProductos || cargandoColecciones || cargandoCategorias;
+  const error = errorProductos || errorColecciones || errorCategorias;
+
+  // Colecciones son administrables desde el panel — se activa la primera
+  // (ya viene ordenada por `orden` desde el backend) en cuanto llegan.
+  useEffect(() => {
+    if (colecciones.length > 0 && coleccionActiva === null) {
+      setColeccionActiva(colecciones[0].id);
+    }
+  }, [colecciones, coleccionActiva]);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -65,15 +81,15 @@ export default function Tienda() {
   }, []);
 
   const filtrados = productos
-    .filter(p => p.coleccion === coleccionActiva)
-    .filter(p => categoriaActiva === 'Todos' || p.categoria === categoriaActiva)
+    .filter(p => p.coleccionId === coleccionActiva)
+    .filter(p => categoriaActiva === CATEGORIA_TODOS || p.categoriaId === categoriaActiva)
     .sort((a, b) => {
-      if (ordenarPor === 'precio-bajo') return parsePrecio(a.precio) - parsePrecio(b.precio);
-      if (ordenarPor === 'precio-alto') return parsePrecio(b.precio) - parsePrecio(a.precio);
+      if (ordenarPor === 'precio-bajo') return a.precio - b.precio;
+      if (ordenarPor === 'precio-alto') return b.precio - a.precio;
       return 0;
     });
 
-  const coleccionLabel = coleccionesSuperiores.find(c => c.id === coleccionActiva)?.nombre ?? 'PRODUCTOS';
+  const coleccionLabel = colecciones.find(c => c.id === coleccionActiva)?.nombre ?? 'PRODUCTOS';
 
   const handleAgregarSuccess = (nombre) => {
     setToast(`"${nombre}" agregado al carrito`);
@@ -169,13 +185,13 @@ export default function Tienda() {
       <section className="seccion-colecciones-drops">
         <div className="container-tienda">
           <div className="grid-colecciones-links">
-            {coleccionesSuperiores.map(col => (
+            {colecciones.map(col => (
               <button
                 key={col.id}
                 onClick={() => setColeccionActiva(col.id)}
                 className={`btn-drop-tab ${coleccionActiva === col.id ? 'activo' : ''}`}
               >
-                <span className="drop-tab-emoji">{col.emoji}</span> {col.nombre}
+                {col.emoji && <span className="drop-tab-emoji">{col.emoji}</span>} {col.nombre}
               </button>
             ))}
           </div>
@@ -187,13 +203,13 @@ export default function Tienda() {
         <div className="container-tienda">
           <span className="label-filtrar-por">FILTRAR POR CATEGORÍA</span>
           <div className="flex-tags-categorias">
-            {categorias.map(cat => (
+            {[{ id: CATEGORIA_TODOS, nombre: CATEGORIA_TODOS }, ...categorias].map(cat => (
               <button
-                key={cat}
-                onClick={() => setCategoriaActiva(cat)}
-                className={`btn-categoria-tag ${categoriaActiva === cat ? 'activo' : ''}`}
+                key={cat.id}
+                onClick={() => setCategoriaActiva(cat.id)}
+                className={`btn-categoria-tag ${categoriaActiva === cat.id ? 'activo' : ''}`}
               >
-                {cat}
+                {cat.nombre}
               </button>
             ))}
           </div>
@@ -222,7 +238,21 @@ export default function Tienda() {
       {/* 5. Grid de productos — card propia del sitio */}
       <section className="seccion-grid-productos-galeria">
         <div className="container-tienda">
-          <div className={`productos-grid${coleccionActiva === 'novedades' ? ' fila-unica-novedades' : ''}`}>
+
+          {cargando && (
+            <div className="tienda-grid-estado"><p>Cargando productos…</p></div>
+          )}
+
+          {!cargando && error && (
+            <div className="tienda-grid-estado"><p>No se pudieron cargar los productos. Intenta de nuevo más tarde.</p></div>
+          )}
+
+          {!cargando && !error && productos.length === 0 && (
+            <div className="tienda-grid-estado"><p>Aún no hay productos publicados. Vuelve pronto.</p></div>
+          )}
+
+          {!cargando && !error && productos.length > 0 && (
+          <div className="productos-grid">
             {filtrados.map(prod => (
               <div
                 key={prod.id}
@@ -232,10 +262,10 @@ export default function Tienda() {
                 {/* Zona imagen */}
                 <div className="producto-card-imagen" style={{ background: prod.bg }}>
                   {prod.tag && <span className="producto-card-badge">{prod.tag}</span>}
-                  {!prod.stock && <span className="producto-card-agotado">Agotado</span>}
-                  {(prod.imagenes?.[0] ?? prod.imagen) ? (
+                  {!prod.enStock && <span className="producto-card-agotado">Agotado</span>}
+                  {prod.imagenes?.[0] ? (
                     <img
-                      src={`${import.meta.env.BASE_URL}${prod.imagenes?.[0] ?? prod.imagen}`}
+                      src={prod.imagenes[0]}
                       alt={prod.nombre}
                       className="producto-card-foto"
                       loading="lazy"
@@ -262,13 +292,16 @@ export default function Tienda() {
                 <div className="producto-card-info">
                   <div className="producto-card-fila-top">
                     <span className="producto-card-nombre">{prod.nombre}</span>
-                    <span className="producto-card-precio">{prod.precio}</span>
+                    <span className="producto-card-precio">{formatCOP(prod.precio)}</span>
                   </div>
-                  <span className="producto-card-cat-label">{prod.categoria}</span>
+                  <span className="producto-card-cat-label">
+                    {categorias.find(c => c.id === prod.categoriaId)?.nombre}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
+          )}
         </div>
       </section>
 
@@ -307,6 +340,7 @@ export default function Tienda() {
       {productoSeleccionado && (
         <ProductoModal
           producto={productoSeleccionado}
+          categoriaNombre={categorias.find(c => c.id === productoSeleccionado.categoriaId)?.nombre}
           onClose={() => setProductoSeleccionado(null)}
           onAgregarSuccess={handleAgregarSuccess}
         />

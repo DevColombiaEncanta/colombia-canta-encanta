@@ -18,3 +18,9 @@ export function formatearFecha(fechaISO) {
 export function gradienteDiagonal(colorInicio, colorFin) {
   return `linear-gradient(135deg, ${colorInicio} 0%, ${colorFin} 100%)`;
 }
+
+// El backend guarda producto.precio como número real (COP) — el frontend solo
+// necesita formatearlo para mostrarlo, ya no parsearlo desde un string.
+export function formatCOP(numero) {
+  return '$' + numero.toLocaleString('es-CO');
+}

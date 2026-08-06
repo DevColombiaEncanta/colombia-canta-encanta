@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { apiFetch } from '../../utils/api';
 import './ReservaModal.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -18,10 +19,20 @@ export default function ReservaModal({ evento, itemSeleccionado, onClose }) {
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorEnvio, setErrorEnvio] = useState(null);
   const overlayRef = useRef(null);
   const panelRef = useRef(null);
 
-  const esPago = evento.precio &&
+  // `accion_tipo` es una columna obligatoria en `eventos` y no existe en absoluto en
+  // `eventos_fijos` — así se distingue de forma estructural (no con un truco de texto)
+  // cuál de las dos tablas es el origen real de este `evento`.
+  const esEventoFijo = evento.accionTipo === undefined;
+  // Eventos reales con accion_tipo:'libre', y los eventos fijos (Salas/Enamoras, que
+  // no tienen concepto de pago en su esquema) se conectan de verdad a POST /api/reservas.
+  // Los eventos de pago siguen con el flujo simulado hasta que exista Mercado Pago (4.6b).
+  const esLibre = evento.accionTipo === 'libre';
+  const puedeReservarDeVerdad = esLibre || esEventoFijo;
+  const esPago = !puedeReservarDeVerdad && evento.precio &&
     !['Entrada libre', 'Próximamente', 'Convocatoria abierta'].includes(evento.precio);
 
   const maxEntradas = evento.maxEntradas ?? 20;
@@ -65,7 +76,7 @@ export default function ReservaModal({ evento, itemSeleccionado, onClose }) {
     setErrors(e => ({ ...e, [field]: validateField(field, form[field]) }));
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
     const allTouched = { nombre: true, celular: true, email: true };
     const allErrors  = {
@@ -76,8 +87,55 @@ export default function ReservaModal({ evento, itemSeleccionado, onClose }) {
     setTouched(allTouched);
     setErrors(allErrors);
     if (Object.values(allErrors).some(Boolean)) return;
+
+    setErrorEnvio(null);
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSubmitted(true); }, 1200);
+
+    if (!puedeReservarDeVerdad) {
+      // Simulación de siempre — eventos de pago todavía no tienen backend real
+      // conectado (ver nota en puedeReservarDeVerdad más arriba, pendiente Mercado
+      // Pago en 4.6b).
+      setTimeout(() => { setLoading(false); setSubmitted(true); }, 1200);
+      return;
+    }
+
+    const datosComprador = {
+      nombre: form.nombre,
+      celular: form.celular,
+      email: form.email,
+      cantidad: form.cantidad,
+    };
+
+    const body = esEventoFijo
+      ? {
+          evento_fijo_id: evento.id,
+          show_seleccionado: itemSeleccionado
+            ? {
+                dia: itemSeleccionado.dia,
+                hora: itemSeleccionado.hora,
+                nombre: itemSeleccionado.nombre,
+                descripcion: itemSeleccionado.descripcion ?? null,
+                fecha_iso: itemSeleccionado.fechaISO,
+              }
+            : null,
+          ...datosComprador,
+        }
+      : {
+          evento_id: evento.id,
+          zona_seleccionada: zonaSeleccionada
+            ? { nombre: zonaSeleccionada.nombre, precio: precioNumerico }
+            : null,
+          ...datosComprador,
+        };
+
+    try {
+      await apiFetch('/api/reservas', { method: 'POST', body });
+      setSubmitted(true);
+    } catch (err) {
+      setErrorEnvio(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const canSubmit = !Object.values(errors).some(Boolean)
@@ -210,6 +268,10 @@ export default function ReservaModal({ evento, itemSeleccionado, onClose }) {
                     </div>
                   )}
                 </div>
+
+                {errorEnvio && (
+                  <p className="rm-field-error" role="alert">{errorEnvio}</p>
+                )}
 
                 <button
                   type="submit"

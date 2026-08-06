@@ -17,6 +17,7 @@ import cursosRouter, { cursosPublicoRouter } from './routes/cursos.js';
 import eventosRouter, { eventosPublicoRouter } from './routes/eventos.js';
 import eventosFijosRouter, { eventosFijosPublicoRouter } from './routes/eventosFijos.js';
 import inscripcionesRouter, { inscripcionesPublicRouter } from './routes/inscripciones.js';
+import reservasRouter, { reservasPublicRouter } from './routes/reservas.js';
 
 dotenv.config();
 
@@ -58,6 +59,7 @@ app.use('/api/admin/cursos', requireAdmin, cursosRouter);
 app.use('/api/admin/eventos', requireAdmin, eventosRouter);
 app.use('/api/admin/eventos-fijos', requireAdmin, eventosFijosRouter);
 app.use('/api/admin/inscripciones', requireAdmin, inscripcionesRouter);
+app.use('/api/admin/reservas', requireAdmin, reservasRouter);
 
 // Endpoints públicos (sin sesión) de solo lectura — Fase 4.0, para que el sitio real
 // (visitantes anónimos) pueda leer el contenido ya publicado. Cada uno filtra solo
@@ -72,10 +74,10 @@ app.use('/api/cursos', cursosPublicoRouter);
 app.use('/api/eventos', eventosPublicoRouter);
 app.use('/api/eventos-fijos', eventosFijosPublicoRouter);
 
-// Único endpoint público de ESCRITURA de todo el backend — recepción real del
-// formulario de inscripción del sitio. Va después de limiterGeneral (línea 42) y
-// además lleva su propio limiterEstricto (ver inscripciones.js) por ser de escritura.
+// Endpoints públicos de ESCRITURA — van después de limiterGeneral (línea 42) y
+// además llevan su propio limiterEstricto (ver inscripciones.js/reservas.js).
 app.use('/api/inscripciones', inscripcionesPublicRouter);
+app.use('/api/reservas', reservasPublicRouter);
 
 // Multer usa mensajes genéricos en inglés (ej. "Unexpected field" cuando se supera
 // el límite de archivos) — se traducen los códigos más comunes a algo legible.

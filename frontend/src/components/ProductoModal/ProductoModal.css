@@ -288,6 +288,16 @@
   transform: scale(1.1);
 }
 
+.color-swatch:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  box-shadow: inset 0 0 0 1.5px rgba(0, 0, 0, 0.15), inset 0 0 0 100px rgba(128, 128, 128, 0.4);
+}
+
+.color-swatch:disabled:hover {
+  transform: none;
+}
+
 /* ---- Tallas ---- */
 .tallas-grupo {
   display: flex;
@@ -317,6 +327,17 @@
   background: var(--coral);
   border-color: var(--coral);
   color: #fff;
+}
+
+.talla-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.talla-btn:disabled:hover {
+  border-color: var(--border-media);
+  color: var(--texto-principal);
 }
 
 /* ---- Cantidad ---- */

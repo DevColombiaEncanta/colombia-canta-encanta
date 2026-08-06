@@ -42,7 +42,12 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
     track.scrollTo({ left: cardLeft - (trackWidth - cardWidth) / 2, behavior: 'smooth' });
   }, [carruselIdx]);
 
-  const esProximamente = evento.precio === 'Próximamente';
+  // `accionTipo` solo existe en `eventos` (no en `eventos_fijos`, que no tiene esa
+  // columna) — se usa cuando está disponible, con el viejo chequeo de texto como
+  // respaldo para no romper el caso de eventos_fijos.
+  const esProximamente = evento.accionTipo
+    ? evento.accionTipo === 'proximamente'
+    : evento.precio === 'Próximamente';
   const pillLibre = evento.pills?.find(p => p.texto.toLowerCase().includes('libre'));
 
   const ctaLabel      = esProximamente ? 'Próximamente' : (evento.cta ?? 'Reservar');

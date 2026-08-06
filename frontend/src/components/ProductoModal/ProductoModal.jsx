@@ -1,26 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useCarrito } from '../../context/CarritoContext';
+import { formatCOP } from '../../utils/formato';
 import './ProductoModal.css';
 
 const TASA_USD = 4200;
-const parseCOP = (precio) => parseInt(precio.replace(/\D/g, ''), 10);
-const formatCOP = (num) => '$' + num.toLocaleString('es-CO');
 const formatUSD = (num) => '$' + (num / TASA_USD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
+export default function ProductoModal({ producto, categoriaNombre, onClose, onAgregarSuccess }) {
   const { agregar } = useCarrito();
-  const precioBase = parseCOP(producto.precio);
+  const precioBase = producto.precio;
+  const variantes = useMemo(() => producto.variantes ?? [], [producto.variantes]);
 
-  const imagenes = producto.imagenes ?? (producto.imagen ? [producto.imagen] : []);
+  const imagenes = producto.imagenes ?? [];
+
+  // Cada producto tiene siempre al menos una fila en producto_variantes (aunque
+  // sea sin talla/color real, ambos en null) — los selectores solo se muestran
+  // si de verdad hay más de un valor entre las variantes reales.
+  const tallasDisponibles = useMemo(
+    () => [...new Set(variantes.map(v => v.talla).filter(Boolean))],
+    [variantes]
+  );
+  const coloresDisponibles = useMemo(() => {
+    const mapa = new Map();
+    for (const v of variantes) {
+      if (v.colorNombre && !mapa.has(v.colorNombre)) {
+        mapa.set(v.colorNombre, { nombre: v.colorNombre, hex: v.colorHex });
+      }
+    }
+    return [...mapa.values()];
+  }, [variantes]);
 
   const [imgActiva, setImgActiva] = useState(0);
-  const [tallaSeleccionada, setTallaSeleccionada] = useState(
-    producto.tallas.length > 0 ? producto.tallas[0] : null
-  );
-  const [colorSeleccionado, setColorSeleccionado] = useState(
-    producto.colores.length > 0 ? producto.colores[0] : null
-  );
+  const [tallaSeleccionada, setTallaSeleccionada] = useState(tallasDisponibles[0] ?? null);
+  const [colorSeleccionado, setColorSeleccionado] = useState(coloresDisponibles[0] ?? null);
   const [cantidad, setCantidad] = useState(1);
+
+  // Variante exacta (talla + color) que corresponde a la selección actual —
+  // determina el stock real disponible para agregar al carrito.
+  const varianteActual = variantes.find(v =>
+    (v.talla ?? null) === tallaSeleccionada &&
+    (v.colorNombre ?? null) === (colorSeleccionado?.nombre ?? null)
+  );
+  const hayStock = (varianteActual?.stock ?? 0) > 0;
+
+  // Para deshabilitar combinaciones agotadas: dada la talla/color ya elegido,
+  // ¿la otra dimensión tiene stock real en esa combinación puntual?
+  const tallaTieneStock = (talla) =>
+    variantes.some(v => v.talla === talla && (v.colorNombre ?? null) === (colorSeleccionado?.nombre ?? null) && v.stock > 0);
+  const colorTieneStock = (colorNombre) =>
+    variantes.some(v => (v.talla ?? null) === tallaSeleccionada && v.colorNombre === colorNombre && v.stock > 0);
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -33,18 +61,17 @@ export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
   }, [onClose]);
 
   const handleAgregar = () => {
-    const varianteId = [
-      producto.id,
-      tallaSeleccionada || 'unico',
-      colorSeleccionado?.nombre || 'unico',
-    ].join('-');
+    if (!varianteActual || !hayStock) return;
 
+    const { variantes: _variantes, ...productoBase } = producto;
     agregar(
       {
-        ...producto,
-        id: varianteId,
-        talla: tallaSeleccionada,
-        color: colorSeleccionado,
+        ...productoBase,
+        id: varianteActual.id,
+        talla: varianteActual.talla,
+        colorNombre: varianteActual.colorNombre,
+        colorHex: varianteActual.colorHex,
+        categoriaNombre,
       },
       cantidad
     );
@@ -63,7 +90,7 @@ export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
 
           {imagenes.length > 0 ? (
             <img
-              src={`${import.meta.env.BASE_URL}${imagenes[imgActiva]}`}
+              src={imagenes[imgActiva]}
               alt={`${producto.nombre} — imagen ${imgActiva + 1}`}
               className="modal-foto"
             />
@@ -81,7 +108,7 @@ export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
                   aria-label={`Ver imagen ${i + 1}`}
                 >
                   <img
-                    src={`${import.meta.env.BASE_URL}${img}`}
+                    src={img}
                     alt=""
                     loading="lazy"
                   />
@@ -98,7 +125,7 @@ export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
           </div>
 
           <div>
-            <span className="label-seccion label-rojo">{producto.categoria}</span>
+            <span className="label-seccion label-rojo">{categoriaNombre}</span>
             <h2 className="modal-titulo">{producto.nombre}</h2>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap', marginTop: '6px' }}>
               <div className="modal-precio">
@@ -112,27 +139,28 @@ export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
           </div>
 
           {/* Stock */}
-          <div className={`stock-badge ${producto.stock ? 'stock-disponible' : 'stock-agotado'}`}>
+          <div className={`stock-badge ${hayStock ? 'stock-disponible' : 'stock-agotado'}`}>
             <span className="stock-dot" />
-            {producto.stock ? 'Disponible' : 'Agotado'}
+            {hayStock ? 'Disponible' : 'Agotado'}
           </div>
 
           {/* Descripción */}
           <p className="modal-descripcion">{producto.descripcion}</p>
 
           {/* Colores */}
-          {producto.colores.length > 0 && (
+          {coloresDisponibles.length > 0 && (
             <div>
               <div className="modal-label">
                 Color: <strong>{colorSeleccionado?.nombre}</strong>
               </div>
               <div className="colores-grupo">
-                {producto.colores.map(color => (
+                {coloresDisponibles.map(color => (
                   <button
                     key={color.nombre}
                     className={`color-swatch ${colorSeleccionado?.nombre === color.nombre ? 'activo' : ''}`}
                     style={{ '--swatch-color': color.hex }}
                     onClick={() => setColorSeleccionado(color)}
+                    disabled={!colorTieneStock(color.nombre)}
                     title={color.nombre}
                   />
                 ))}
@@ -141,17 +169,18 @@ export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
           )}
 
           {/* Tallas */}
-          {producto.tallas.length > 0 && (
+          {tallasDisponibles.length > 0 && (
             <div>
               <div className="modal-label">
                 Talla: <strong>{tallaSeleccionada}</strong>
               </div>
               <div className="tallas-grupo">
-                {producto.tallas.map(talla => (
+                {tallasDisponibles.map(talla => (
                   <button
                     key={talla}
                     className={`talla-btn ${tallaSeleccionada === talla ? 'activo' : ''}`}
                     onClick={() => setTallaSeleccionada(talla)}
+                    disabled={!tallaTieneStock(talla)}
                   >
                     {talla}
                   </button>
@@ -182,12 +211,12 @@ export default function ProductoModal({ producto, onClose, onAgregarSuccess }) {
 
           {/* Agregar al carrito */}
           <button
-            className={`btn modal-btn-agregar ${producto.stock ? 'btn-azul' : ''}`}
+            className={`btn modal-btn-agregar ${hayStock ? 'btn-azul' : ''}`}
             onClick={handleAgregar}
-            disabled={!producto.stock}
-            style={!producto.stock ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+            disabled={!hayStock}
+            style={!hayStock ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
           >
-            {producto.stock
+            {hayStock
               ? `Agregar al carrito · ${formatCOP(precioBase * cantidad)}`
               : 'Sin stock disponible'}
           </button>
