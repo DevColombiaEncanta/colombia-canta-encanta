@@ -13,6 +13,19 @@
   align-items: center;
 }
 
+.carrito-item-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
 .carrito-resumen {
   position: sticky;
   top: 100px;
@@ -35,6 +48,17 @@
   .carrito-item {
     grid-template-columns: 64px 1fr;
     gap: 12px;
+    padding: 16px;
+  }
+
+  /* Punto 23 (5.4 tercera ronda) — bug confirmado: la miniatura tenía un
+     tamaño fijo de 80px por estilo inline, sin importar que acá la columna de
+     la grilla se achica a 64px — la foto quedaba más ancha que su columna y
+     se montaba encima del título del producto. */
+  .carrito-item-thumb {
+    width: 64px;
+    height: 64px;
+    font-size: 26px;
   }
 
   .carrito-item-acciones {

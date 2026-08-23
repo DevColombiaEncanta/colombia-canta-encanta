@@ -1,0 +1,368 @@
+/* ⭐ 5.3a — antes de nombrar cualquier clase acá se revisó contra todo el CSS
+   público (pages/Eventos.css usa el prefijo `.ev-`, CarruselEventos.css usa
+   `.eventos-ac-`, ninguno choca con `.eventos-` a secas) — mismo hallazgo que
+   costó 3 bugs reales en 5.2 (ver Hero.css/Noticias.css), no se repite acá. */
+
+.eventos-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.eventos-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.eventos-lista-panel {
+  position: sticky;
+  top: 116px;
+}
+
+.eventos-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.eventos-filtros input,
+.eventos-filtros select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.eventos-contador {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+  margin: 0 0 10px;
+}
+
+.eventos-vacio {
+  color: var(--texto-secundario);
+  font-size: 14px;
+}
+
+.eventos-panel-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.eventos-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+  background: var(--bg-card);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.eventos-item:hover {
+  background: var(--bg-hover);
+}
+
+.eventos-item.activo {
+  border-color: var(--coral);
+  background: color-mix(in srgb, var(--coral) 10%, transparent);
+}
+
+.eventos-item-titulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-principal);
+}
+
+.eventos-item-destacado {
+  color: var(--coral);
+  font-size: 12px;
+}
+
+.eventos-item-meta {
+  font-size: 12px;
+  color: var(--texto-secundario);
+}
+
+.eventos-form-vacio {
+  color: var(--texto-secundario);
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.eventos-form-vacio .admin-form-aviso {
+  display: inline-flex;
+}
+
+.eventos-form-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1.2rem;
+  color: var(--texto-principal);
+  margin: 0 0 20px;
+}
+
+.eventos-seccion-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1rem;
+  color: var(--texto-principal);
+  margin: 32px 0 16px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-sutil);
+}
+
+/* ── Fecha autogenerada (2026-08-16: ya no es editable, solo vista previa) ── */
+.eventos-fecha-preview {
+  font-size: 13px;
+  color: var(--texto-secundario);
+  background: var(--bg-hover);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: -8px 0 20px;
+}
+
+.eventos-fecha-preview strong {
+  color: var(--texto-principal);
+}
+
+/* ── Pills ── */
+.eventos-pills {
+  margin-bottom: 20px;
+}
+
+.eventos-pill-fila {
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.eventos-pill-fila input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.eventos-pill-icono {
+  text-align: center;
+}
+
+.eventos-pills-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* ── Cómo se reserva ── */
+.eventos-camino-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.eventos-camino-opcion {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-card);
+  cursor: pointer;
+}
+
+.eventos-camino-opcion:hover {
+  background: var(--bg-hover);
+}
+
+.eventos-camino-opcion.activo {
+  border-color: var(--coral);
+  background: color-mix(in srgb, var(--coral) 10%, transparent);
+}
+
+.eventos-camino-titulo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texto-principal);
+}
+
+.eventos-camino-desc {
+  font-size: 12px;
+  color: var(--texto-secundario);
+  line-height: 1.4;
+}
+
+/* ── Precio compuesto (moneda + monto, 2026-08-16) ── */
+.eventos-precio-compuesto {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 8px;
+}
+
+.eventos-precio-compuesto select,
+.eventos-precio-compuesto input[type="number"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 15px;
+}
+
+/* ── Zonas ── */
+.eventos-zonas {
+  margin-bottom: 20px;
+}
+
+.eventos-zona-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.eventos-zona-fila input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.eventos-zona-fila input.invalido,
+.eventos-testimonio-fila textarea.invalido,
+.eventos-testimonio-datos input.invalido {
+  border-color: var(--rojo);
+}
+
+/* ── Testimonios ── */
+.eventos-testimonios {
+  margin-bottom: 20px;
+}
+
+.eventos-testimonio-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+  margin-bottom: 10px;
+}
+
+.eventos-testimonio-fila textarea {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+  min-height: 60px;
+  resize: vertical;
+}
+
+.eventos-testimonio-datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.eventos-testimonio-datos input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+/* ── Lista dinámica simple (programa) ── */
+.eventos-lista-simple {
+  margin-bottom: 20px;
+}
+
+.eventos-lista-simple-fila {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.eventos-lista-simple-fila input[type="text"] {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+@media (max-width: 1024px) {
+  .eventos-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .eventos-lista-panel {
+    position: static;
+  }
+
+  .eventos-panel-lista {
+    max-height: 50vh;
+  }
+
+  .eventos-camino-selector {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 599px) {
+  .eventos-panel-header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .eventos-panel-header-textos {
+    width: 100%;
+  }
+
+  .eventos-pill-fila,
+  .eventos-zona-fila,
+  .eventos-testimonio-datos {
+    grid-template-columns: 1fr;
+  }
+}

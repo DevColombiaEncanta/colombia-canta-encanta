@@ -18,6 +18,7 @@ import eventosRouter, { eventosPublicoRouter } from './routes/eventos.js';
 import eventosFijosRouter, { eventosFijosPublicoRouter } from './routes/eventosFijos.js';
 import inscripcionesRouter, { inscripcionesPublicRouter } from './routes/inscripciones.js';
 import reservasRouter, { reservasPublicRouter } from './routes/reservas.js';
+import auditLogRouter from './routes/auditLog.js';
 
 dotenv.config();
 
@@ -60,6 +61,7 @@ app.use('/api/admin/eventos', requireAdmin, eventosRouter);
 app.use('/api/admin/eventos-fijos', requireAdmin, eventosFijosRouter);
 app.use('/api/admin/inscripciones', requireAdmin, inscripcionesRouter);
 app.use('/api/admin/reservas', requireAdmin, reservasRouter);
+app.use('/api/admin/audit-log', requireAdmin, auditLogRouter);
 
 // Endpoints públicos (sin sesión) de solo lectura — Fase 4.0, para que el sitio real
 // (visitantes anónimos) pueda leer el contenido ya publicado. Cada uno filtra solo
@@ -81,8 +83,15 @@ app.use('/api/reservas', reservasPublicRouter);
 
 // Multer usa mensajes genéricos en inglés (ej. "Unexpected field" cuando se supera
 // el límite de archivos) — se traducen los códigos más comunes a algo legible.
+// ⭐ Pedido del usuario (2026-08-15): las fotos RAW de cámara (Canon .CR2, etc.)
+// suelen pesar 20-45MB — muy por encima del límite de 8MB — así que en la
+// práctica la mayoría choca acá, con el tamaño, antes de siquiera llegar a la
+// validación de formato de `imageUpload.js` (que si detecta el archivo
+// completo, da un mensaje más específico). Este mensaje no puede saber con
+// certeza que es RAW (multer corta el archivo a mitad de camino, no llega a
+// verse completo), así que solo lo sugiere como causa probable.
 const MENSAJES_MULTER = {
-  LIMIT_FILE_SIZE: 'El archivo supera el tamaño máximo permitido',
+  LIMIT_FILE_SIZE: 'El archivo supera el tamaño máximo permitido (8MB). Si es una foto tomada directo de una cámara, puede estar en formato RAW (mucho más pesado que un JPG) — expórtala como JPG desde la cámara o el celular y vuelve a intentar',
   LIMIT_UNEXPECTED_FILE: 'Se superó la cantidad máxima de archivos permitida',
 };
 

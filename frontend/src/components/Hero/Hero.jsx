@@ -8,18 +8,24 @@ export default function Hero() {
   const { slides, cargando, error } = useHero();
   const { eventos } = useEventos();
   const [active, setActive] = useState(0);
+  // ⭐ Pedido del usuario (2026-08-15): el carrusel seguía avanzando solo
+  // mientras alguien leía la descripción o apuntaba a un botón — molesto en
+  // especial con textos largos. Se pausa con el mouse encima, y también con
+  // el foco de teclado (alguien tabulando hasta un botón del CTA tiene el
+  // mismo problema que alguien con el mouse encima, solo que sin hover).
+  const [pausado, setPausado] = useState(false);
 
   const goTo = (idx) => setActive(idx);
   const next = () => setActive((a) => (slides.length ? (a + 1) % slides.length : 0));
   const prev = () => setActive((a) => (slides.length ? (a - 1 + slides.length) % slides.length : 0));
 
   useEffect(() => {
-    if (slides.length === 0) return;
+    if (slides.length === 0 || pausado) return;
     const id = setInterval(() => {
       setActive((a) => (a + 1) % slides.length);
     }, 8000);
     return () => clearInterval(id);
-  }, [slides.length]);
+  }, [slides.length, pausado]);
 
   const eventoDestacado = eventos.find((e) => e.destacadoHero);
 
@@ -50,7 +56,15 @@ export default function Hero() {
   const activeSlide = slides[active];
 
   return (
-    <section className="hero-carousel">
+    <section
+      className="hero-carousel"
+      onMouseEnter={() => setPausado(true)}
+      onMouseLeave={() => setPausado(false)}
+      onFocus={() => setPausado(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setPausado(false);
+      }}
+    >
       {/* ── Imagen — derecha, difuminada hacia el fondo (crossfade) ── */}
       <div className="hero-imagen-area" aria-hidden="true">
         {slides.map((slide, i) => (

@@ -1,0 +1,282 @@
+/* ⭐ 5.4 — revisado contra todo el CSS público antes de nombrar nada acá: la
+   Tienda pública usa `.producto-card`/`.productos-grid` (Tienda.css) y
+   `.modal-*` (ProductoModal.css) — ninguno choca con `.prod-` a secas
+   (confirmado con una búsqueda, mismo hallazgo que costó bugs reales en
+   Hero/Noticias 5.2, no se repite acá). */
+
+.prod-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.prod-panel-header-acciones {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.prod-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.prod-lista-panel {
+  position: sticky;
+  top: 116px;
+}
+
+.prod-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.prod-filtros input,
+.prod-filtros select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.prod-contador {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+  margin: 0 0 10px;
+}
+
+.prod-vacio {
+  color: var(--texto-secundario);
+  font-size: 14px;
+}
+
+.prod-panel-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.prod-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+  background: var(--bg-card);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.prod-item:hover {
+  background: var(--bg-hover);
+}
+
+.prod-item.activo {
+  border-color: var(--coral);
+  background: color-mix(in srgb, var(--coral) 10%, transparent);
+}
+
+/* Punto 18 (5.4 tercera ronda): un producto oculto ya tenía la etiqueta de
+   texto "(oculto)" en el meta, pero se perdía entre el resto de la lista —
+   atenuar la fila entera lo hace evidente de un vistazo. */
+.prod-item.inactivo {
+  opacity: 0.55;
+}
+
+.prod-item-thumb {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: var(--bg-input);
+}
+
+.prod-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.prod-item-textos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.prod-item-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-principal);
+}
+
+.prod-item-meta {
+  font-size: 12px;
+  color: var(--texto-secundario);
+}
+
+.prod-form-vacio {
+  color: var(--texto-secundario);
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.prod-form-vacio .admin-form-aviso {
+  display: inline-flex;
+}
+
+.prod-form-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1.2rem;
+  color: var(--texto-principal);
+  margin: 0 0 20px;
+}
+
+.prod-seccion-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1rem;
+  color: var(--texto-principal);
+  margin: 32px 0 4px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-sutil);
+}
+
+.prod-seccion-nota {
+  font-size: 13px;
+  color: var(--texto-secundario);
+  margin: 0 0 16px;
+}
+
+/* ── Selector + botón "Gestionar" ── */
+.prod-selector-fila {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.prod-selector-fila select {
+  min-width: 0;
+}
+
+/* ── Fondo degradado (bg) ── */
+.prod-bg-fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prod-bg-fila input[type="color"] {
+  width: 44px;
+  padding: 4px;
+}
+
+.prod-bg-preview {
+  flex: 1;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+}
+
+/* ── Variantes (talla / color / stock) ── */
+.prod-variantes {
+  margin-bottom: 20px;
+}
+
+.prod-variante-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr 44px 90px auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.prod-variante-fila input[type="text"],
+.prod-variante-fila input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.prod-variante-fila input[type="color"] {
+  padding: 4px;
+  height: 40px;
+}
+
+.prod-variante-talla {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.prod-variante-talla select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+/* Las filas de variante no viven dentro de `.admin-field` (no son un FormField
+   con label propio), así que el `.invalido` genérico de AdminUI.css no las
+   alcanza — se repite acá el mismo borde rojo para esta fila puntual. */
+.prod-variante-fila input.invalido,
+.prod-variante-fila select.invalido {
+  border-color: var(--rojo);
+}
+
+@media (max-width: 1024px) {
+  .prod-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .prod-lista-panel {
+    position: static;
+  }
+
+  .prod-panel-lista {
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 599px) {
+  .prod-panel-header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .prod-panel-header-textos {
+    width: 100%;
+  }
+
+  .prod-variante-fila {
+    grid-template-columns: 1fr;
+  }
+}

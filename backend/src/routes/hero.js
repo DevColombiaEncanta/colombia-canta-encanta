@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { supabase } from '../config/supabaseClient.js';
 import { requireCsrf } from '../middleware/requireCsrf.js';
 import { logAudit } from '../lib/auditLog.js';
-import { uploadMiddleware, validarWebpReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
+import { uploadMiddleware, validarImagenReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
 import { booleanFromString, jsonArrayField, stripUndefined } from '../lib/zodMultipart.js';
 import { toCamelCase } from '../lib/camelCase.js';
 import { errorGenerico } from '../lib/errores.js';
@@ -11,9 +11,24 @@ import { errorGenerico } from '../lib/errores.js';
 const router = Router();
 const CARPETA = 'hero-slides';
 
+// ⭐ Hallazgo real (revisión crítica 5.2, 2026-08-15): el front (Hero.jsx)
+// valida que `to` sea una ruta interna — pero esa validación vivía SOLO ahí.
+// Cualquiera que hablara directo con la API (curl, un fetch manual) podía
+// guardar cualquier string en `to`, incluido un esquema `javascript:` — que
+// <Link to={cta.to}> del Hero público renderiza tal cual como `href` de un
+// `<a>`, un vector real de XSS-guardado (no solo un link roto). Se repite acá
+// la misma regla de lista blanca del front, como la barrera de verdad — la
+// del cliente es solo para dar feedback rápido, nunca la única.
+function esRutaInternaValida(to) {
+  if (!to) return true; // vacío: fila decorativa sin link, válida
+  return to.startsWith('/') && !to.startsWith('//');
+}
+
 const ctaSchema = z.object({
   label: z.string().optional(),
-  to: z.string().optional(),
+  to: z.string().optional().refine(esRutaInternaValida, {
+    message: 'El destino de un botón debe ser una ruta interna que empiece con "/", no una página externa',
+  }),
   primario: z.boolean().optional(),
 });
 
@@ -64,7 +79,7 @@ router.post('/', requireCsrf, uploadMiddleware.single('imagen'), async (req, res
   }
   const { label, titulo, descripcion, orden, ctas } = result.data;
 
-  await validarWebpReal(req.file.buffer);
+  await validarImagenReal(req.file.buffer);
   const { url } = await procesarYSubirImagen(req.file.buffer, CARPETA);
 
   const { data, error } = await supabase
@@ -123,7 +138,7 @@ router.patch('/:id', requireCsrf, uploadMiddleware.single('imagen'), async (req,
 
   let imagenVieja = null;
   if (req.file) {
-    await validarWebpReal(req.file.buffer);
+    await validarImagenReal(req.file.buffer);
     const { url } = await procesarYSubirImagen(req.file.buffer, CARPETA);
     updates.imagen = url;
     imagenVieja = actual.imagen;

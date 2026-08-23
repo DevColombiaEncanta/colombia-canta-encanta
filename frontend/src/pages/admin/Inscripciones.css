@@ -1,0 +1,246 @@
+/* 5.5 · Mismo esqueleto de layout que Eventos.css/Cursos.css (lista + panel de
+   detalle). Prefijo `.insadmin-` propio, distinto de `.inscr-` que ya usa el
+   formulario público (pages/Inscripciones.jsx) — evita que el mismo nombre de
+   clase choque entre las 2 hojas de estilo globales. */
+
+.insadmin-panel-header {
+  margin-bottom: 20px;
+}
+
+.insadmin-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.insadmin-lista-panel {
+  position: sticky;
+  top: 116px;
+}
+
+.insadmin-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.insadmin-filtros input,
+.insadmin-filtros select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.insadmin-contador {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+  margin: 0 0 10px;
+}
+
+.insadmin-vacio {
+  color: var(--texto-secundario);
+  font-size: 14px;
+}
+
+.insadmin-panel-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.insadmin-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+  background: var(--bg-card);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.insadmin-item:hover {
+  background: var(--bg-hover);
+}
+
+.insadmin-item.activo {
+  border-color: var(--coral);
+  background: color-mix(in srgb, var(--coral) 10%, transparent);
+}
+
+.insadmin-item-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-principal);
+}
+
+.insadmin-item-meta {
+  font-size: 12px;
+  color: var(--texto-secundario);
+}
+
+.insadmin-estado {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.insadmin-estado-pendiente { color: #B8860B; }
+.insadmin-estado-confirmada { color: #1a8a4a; }
+.insadmin-estado-cancelada { color: var(--rojo); }
+
+.insadmin-form-vacio {
+  color: var(--texto-secundario);
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.insadmin-form-vacio .admin-form-aviso {
+  display: inline-flex;
+}
+
+.insadmin-form-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1.2rem;
+  color: var(--texto-principal);
+  margin: 0 0 4px;
+}
+
+.insadmin-form-sub {
+  font-size: 13px;
+  color: var(--texto-secundario);
+  margin: 0 0 20px;
+}
+
+.insadmin-seccion-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1rem;
+  color: var(--texto-principal);
+  margin: 28px 0 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-sutil);
+}
+
+.insadmin-datos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 20px;
+}
+
+.insadmin-datos-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  color: var(--texto-principal);
+}
+
+.insadmin-dato-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+/* ── Pagos por cuota (2026-08-19) ── */
+.insadmin-duracion-nota {
+  font-size: 13px;
+  color: var(--texto-secundario);
+  margin: -6px 0 14px;
+}
+
+.insadmin-cuotas-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--texto-secundario);
+  font-size: 14px;
+}
+
+.insadmin-cuotas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.insadmin-cuota-fila {
+  display: grid;
+  grid-template-columns: 90px 1fr 1fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+}
+
+.insadmin-cuota-num {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  padding-bottom: 12px;
+}
+
+.insadmin-cuota-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--texto-secundario);
+}
+
+.insadmin-cuota-fila .admin-field {
+  margin: 0;
+}
+
+.insadmin-cuota-fila .admin-fila-quitar {
+  margin-bottom: 12px;
+}
+
+@media (max-width: 1024px) {
+  .insadmin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .insadmin-lista-panel {
+    position: static;
+  }
+
+  .insadmin-panel-lista {
+    max-height: 50vh;
+  }
+
+  .insadmin-cuota-fila {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .insadmin-cuota-num {
+    grid-column: 1 / -1;
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 599px) {
+  .insadmin-datos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .insadmin-cuota-fila {
+    grid-template-columns: 1fr;
+  }
+}

@@ -108,20 +108,23 @@ export default function Carrito() {
                       borderBottom: index < items.length - 1 ? '1px solid var(--border-sutil)' : 'none'
                     }}
                   >
-                    <div style={{
-                      width: '80px',
-                      height: '80px',
-                      borderRadius: '10px',
-                      background: item.bg,
-                      backgroundImage: item.imagenes?.[0] ? `url(${item.imagenes[0]})` : undefined,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '32px',
-                      flexShrink: 0
-                    }}>
+                    <div
+                      className="carrito-item-thumb"
+                      style={{
+                        // Bug real encontrado en 5.4 tercera ronda: `background` (shorthand)
+                        // y `backgroundImage` en el mismo objeto de estilo chocan — si
+                        // `backgroundImage` queda en `undefined`, React limpia esa
+                        // propiedad después de que `background` ya la había definido,
+                        // dejando el degradado invisible. Usar solo `backgroundImage`
+                        // (una URL o, si no hay foto, el degradado — un gradiente CSS
+                        // también es un valor válido de `background-image`) evita el
+                        // choque Y deja que `background-size: cover` de Carrito.css siga
+                        // aplicando — el shorthand `background` reinicia ese valor a su
+                        // default cuando no lo especifica, que fue justo lo que dejaba la
+                        // foto sin recortar (se veía como una esquina en blanco).
+                        backgroundImage: item.imagenes?.[0] ? `url(${item.imagenes[0]})` : item.bg,
+                      }}
+                    >
                       {!item.imagenes?.[0] && item.emoji}
                     </div>
 

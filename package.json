@@ -1,0 +1,11 @@
+{
+  "name": "colombia-canta",
+  "private": true,
+  "description": "Arranca backend y frontend juntos en desarrollo, un solo comando desde la raíz del repo.",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,magenta --kill-others-on-fail \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

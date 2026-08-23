@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { apiFetch } from '../../utils/api';
+import { EMAIL_REGEX } from '../../utils/validacion';
 import './ReservaModal.css';
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const formatCOP = n => '$' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 function validateField(field, value) {
   if (field === 'nombre')  return value.trim().length < 2  ? 'Ingresa tu nombre completo' : '';
   if (field === 'celular') return value.replace(/\D/g, '').length < 7 ? 'Ingresa un número válido' : '';
-  if (field === 'email')   return EMAIL_RE.test(value.trim()) ? '' : 'Ingresa un correo electrónico válido';
+  if (field === 'email')   return EMAIL_REGEX.test(value.trim()) ? '' : 'Ingresa un correo electrónico válido';
   return '';
 }
 

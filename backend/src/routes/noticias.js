@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { supabase } from '../config/supabaseClient.js';
 import { requireCsrf } from '../middleware/requireCsrf.js';
 import { logAudit } from '../lib/auditLog.js';
-import { uploadMiddleware, validarWebpReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
+import { uploadMiddleware, validarImagenReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
 import { booleanFromString, jsonArrayField, stripUndefined } from '../lib/zodMultipart.js';
 import { generarSlugUnico } from '../lib/slug.js';
 import { toCamelCase } from '../lib/camelCase.js';
@@ -78,8 +78,8 @@ router.post('/', requireCsrf, uploadFields, async (req, res, next) => {
 
   // Se validan los DOS archivos (magic bytes) antes de subir ninguno — si img se subiera
   // primero y banner fallara después, img quedaría huérfana en Storage sin fila que la use.
-  await validarWebpReal(imgFile.buffer);
-  if (bannerFile) await validarWebpReal(bannerFile.buffer);
+  await validarImagenReal(imgFile.buffer);
+  if (bannerFile) await validarImagenReal(bannerFile.buffer);
 
   const slug = await generarSlugUnico('noticias', titulo);
   const { url: imgUrl } = await procesarYSubirImagen(imgFile.buffer, CARPETA_IMG);
@@ -151,8 +151,8 @@ router.patch('/:id', requireCsrf, uploadFields, async (req, res, next) => {
   const bannerFile = req.files?.banner?.[0];
 
   // Validar ambos ANTES de subir ninguno — mismo motivo que en POST.
-  if (imgFile) await validarWebpReal(imgFile.buffer);
-  if (bannerFile) await validarWebpReal(bannerFile.buffer);
+  if (imgFile) await validarImagenReal(imgFile.buffer);
+  if (bannerFile) await validarImagenReal(bannerFile.buffer);
 
   let imgVieja = null;
   let bannerVieja = null;

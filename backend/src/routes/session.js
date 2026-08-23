@@ -22,6 +22,25 @@ function unauthorized(next, motivo) {
   next(err);
 }
 
+// 5.1 · Chequeo liviano de sesión — para cuando el panel recarga la página y necesita
+// saber si las cookies httpOnly ya puestas siguen siendo válidas, sin tener que
+// intentar un login ni un refresh a ciegas. Reutiliza verifyAdminToken, igual que
+// requireAdmin.js y el resto de esta ruta.
+router.get('/', async (req, res, next) => {
+  const accessToken = req.cookies?.[ACCESS_COOKIE];
+  if (!accessToken) {
+    return unauthorized(next, 'sin cookie de acceso');
+  }
+
+  const { admin, reason } = await verifyAdminToken(accessToken);
+  if (!admin) {
+    return unauthorized(next, reason);
+  }
+
+  const csrfToken = req.cookies?.[CSRF_COOKIE];
+  res.json({ ok: true, admin, csrfToken });
+});
+
 router.post('/', async (req, res, next) => {
   const { access_token, refresh_token } = req.body || {};
 

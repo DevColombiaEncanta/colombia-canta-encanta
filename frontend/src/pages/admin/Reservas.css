@@ -1,0 +1,181 @@
+/* 5.6 · Mismo esqueleto de layout que Inscripciones.css (lista + panel de
+   detalle). Prefijo `.resadmin-` propio para no chocar con clases de otras
+   hojas de estilo del panel. */
+
+.resadmin-panel-header {
+  margin-bottom: 20px;
+}
+
+.resadmin-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.resadmin-lista-panel {
+  position: sticky;
+  top: 116px;
+}
+
+.resadmin-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.resadmin-filtros input,
+.resadmin-filtros select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.resadmin-filtro-fecha {
+  margin: 0;
+}
+
+.resadmin-contador {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+  margin: 0 0 10px;
+}
+
+.resadmin-vacio {
+  color: var(--texto-secundario);
+  font-size: 14px;
+}
+
+.resadmin-panel-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.resadmin-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+  background: var(--bg-card);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.resadmin-item:hover {
+  background: var(--bg-hover);
+}
+
+.resadmin-item.activo {
+  border-color: var(--coral);
+  background: color-mix(in srgb, var(--coral) 10%, transparent);
+}
+
+.resadmin-item-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-principal);
+}
+
+.resadmin-item-meta {
+  font-size: 12px;
+  color: var(--texto-secundario);
+}
+
+.resadmin-estado {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.resadmin-estado-pendiente { color: #B8860B; }
+.resadmin-estado-pagada { color: #1a8a4a; }
+.resadmin-estado-cancelada { color: var(--rojo); }
+.resadmin-estado-libre { color: #2563a8; }
+
+.resadmin-form-vacio {
+  color: var(--texto-secundario);
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.resadmin-form-vacio .admin-form-aviso {
+  display: inline-flex;
+}
+
+.resadmin-form-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1.2rem;
+  color: var(--texto-principal);
+  margin: 0 0 4px;
+}
+
+.resadmin-form-sub {
+  font-size: 13px;
+  color: var(--texto-secundario);
+  margin: 0 0 20px;
+}
+
+.resadmin-seccion-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1rem;
+  color: var(--texto-principal);
+  margin: 28px 0 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-sutil);
+}
+
+.resadmin-datos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 20px;
+}
+
+.resadmin-datos-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  color: var(--texto-principal);
+}
+
+.resadmin-dato-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+@media (max-width: 1024px) {
+  .resadmin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .resadmin-lista-panel {
+    position: static;
+  }
+
+  .resadmin-panel-lista {
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 599px) {
+  .resadmin-datos-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -913,7 +913,8 @@
     margin-left: auto;
   }
 
-  /* Carrito oculto en top bar — se ve dentro del menú mobile */
+  /* Carrito oculto en top bar — se ve dentro del menú mobile ("Admin" ya se
+     esconde solo, es parte de .navbar-links) */
   .btn-carrito {
     display: none;
   }

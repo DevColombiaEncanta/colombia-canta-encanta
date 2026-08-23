@@ -1,0 +1,146 @@
+/* 5.6 · Historial — a diferencia de Inscripciones/Reservas, no hay panel de
+   detalle (nada que editar acá, es un registro de solo lectura): una sola
+   columna de feed con filtros arriba y "cargar más" al final. Prefijo
+   `.histadmin-` propio. */
+
+.histadmin-panel-header {
+  margin-bottom: 20px;
+}
+
+.histadmin-filtros {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  align-items: end;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-sutil);
+  background: var(--bg-card);
+  margin-bottom: 20px;
+}
+
+.histadmin-filtros .admin-field {
+  margin: 0;
+}
+
+.histadmin-filtros input,
+.histadmin-filtros select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.histadmin-filtros-acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.histadmin-vacio {
+  color: var(--texto-secundario);
+  font-size: 14px;
+}
+
+.histadmin-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.histadmin-entrada {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+  background: var(--bg-card);
+}
+
+.histadmin-entrada-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.histadmin-accion {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.histadmin-accion-crear { color: #1a8a4a; background: color-mix(in srgb, #1a8a4a 14%, transparent); }
+.histadmin-accion-editar { color: #B8860B; background: color-mix(in srgb, #B8860B 14%, transparent); }
+.histadmin-accion-borrar { color: var(--rojo); background: color-mix(in srgb, var(--rojo) 14%, transparent); }
+
+.histadmin-entidad {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-principal);
+}
+
+.histadmin-fecha {
+  font-size: 12px;
+  color: var(--texto-secundario);
+  margin-left: auto;
+}
+
+.histadmin-usuario {
+  font-size: 13px;
+  color: var(--texto-secundario);
+  margin: 0;
+}
+
+.histadmin-id {
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.histadmin-detalle {
+  margin-top: 8px;
+}
+
+.histadmin-detalle summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--coral);
+  font-weight: 600;
+}
+
+.histadmin-detalle pre {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  font-size: 12px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.histadmin-cargar-mas {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+@media (max-width: 1024px) {
+  .histadmin-filtros {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 599px) {
+  .histadmin-filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .histadmin-fecha {
+    margin-left: 0;
+  }
+}

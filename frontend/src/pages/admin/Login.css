@@ -1,0 +1,102 @@
+.admin-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-body);
+  padding: 24px;
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-sutil);
+  border-radius: 16px;
+  padding: 36px 32px;
+  box-shadow: 0 8px 30px var(--sombra-media);
+  text-align: center;
+}
+
+.admin-login-logo {
+  height: 48px;
+  margin-bottom: 20px;
+}
+
+.admin-login-card h1 {
+  font-family: var(--font-titulo);
+  font-size: 1.3rem;
+  color: var(--texto-principal);
+  margin: 0 0 24px;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.admin-login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--texto-secundario);
+}
+
+.admin-login-form input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 1rem;
+}
+
+.admin-login-form input:focus {
+  outline: 2px solid var(--azul);
+  outline-offset: 1px;
+}
+
+.admin-login-form input.invalido {
+  border-color: var(--rojo);
+}
+
+.admin-login-form input.invalido:focus {
+  outline-color: var(--rojo);
+}
+
+.admin-login-campo-error {
+  font-size: 0.78rem;
+  color: var(--rojo);
+  font-weight: 500;
+}
+
+.admin-login-form button {
+  margin-top: 8px;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  background: var(--azul);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-login-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-login-hint {
+  font-size: 0.85rem;
+  color: var(--texto-secundario);
+  margin: -8px 0 0;
+}
+
+.admin-login-error {
+  color: var(--rojo);
+  font-size: 0.85rem;
+  margin: 0;
+}

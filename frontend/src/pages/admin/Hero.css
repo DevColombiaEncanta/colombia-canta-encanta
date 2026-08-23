@@ -1,0 +1,97 @@
+.hero-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.hero-selector-tab {
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-card);
+  color: var(--texto-principal);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hero-selector-tab.activo {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: #fff;
+}
+
+.hero-selector-nueva {
+  border-style: dashed;
+}
+
+/* ⭐ Hallazgo real (2026-08-14, reportado por el usuario probando la web):
+   esta clase se llamaba antes `.hero-ctas`, el mismo nombre que ya usa el
+   Hero PÚBLICO (components/Hero/Hero.css) para el contenedor de sus propios
+   botones — como Vite no aísla el CSS por página, la regla de acá (columna,
+   ancho completo) se colaba en el sitio público y estiraba los botones del
+   carrusel real a todo el ancho. Renombrada para no colisionar.
+   Ver también HelpTooltip.jsx, agregado en el mismo hallazgo. */
+.hero-cta-lista {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hero-cta-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.hero-cta-encabezados {
+  margin-bottom: -2px;
+}
+
+.hero-cta-encabezados .admin-field-label-texto {
+  display: inline-flex;
+  align-items: center;
+}
+
+.hero-cta-fila input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.hero-cta-fila input[type="text"].invalido {
+  border-color: var(--rojo);
+}
+
+.hero-cta-destino {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-self: start;
+}
+
+.hero-cta-primario {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--texto-secundario);
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .hero-cta-fila {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-cta-encabezados {
+    display: none;
+  }
+}

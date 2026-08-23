@@ -8,3 +8,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Dependencias del script raíz (concurrently) — backend/ y frontend/ ya ignoran las suyas
+node_modules/

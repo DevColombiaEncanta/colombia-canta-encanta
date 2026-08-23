@@ -57,6 +57,13 @@ const IconoContacto = () => (
   </IconoBase>
 );
 
+const IconoAdmin = () => (
+  <IconoBase>
+    <path d="M12 2 4 5v6c0 5 3.4 8.7 8 11 4.6-2.3 8-6 8-11V5l-8-3Z" />
+    <path d="M9.5 12 11 13.5 15 9.5" />
+  </IconoBase>
+);
+
 const IconoCerrar = () => (
   <IconoBase>
     <path d="M18 6 6 18M6 6l12 12" />
@@ -216,6 +223,10 @@ export default function Navbar() {
             </div>
 
             <Link to="/contacto" className="btn-contacto">Contacto</Link>
+
+            <Link to="/admin" className={`nav-link${isActive('/admin') ? ' active' : ''}`}>
+              Admin
+            </Link>
           </div>
 
           {/* Utilidades: siempre visibles en desktop y mobile */}
@@ -332,6 +343,10 @@ export default function Navbar() {
 
           <Link to="/contacto" className="mobile-drawer-link">
             <span className="mobile-drawer-link-left"><IconoContacto /> Contacto</span>
+          </Link>
+
+          <Link to="/admin" className="mobile-drawer-link">
+            <span className="mobile-drawer-link-left"><IconoAdmin /> Panel administrativo</span>
           </Link>
         </nav>
 

@@ -3,48 +3,103 @@ import { z } from 'zod';
 import { supabase } from '../config/supabaseClient.js';
 import { requireCsrf } from '../middleware/requireCsrf.js';
 import { logAudit } from '../lib/auditLog.js';
-import { uploadMiddleware, validarWebpReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
-import { booleanFromString, jsonArrayField, stripUndefined } from '../lib/zodMultipart.js';
+import { stripUndefined } from '../lib/zodMultipart.js';
 import { toCamelCase } from '../lib/camelCase.js';
 import { errorGenerico } from '../lib/errores.js';
 
 const router = Router();
-const CARPETA = 'cursos';
 
 const horarioSchema = z.object({
   dia: z.string().trim().min(1, 'horarios[].dia es obligatorio'),
   hora: z.string().trim().min(1, 'horarios[].hora es obligatoria'),
 });
 
-const nivelesArraySchema = jsonArrayField(z.string().uuid('cada nivel debe ser un uuid válido'))
+const nivelesArraySchema = z.array(z.string().uuid('cada nivel debe ser un uuid válido'))
+  .max(50, 'no puede haber más de 50 niveles asociados')
   .optional()
   .refine((arr) => !arr || new Set(arr).size === arr.length, {
     message: 'No puede haber un mismo nivel repetido en la lista',
   });
 
+// 5.5 · Ajuste a pedido del usuario (2026-08-19): sin subida de imagen, este
+// router recibe JSON normal (ya no multipart/form-data) — los arrays/booleans
+// llegan con su tipo real, sin necesidad de los helpers `jsonArrayField`/
+// `booleanFromString` (esos son solo para cuando multer deja todo como texto).
+// ⭐ Hallazgo real (auditoría 5.5, 2026-08-19): estos campos opcionales
+// aceptan `null` además de `undefined` — el frontend los manda siempre como
+// `null` al editar un curso (nunca los omite), para poder BORRAR un valor ya
+// guardado. Antes, un campo vacío simplemente no se mandaba, así que una vez
+// puesto un tagline/duración/precio/emoji, nunca se podía volver a limpiar
+// desde el panel. `precio_numerico` necesita `z.union` en vez de solo
+// `.nullable()` porque `z.coerce.number()` convierte `null` a `0` antes de
+// llegar a `.positive()` — sin el union, mandar `null` fallaría la validación
+// en vez de limpiar el campo.
 const baseCursoSchema = z.object({
   nombre: z.string().trim().min(1, 'nombre es obligatorio'),
-  tagline: z.string().trim().optional(),
+  tagline: z.string().trim().optional().nullable(),
   color: z.string().trim().optional(),
   descripcion: z.string().trim().min(1, 'descripcion es obligatoria'),
-  instrumentos: jsonArrayField(z.string().min(1)).optional(),
-  horarios: jsonArrayField(horarioSchema).optional(),
-  duracion: z.string().trim().optional(),
-  precio: z.string().trim().optional(),
-  precio_numerico: z.coerce.number().positive('precio_numerico debe ser mayor a 0').optional(),
+  instrumentos: z.array(z.string().min(1)).max(20, 'no puede haber más de 20 instrumentos').optional(),
+  // Obligatorio (mínimo 1) para un curso grupal, opcional para uno
+  // personalizado — esa regla cruzada se valida a mano más abajo
+  // (validarHorariosRequeridos), no acá, por el mismo motivo que
+  // profesor_nombre: `.refine()` sobre el objeto completo rompería el
+  // `.partial()` que arma updateCursoSchema.
+  horarios: z.array(horarioSchema).max(20, 'no puede haber más de 20 horarios').optional(),
+  duracion: z.string().trim().optional().nullable(),
+  precio: z.string().trim().optional().nullable(),
+  precio_numerico: z.union([z.null(), z.coerce.number().positive('precio_numerico debe ser mayor a 0')]).optional(),
   orden: z.coerce.number().int('orden debe ser un entero'),
   niveles: nivelesArraySchema,
+  // 5.5 · Cursos personalizados con profesor (ej. clases 1 a 1 de guitarra) —
+  // pre-análisis en readme_guia.md, 2026-08-18. `profesor_nombre` solo tiene
+  // sentido cuando `es_personalizado` es true; validado a mano más abajo
+  // (validarProfesorPersonalizado), mismo motivo que arriba.
+  es_personalizado: z.boolean().optional(),
+  profesor_nombre: z.string().trim().max(80, 'profesor_nombre no puede superar 80 caracteres').optional().nullable(),
+  // Reemplaza la subida de ícono real (2026-08-19, pedido del usuario: poco
+  // realista que el staff suba fotos acá) — mismo respaldo visual liviano ya
+  // usado en Productos/Eventos.
+  emoji: z.string().trim().max(4, 'emoji no puede superar 4 caracteres').optional().nullable(),
 });
 
 const createCursoSchema = baseCursoSchema;
 const updateCursoSchema = baseCursoSchema.partial().extend({
-  activo: booleanFromString.optional(),
+  activo: z.boolean().optional(),
 });
 
 function zodError(result) {
   const err = new Error(result.error.issues.map((i) => i.message).join(', '));
   err.status = 400;
   return err;
+}
+
+// Se aplica tanto en POST (con `actual = null`) como en PATCH (con el registro
+// ya guardado) para que un PATCH parcial que solo cambia `profesor_nombre` sin
+// re-mandar `es_personalizado`, o viceversa, siga viendo el estado real.
+function validarProfesorPersonalizado(datosNuevos, actual) {
+  const esPersonalizado = datosNuevos.es_personalizado ?? actual?.es_personalizado ?? false;
+  const profesorNombre = datosNuevos.profesor_nombre !== undefined ? datosNuevos.profesor_nombre : actual?.profesor_nombre;
+  if (esPersonalizado && !profesorNombre?.trim()) {
+    const err = new Error('profesor_nombre es obligatorio para un curso personalizado');
+    err.status = 400;
+    throw err;
+  }
+}
+
+// Un curso grupal necesita al menos 1 franja horaria real para que el
+// formulario público de inscripción pueda ofrecerla como opción seleccionable
+// (2026-08-19, pedido del usuario) — un personalizado se coordina directo con
+// el profesor, ahí sí puede quedar sin franjas fijas.
+function validarHorariosRequeridos(datosNuevos, actual) {
+  const esPersonalizado = datosNuevos.es_personalizado ?? actual?.es_personalizado ?? false;
+  if (esPersonalizado) return;
+  const horarios = datosNuevos.horarios !== undefined ? datosNuevos.horarios : actual?.horarios;
+  if (!horarios || horarios.length === 0) {
+    const err = new Error('horarios es obligatorio para un curso grupal (al menos 1 franja)');
+    err.status = 400;
+    throw err;
+  }
 }
 
 // 23503 = foreign_key_violation. Al crear/editar significa un nivel_id que no existe;
@@ -109,32 +164,25 @@ router.get('/', async (req, res, next) => {
   res.json({ ok: true, data: data.map(aplanarNiveles) });
 });
 
-// POST / — crear curso + relaciones con niveles (multipart/form-data: campos + archivo "icono")
-router.post('/', requireCsrf, uploadMiddleware.single('icono'), async (req, res, next) => {
-  if (!req.file) {
-    const err = new Error('icono es obligatorio');
-    err.status = 400;
-    return next(err);
-  }
-
+// POST / — crear curso + relaciones con niveles (JSON)
+router.post('/', requireCsrf, async (req, res, next) => {
   const result = createCursoSchema.safeParse(req.body);
   if (!result.success) {
     return next(zodError(result));
   }
   const { niveles, ...camposCurso } = result.data;
 
+  validarProfesorPersonalizado(camposCurso, null);
+  validarHorariosRequeridos(camposCurso, null);
   await validarNivelesExisten(niveles);
-  await validarWebpReal(req.file.buffer);
-  const { url } = await procesarYSubirImagen(req.file.buffer, CARPETA);
 
   const { data: curso, error: cursoError } = await supabase
     .from('cursos')
-    .insert({ ...camposCurso, icono: url })
+    .insert(camposCurso)
     .select()
     .single();
 
   if (cursoError) {
-    await borrarImagenPorUrl(url);
     return next(traducirErrorCurso(cursoError));
   }
 
@@ -146,7 +194,6 @@ router.post('/', requireCsrf, uploadMiddleware.single('icono'), async (req, res,
       // El curso ya se creó — si las relaciones fallan (ej. un nivel_id inexistente),
       // no dejamos un curso a medias: se revierte, mismo criterio que Productos.
       await supabase.from('cursos').delete().eq('id', curso.id);
-      await borrarImagenPorUrl(url);
       return next(traducirErrorCurso(relError));
     }
   }
@@ -162,9 +209,8 @@ router.post('/', requireCsrf, uploadMiddleware.single('icono'), async (req, res,
   res.status(201).json({ ok: true, data: await obtenerCursoCompleto(curso.id) });
 });
 
-// PATCH /:id — editar. Icono: si se manda archivo nuevo, reemplaza el actual.
-// Niveles: reemplazo completo si se manda el campo (Opción A, igual que Productos).
-router.patch('/:id', requireCsrf, uploadMiddleware.single('icono'), async (req, res, next) => {
+// PATCH /:id — editar. Niveles: reemplazo completo si se manda el campo (Opción A, igual que Productos).
+router.patch('/:id', requireCsrf, async (req, res, next) => {
   const { id } = req.params;
 
   const { data: actual, error: fetchError } = await supabase.from('cursos').select('*').eq('id', id).maybeSingle();
@@ -181,21 +227,14 @@ router.patch('/:id', requireCsrf, uploadMiddleware.single('icono'), async (req, 
   const { niveles, ...camposParciales } = result.data;
   const camposCurso = stripUndefined(camposParciales);
 
+  validarProfesorPersonalizado(camposCurso, actual);
+  validarHorariosRequeridos(camposCurso, actual);
   await validarNivelesExisten(niveles);
-
-  let iconoViejo = null;
-  if (req.file) {
-    await validarWebpReal(req.file.buffer);
-    const { url } = await procesarYSubirImagen(req.file.buffer, CARPETA);
-    camposCurso.icono = url;
-    iconoViejo = actual.icono;
-  }
 
   // Niveles ANTES que el update del curso — si esto falla, el curso todavía no se tocó.
   if (niveles !== undefined) {
     const { error: deleteError } = await supabase.from('curso_niveles').delete().eq('curso_id', id);
     if (deleteError) {
-      if (camposCurso.icono) await borrarImagenPorUrl(camposCurso.icono);
       return next(errorGenerico(deleteError, 'PATCH /api/admin/cursos/:id (curso_niveles delete)'));
     }
 
@@ -203,19 +242,16 @@ router.patch('/:id', requireCsrf, uploadMiddleware.single('icono'), async (req, 
       const filas = niveles.map((nivel_id) => ({ curso_id: id, nivel_id }));
       const { error: insertError } = await supabase.from('curso_niveles').insert(filas);
       if (insertError) {
-        if (camposCurso.icono) await borrarImagenPorUrl(camposCurso.icono);
         return next(traducirErrorCurso(insertError));
       }
     }
   }
 
-  const { error: updateError } = await supabase.from('cursos').update(camposCurso).eq('id', id);
-  if (updateError) {
-    return next(traducirErrorCurso(updateError));
-  }
-
-  if (iconoViejo) {
-    await borrarImagenPorUrl(iconoViejo);
+  if (Object.keys(camposCurso).length > 0) {
+    const { error: updateError } = await supabase.from('cursos').update(camposCurso).eq('id', id);
+    if (updateError) {
+      return next(traducirErrorCurso(updateError));
+    }
   }
 
   await logAudit({
@@ -229,7 +265,7 @@ router.patch('/:id', requireCsrf, uploadMiddleware.single('icono'), async (req, 
   res.json({ ok: true, data: await obtenerCursoCompleto(id) });
 });
 
-// DELETE /:id — borra el curso (curso_niveles se va solo por ON DELETE CASCADE) + su icono.
+// DELETE /:id — borra el curso (curso_niveles se va solo por ON DELETE CASCADE).
 // Rechazado si hay inscripciones referenciando este curso (ON DELETE RESTRICT).
 router.delete('/:id', requireCsrf, async (req, res, next) => {
   const { id } = req.params;
@@ -244,10 +280,6 @@ router.delete('/:id', requireCsrf, async (req, res, next) => {
   const { error } = await supabase.from('cursos').delete().eq('id', id);
   if (error) {
     return next(traducirErrorCurso(error, true));
-  }
-
-  if (actual.icono) {
-    await borrarImagenPorUrl(actual.icono);
   }
 
   await logAudit({

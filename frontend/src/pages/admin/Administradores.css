@@ -1,0 +1,90 @@
+/* 5.7 · Pantalla simple (sin panel lista+detalle): tarjeta de invitar arriba,
+   filas de admins abajo con acciones inline. Prefijo `.adminsadmin-` propio. */
+
+.adminsadmin-invitar {
+  margin-bottom: 20px;
+}
+
+.adminsadmin-seccion-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1rem;
+  color: var(--texto-principal);
+  margin: 0 0 14px;
+}
+
+.adminsadmin-invitar-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.adminsadmin-invitar-form .admin-field {
+  flex: 1;
+  margin: 0;
+}
+
+.adminsadmin-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adminsadmin-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+  background: var(--bg-card);
+}
+
+.adminsadmin-fila-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.adminsadmin-email {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-principal);
+}
+
+.adminsadmin-meta {
+  font-size: 12px;
+  color: var(--texto-secundario);
+}
+
+.adminsadmin-rol {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.adminsadmin-rol-admin_maestro { color: var(--coral); }
+.adminsadmin-rol-admin { color: var(--azul); }
+
+.adminsadmin-activo { color: #1a8a4a; font-weight: 600; }
+.adminsadmin-inactivo { color: var(--rojo); font-weight: 600; }
+
+.adminsadmin-fila-acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 599px) {
+  .adminsadmin-invitar-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .adminsadmin-fila {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

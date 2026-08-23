@@ -1,0 +1,146 @@
+/* 5.3b — antes de nombrar cualquier clase acá se revisó contra el CSS
+   público de EventosFijos (components/EventosFijos/EventosFijos.css usa el
+   prefijo `.ef-`, EventosFijosHome.css usa `.efh-`) — se eligió a propósito
+   el prefijo `.evfijos-`, distinto de ambos, para no dejar ninguna duda al
+   leer el nombre de una clase (mismo criterio que costó 3 bugs reales en
+   5.2, ver Hero.css/Noticias.css). */
+
+.evfijos-panel-header {
+  margin-bottom: 20px;
+}
+
+.evfijos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.evfijos-card {
+  padding: 24px;
+}
+
+.evfijos-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1.2rem;
+  color: var(--texto-principal);
+  margin: 0 0 6px;
+}
+
+.evfijos-nota {
+  font-size: 13px;
+  color: var(--texto-secundario);
+  margin: 0 0 20px;
+}
+
+.evfijos-form-mes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-sutil);
+  margin-bottom: 20px;
+}
+
+.evfijos-form-mes .admin-field {
+  width: 100%;
+  max-width: 320px;
+}
+
+.evfijos-subtitulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-titulo);
+  font-size: 1rem;
+  color: var(--texto-principal);
+  margin: 0 0 12px;
+}
+
+.evfijos-show-fila {
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  gap: 14px;
+  align-items: start;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+  margin-bottom: 10px;
+}
+
+.evfijos-show-foto .admin-field {
+  margin-bottom: 0;
+}
+
+.evfijos-show-foto .admin-upload-vacio {
+  padding: 20px 12px;
+}
+
+.evfijos-show-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.evfijos-show-fila-datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.evfijos-show-dia-preview {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-secundario);
+  background: var(--bg-hover);
+  border-radius: 8px;
+  padding: 10px 12px;
+  white-space: nowrap;
+}
+
+.evfijos-show-campos input[type="text"],
+.evfijos-show-campos input[type="date"],
+.evfijos-show-campos textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.evfijos-show-campos textarea {
+  min-height: 50px;
+  resize: vertical;
+}
+
+.evfijos-show-campos input.invalido,
+.evfijos-show-campos textarea.invalido {
+  border-color: var(--rojo);
+}
+
+.evfijos-programacion {
+  margin-top: 4px;
+}
+
+.evfijos-guardar-prog {
+  margin-top: 16px;
+}
+
+@media (max-width: 767px) {
+  .evfijos-show-fila {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 599px) {
+  .evfijos-show-fila-datos {
+    grid-template-columns: 1fr;
+  }
+
+  .evfijos-show-dia-preview {
+    text-align: center;
+  }
+}

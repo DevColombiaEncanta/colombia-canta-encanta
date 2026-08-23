@@ -7,6 +7,26 @@ import ReservaModal from '../ReservaModal/ReservaModal';
 import './EventoDetalle.css';
 import '../CarruselEventos/CarruselEventos.css';
 
+// Hallazgo real (2026-08-16, encontrado tocando este archivo por otra razón):
+// estaban declarados DENTRO del componente — se recreaban en cada render, lo
+// que React marca como anti-patrón real (pierden cualquier estado propio en
+// cada render, aunque acá no tuvieran ninguno). Movidos afuera.
+const WaIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+);
+
+const FormIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/>
+    <polyline points="10 9 9 9 8 9"/>
+  </svg>
+);
+
 export default function EventoDetalle({ evento, eventos, eventosFijos }) {
   const [searchParams] = useSearchParams();
   const [stickyVisible, setStickyVisible] = useState(false);
@@ -62,19 +82,26 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
   const itemSeleccionado = hasProg && carruselIdx !== null
     ? evento.programacion[carruselIdx]
     : null;
-  const currentGalSrc = galTotal > 0
-    ? (hasProg && carruselIdx !== null
-        ? evento.galeria[carruselIdx % galTotal]
-        : evento.galeria[galIdx])
-    : undefined;
+  // 2026-08-16 · Rediseño pedido por el usuario: cada show de `programacion`
+  // guarda su propia `foto` (antes se elegía por posición dentro de
+  // `galeria`, `galeria[i % galTotal]` — se podía agregar/editar/borrar un
+  // show sin resubir las fotos de los demás recién con este cambio).
+  const currentGalSrc = hasProg && carruselIdx !== null
+    ? evento.programacion[carruselIdx]?.foto
+    : (galTotal > 0 ? evento.galeria[galIdx] : undefined);
   const progPrev = () => setCarruselIdx(i => (i !== null && i > 0 ? i - 1 : i));
   const progNext = () => setCarruselIdx(i => {
     const next = (i ?? -1) + 1;
     return next < (evento.programacion?.length ?? 0) ? next : i;
   });
 
+  // `nombre` es opcional por show (2026-08-16 — experiencias como "Colombia
+  // me Enamoras" repiten siempre el mismo contenido, solo cambian las
+  // fechas) — el título de la experiencia sirve de respaldo cuando falta.
+  const nombreShowSeleccionado = itemSeleccionado?.nombre || evento.titulo;
+
   const waLinkEfectivo = itemSeleccionado
-    ? `https://wa.me/573015315119?text=Hola%2C+quiero+reservar+para+%22${encodeURIComponent(itemSeleccionado.nombre)}%22+el+${encodeURIComponent(itemSeleccionado.dia)}+a+las+${encodeURIComponent(itemSeleccionado.hora)}.`
+    ? `https://wa.me/573015315119?text=Hola%2C+quiero+reservar+para+%22${encodeURIComponent(nombreShowSeleccionado)}%22+el+${encodeURIComponent(itemSeleccionado.dia)}+a+las+${encodeURIComponent(itemSeleccionado.hora)}.`
     : waLink;
   const ctaLabelEfectivo      = itemSeleccionado ? 'Reservar este show' : ctaLabel;
   const ctaLabelCortoEfectivo = itemSeleccionado ? 'Reservar' : ctaLabelCorto;
@@ -99,22 +126,6 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
     .filter(e => e.slug !== evento.slug)
     .filter(e => !e.fechaISO || new Date(e.fechaISO) >= hoy)
     .slice(0, 3);
-
-  const WaIcon = ({ size = 18 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-    </svg>
-  );
-
-  const FormIcon = ({ size = 18 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-      <polyline points="14 2 14 8 20 8"/>
-      <line x1="16" y1="13" x2="8" y2="13"/>
-      <line x1="16" y1="17" x2="8" y2="17"/>
-      <polyline points="10 9 9 9 8 9"/>
-    </svg>
-  );
 
   return (
     <>
@@ -168,7 +179,7 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
       <div className="evento-cuerpo">
         {/* Columna izquierda */}
         <div className="evento-col-izq">
-          {galTotal > 0 && (
+          {(galTotal > 0 || hasProg) && (
             <section className="evento-sec-galeria">
               <h2>Galería</h2>
               <div className="evento-galeria-carrusel">
@@ -240,7 +251,7 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
                               <span className="prog-strip-dia-num">{diaNum}</span>
                             </span>
                             <span className="prog-strip-info">
-                              <span className="prog-strip-nombre">{item.nombre}</span>
+                              <span className="prog-strip-nombre">{item.nombre || evento.titulo}</span>
                               <span className="prog-strip-hora">{item.hora}</span>
                             </span>
                           </div>
@@ -333,7 +344,10 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
           <div className="compra-card">
             <div className="compra-card-header">
               <div className="compra-card-titulo">{evento.titulo}</div>
-              {itemSeleccionado && (
+              {/* Sin `nombre` distinto (ej. Colombia me Enamoras, siempre la misma
+                 experiencia) repetiría el título de arriba sin decir nada nuevo —
+                 el día/hora elegido ya se muestra debajo, alcanza con eso. */}
+              {itemSeleccionado?.nombre && (
                 <div className="compra-card-evento-sel">
                   <span className="compra-card-evento-nombre">{itemSeleccionado.nombre}</span>
                   <button className="compra-card-evento-clear" onClick={() => setCarruselIdx(null)} aria-label="Deseleccionar evento">×</button>
@@ -391,7 +405,7 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
                 >
                   <span className="compra-btn-txt">
                     {ctaLabelEfectivo}
-                    {itemSeleccionado && <span className="compra-btn-evt">{itemSeleccionado.nombre}</span>}
+                    {itemSeleccionado?.nombre && <span className="compra-btn-evt">{itemSeleccionado.nombre}</span>}
                   </span>
                 </button>
               )}
@@ -461,7 +475,7 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
             >
               <span className="compra-btn-txt">
                 {ctaLabelCortoEfectivo}
-                {itemSeleccionado && <span className="compra-btn-evt">{itemSeleccionado.nombre}</span>}
+                {itemSeleccionado?.nombre && <span className="compra-btn-evt">{itemSeleccionado.nombre}</span>}
               </span>
             </button>
           )}

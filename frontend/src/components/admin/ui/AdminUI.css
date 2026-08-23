@@ -1,0 +1,636 @@
+/* ===== Piezas reutilizables del panel (Fase 5.2+) =====
+   Mismo criterio de siempre: CSS propio, reutiliza las variables de main.css
+   para que temas claro/oscuro funcionen gratis, sin librería de terceros. */
+
+.admin-page-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1.6rem;
+  color: var(--texto-principal);
+  margin: 0 0 4px;
+}
+
+.admin-page-sub {
+  color: var(--texto-secundario);
+  font-size: 14px;
+  margin: 0 0 24px;
+}
+
+.admin-page-error {
+  color: var(--rojo);
+  font-size: 14px;
+}
+
+/* ⭐ Ajuste 2026-08-15 (pedido del usuario): el aviso de "guardado"/"borrado"
+   vivía arriba de toda la página, lejos del botón en el que se acaba de hacer
+   click — se movió a la zona de acciones del formulario (ver HeroForm/
+   NoticiaForm), pegado justo encima de los botones "Guardar"/"Borrar". El
+   estado sigue viviendo en el padre (Hero()/Noticias(), que no se remonta) —
+   solo cambió DÓNDE se dibuja, no dónde vive. */
+.admin-form-aviso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--coral) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--coral) 35%, transparent);
+  color: var(--coral);
+  font-size: 13px;
+  font-weight: 600;
+  animation: adminAvisoEntrada 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes adminAvisoEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-inactivo-tag {
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+/* Checkbox "activo/a" arriba de un formulario de crear/editar */
+.admin-form-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-sutil);
+}
+
+/* Botón redondo "×" para quitar una fila de una lista dinámica (CTAs, párrafos, etc.) */
+.admin-fila-quitar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-chip);
+  color: var(--texto-principal);
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.admin-fila-quitar:hover {
+  background: var(--bg-hover);
+}
+
+.admin-form-acciones {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.admin-form-acciones .admin-btn-ancho {
+  flex: 1;
+}
+
+.admin-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-sutil);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px var(--sombra-sutil);
+  padding: 28px 32px;
+}
+
+@media (max-width: 599px) {
+  .admin-card {
+    padding: 20px 16px;
+  }
+
+  /* ⭐ Pedido del usuario (2026-08-15): título/subtítulo de cada pantalla del
+     panel, centrados en mobile en vez de pegados a la izquierda — lee mejor
+     en una pantalla angosta, mismo criterio ya usado en el resto del sitio
+     público (`.page-header` en main.css también centra en mobile). */
+  .admin-page-titulo,
+  .admin-page-sub {
+    text-align: center;
+  }
+}
+
+/* --- Campo genérico --- */
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.admin-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-field-label-texto {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+.admin-field-hint {
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: normal;
+}
+
+/* ── Ícono de ayuda "?" con globo de texto — para campos cuyo formato no es
+   obvio a simple vista (ver HelpTooltip.jsx) ── */
+
+.admin-ayuda {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.admin-ayuda-icono {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-secundario);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  padding: 0;
+}
+
+.admin-ayuda-icono:hover,
+.admin-ayuda-icono:focus-visible {
+  border-color: var(--coral);
+  color: var(--coral);
+}
+
+.admin-ayuda-globo {
+  position: absolute;
+  z-index: 20;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 240px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-media);
+  box-shadow: var(--sombra-media);
+  color: var(--texto-principal);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.admin-ayuda-icono:hover + .admin-ayuda-globo,
+.admin-ayuda-icono:focus-visible + .admin-ayuda-globo,
+.admin-ayuda-globo.abierto {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ⭐ Hallazgo real (2026-08-16, reportado por el usuario probando en mobile/
+   tablet): centrado sobre el ícono (`left: 50%` + `translateX(-50%)`) hace
+   que el globo se corte contra el borde de la pantalla en campos que quedan
+   cerca del borde izquierdo/derecho en viewports angostos, porque no tiene
+   ninguna detección de colisión con el viewport. En vez de intentar ese
+   cálculo en CSS puro, en mobile/tablet se centra directo en la pantalla
+   (`position: fixed`, centrado real) — dejar de depender de dónde esté el
+   ícono es más simple y más confiable que perseguir el borde. */
+@media (max-width: 1024px) {
+  .admin-ayuda-globo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    max-width: min(280px, calc(100vw - 32px));
+    width: max-content;
+  }
+}
+
+.admin-field input[type="text"],
+.admin-field input[type="email"],
+.admin-field input[type="number"],
+.admin-field input[type="date"],
+.admin-field input[type="time"],
+.admin-field input[type="url"],
+.admin-field input[type="color"],
+.admin-field textarea,
+.admin-field select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 15px;
+  font-family: var(--font-cuerpo);
+}
+
+.admin-field input:disabled,
+.admin-field textarea:disabled,
+.admin-field select:disabled {
+  background: var(--bg-hover);
+  color: var(--texto-secundario);
+  cursor: not-allowed;
+}
+
+.admin-field textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.admin-field input:focus,
+.admin-field textarea:focus,
+.admin-field select:focus {
+  outline: 2px solid var(--azul);
+  outline-offset: 1px;
+}
+
+.admin-field input.invalido,
+.admin-field textarea.invalido {
+  border-color: var(--rojo);
+}
+
+.admin-field-error {
+  font-size: 0.8rem;
+  color: var(--rojo);
+  font-weight: 500;
+}
+
+.admin-field-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 599px) {
+  .admin-field-fila {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Botones --- */
+.admin-btn {
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-cuerpo);
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.admin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-btn-primario {
+  background: var(--coral);
+  color: #fff;
+}
+
+.admin-btn-primario:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.admin-btn-secundario {
+  background: var(--bg-chip);
+  color: var(--texto-principal);
+  border: 1px solid var(--border-media);
+}
+
+.admin-btn-secundario:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.admin-btn-peligro {
+  background: var(--rojo);
+  color: #fff;
+}
+
+.admin-btn-peligro:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.admin-btn-ancho {
+  width: 100%;
+}
+
+/* --- Checkbox --- */
+.admin-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-principal);
+  cursor: pointer;
+}
+
+.admin-checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--azul);
+  cursor: pointer;
+}
+
+/* --- Diálogo de confirmación --- */
+.admin-dialog-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.admin-dialog {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 10px 40px var(--sombra-fuerte);
+}
+
+.admin-dialog h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-titulo);
+  color: var(--texto-principal);
+}
+
+.admin-dialog p {
+  margin: 0 0 22px;
+  color: var(--texto-secundario);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.admin-dialog-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* --- Advertencia reforzada dentro de ConfirmDialog (2026-08-17) --- */
+.admin-dialog-advertencia {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: -6px 0 14px !important;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--rojo) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rojo) 40%, transparent);
+  color: var(--rojo);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* --- Recorte de imagen (ImageCropModal.jsx, 2026-08-16) --- */
+.admin-crop-dialog {
+  max-width: 420px;
+}
+
+.admin-crop-marco {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-hover);
+  margin: 0 auto 16px;
+  cursor: grab;
+  touch-action: none;
+  max-width: 100%;
+}
+
+.admin-crop-marco:active {
+  cursor: grabbing;
+}
+
+.admin-crop-marco img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.admin-crop-zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-crop-zoom input[type="range"] {
+  flex: 1;
+}
+
+/* --- Subida de imagen --- */
+.admin-upload {
+  border: 2px dashed var(--border-media);
+  border-radius: 12px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.admin-upload:hover,
+.admin-upload-arrastrando {
+  border-color: var(--azul);
+  background: var(--bg-hover);
+}
+
+.admin-upload.invalido {
+  border-color: var(--rojo);
+}
+
+.admin-upload-preview {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+.admin-upload-vacio {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--texto-secundario);
+}
+
+.admin-upload-vacio span {
+  font-size: 32px;
+}
+
+.admin-upload-vacio p {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
+.admin-upload-formatos {
+  font-size: 12px !important;
+  opacity: 0.7;
+}
+
+.admin-upload-nombre {
+  font-size: 13px;
+  color: var(--texto-secundario);
+  margin: 8px 0 0;
+}
+
+/* --- Subida de galería (varias fotos, ver GaleriaUploadField.jsx, 5.3a) --- */
+.admin-upload-compacto .admin-upload-vacio {
+  padding: 24px 16px;
+}
+
+.admin-galeria-actual {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.admin-galeria-miniatura {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border-sutil);
+  display: block;
+}
+
+.admin-galeria-nueva-item {
+  position: relative;
+}
+
+.admin-galeria-quitar {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.admin-galeria-quitar:hover {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+/* --- Catálogo simple (CatalogoSimpleModal.jsx, 5.4 — colecciones, categorías, niveles) --- */
+.catalogo-dialog {
+  max-width: 520px;
+  text-align: left;
+}
+
+.catalogo-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 50vh;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.catalogo-vacio {
+  color: var(--texto-secundario);
+  font-size: 14px;
+}
+
+.catalogo-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+}
+
+.catalogo-fila-campos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.catalogo-fila-campos input[type="text"],
+.catalogo-fila-campos input[type="number"] {
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.catalogo-nombre {
+  flex: 1;
+  min-width: 120px;
+}
+
+.catalogo-emoji {
+  width: 52px;
+  text-align: center;
+}
+
+.catalogo-orden {
+  width: 64px;
+}
+
+.catalogo-activo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--texto-secundario);
+  white-space: nowrap;
+}
+
+.catalogo-activo input {
+  accent-color: var(--azul);
+}
+
+.catalogo-fila-acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.catalogo-fila-acciones .admin-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+}

@@ -486,6 +486,13 @@
 }
 
 /* ── Toast ── */
+/* Punto 22 (5.4 tercera ronda) — bug confirmado: el mensaje incluye el nombre
+   del producto (`"${nombre}" agregado al carrito`), que para un nombre real
+   largo (ej. "Camiseta Colombia Canta y Encanta") es más ancho que una
+   pantalla de celular. `white-space: nowrap` sin ningún `max-width` dejaba
+   ese texto cortado contra los bordes en mobile. Ahora el toast tiene un
+   ancho máximo y el texto puede pasar a una 2da línea si hace falta — en
+   desktop, donde casi siempre entra en una sola línea, se ve igual que antes. */
 .tienda-toast {
   position: fixed;
   bottom: 32px;
@@ -494,12 +501,14 @@
   background: var(--azul-oscuro);
   color: #fff;
   padding: 14px 28px;
-  border-radius: 100px;
+  border-radius: 24px;
   font-size: 14px;
   font-weight: 600;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  white-space: nowrap;
+  max-width: calc(100vw - 40px);
+  text-align: center;
+  white-space: normal;
 }
 
 /* ── Responsive: tablet+mobile (1024px) y mobile (599px) ── */

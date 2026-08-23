@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { supabase } from '../config/supabaseClient.js';
 import { requireCsrf } from '../middleware/requireCsrf.js';
 import { logAudit } from '../lib/auditLog.js';
-import { uploadMiddleware, validarWebpReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
+import { uploadMiddleware, validarImagenReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
 import { booleanFromString, jsonArrayField, stripUndefined } from '../lib/zodMultipart.js';
 import { generarSlugUnico } from '../lib/slug.js';
 import { toCamelCase } from '../lib/camelCase.js';
@@ -14,10 +14,25 @@ const CARPETA_IMG = 'eventos/img';
 const CARPETA_GALERIA = 'eventos/galeria';
 const MAX_GALERIA = 10;
 
-const TIPOS = ['Gira USA', 'Sede', 'Festival'];
 const ACCION_TIPOS = ['libre', 'pago', 'festival', 'proximamente'];
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'debe ser un color hex válido (ej: #1A56DB)');
 const fechaISO = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'debe tener formato YYYY-MM-DD');
+
+// ⭐ Hallazgo real (revisión crítica 5.3a, 2026-08-16): `z.string().url()` en
+// esta versión de Zod valida FORMA, no seguridad — acepta cualquier esquema
+// con esa forma, incluido `javascript:alert(1)` (verificado: `new URL(...)`
+// no tira error con ese valor, así que Zod tampoco). `wa_link`/
+// `inscripcion_link`/`bases` se renderizan tal cual como `href` de un `<a>`
+// en el sitio público (EventoDetalle.jsx) — mismo riesgo de XSS guardado ya
+// encontrado y corregido en el CTA del Hero (ver `esRutaInternaValida` en
+// hero.js). Acá la ruta correcta es la opuesta (una URL externa real, no una
+// interna) — se exige explícitamente que empiece con http(s), en vez de
+// confiar en que "parece una URL" sea suficiente.
+function urlSegura(mensaje) {
+  return z.string().trim().url(mensaje).refine((v) => /^https?:\/\//i.test(v), {
+    message: `${mensaje} (debe empezar con http:// o https://)`,
+  });
+}
 
 const pillSchema = z.object({
   icono: z.string().trim().optional(),
@@ -35,7 +50,12 @@ const testimonioSchema = z.object({
 
 const baseEventoSchema = z.object({
   titulo: z.string().trim().min(1, 'titulo es obligatorio'),
-  tipo: z.enum(TIPOS),
+  // 5.3a permitía solo 3 valores fijos (`z.enum`) — a pedido del usuario
+  // (2026-08-16) pasa a ser texto libre, porque la lista real de tipos de
+  // evento puede crecer con el tiempo (giras nuevas, formatos nuevos) y no
+  // tiene sentido tocar el backend cada vez. El panel sigue sugiriendo los
+  // tipos ya usados vía `<datalist>`, pero no restringe.
+  tipo: z.string().trim().min(1, 'tipo es obligatorio').max(60, 'tipo es demasiado largo'),
   fecha: z.string().trim().min(1, 'fecha es obligatoria'),
   fecha_iso: fechaISO,
   fecha_iso_fin: fechaISO.optional(),
@@ -53,15 +73,19 @@ const baseEventoSchema = z.object({
   precio_detalle: z.string().trim().optional(),
   zonas: jsonArrayField(zonaSchema).optional(),
   max_entradas: z.coerce.number().int('max_entradas debe ser un entero').positive('max_entradas debe ser mayor a 0').optional(),
-  cta: z.string().trim().min(1, 'cta es obligatorio'),
-  cta_wa: z.string().trim().optional(),
+  cta: z.string().trim().min(1, 'cta es obligatorio').max(35, 'cta no puede pasar de 35 caracteres'),
+  cta_wa: z.string().trim().max(18, 'cta_wa no puede pasar de 18 caracteres').optional(),
   color: hexColor,
   color_hero: hexColor,
-  wa_link: z.string().trim().url('wa_link debe ser una URL válida'),
+  // Opcional a pedido del usuario (2026-08-16): no todos los caminos de
+  // reserva dependen de WhatsApp (festival usa `inscripcion_link`,
+  // proximamente no reserva nada), y el sitio público ya tiene un número de
+  // WhatsApp de respaldo cuando `waLink` viene vacío (ver EventoDetalle.jsx).
+  wa_link: urlSegura('wa_link debe ser una URL válida').optional(),
   testimonios: jsonArrayField(testimonioSchema).optional(),
   inscripcion_cerrada: booleanFromString.optional(),
-  inscripcion_link: z.string().trim().url('inscripcion_link debe ser una URL válida').optional(),
-  bases: z.string().trim().url('bases debe ser una URL válida').optional(),
+  inscripcion_link: urlSegura('inscripcion_link debe ser una URL válida').optional(),
+  bases: urlSegura('bases debe ser una URL válida').optional(),
   destacado_hero: booleanFromString.optional(),
   accion_tipo: z.enum(ACCION_TIPOS),
 });
@@ -96,10 +120,18 @@ async function limpiarOtrosDestacados(idExcluido) {
 
 // GET / — listar todos los eventos
 router.get('/', async (req, res, next) => {
+  // ⭐ Hallazgo real (2026-08-16): ordenar solo por `fecha_iso` no define qué
+  // pasa entre 2 eventos con la misma fecha — Postgres no garantiza ningún
+  // orden entre filas "empatadas" si no hay un segundo criterio explícito.
+  // Se agrega `creado_en` ascendente como desempate, para que el evento
+  // creado primero aparezca primero cuando 2 comparten fecha (pedido del
+  // usuario). El `.sort()` de JS que hace el sitio público (`CarruselEventos.jsx`)
+  // es estable, así que respeta este orden de desempate tal cual llega.
   const { data, error } = await supabase
     .from('eventos')
     .select('*')
-    .order('fecha_iso', { ascending: false });
+    .order('fecha_iso', { ascending: false })
+    .order('creado_en', { ascending: true });
 
   if (error) {
     return next(errorGenerico(error, 'GET /api/admin/eventos'));
@@ -126,9 +158,9 @@ router.post('/', requireCsrf, uploadFields, async (req, res, next) => {
   const { destacado_hero, ...camposEvento } = result.data;
 
   // Validar TODOS los archivos antes de subir ninguno.
-  await validarWebpReal(imgFile.buffer);
+  await validarImagenReal(imgFile.buffer);
   for (const archivo of galeriaFiles) {
-    await validarWebpReal(archivo.buffer);
+    await validarImagenReal(archivo.buffer);
   }
 
   const { url: imgUrl } = await procesarYSubirImagen(imgFile.buffer, CARPETA_IMG);
@@ -195,8 +227,8 @@ router.patch('/:id', requireCsrf, uploadFields, async (req, res, next) => {
   let imgVieja = null;
   let galeriaVieja = null;
 
-  if (imgFile) await validarWebpReal(imgFile.buffer);
-  for (const archivo of galeriaFiles) await validarWebpReal(archivo.buffer);
+  if (imgFile) await validarImagenReal(imgFile.buffer);
+  for (const archivo of galeriaFiles) await validarImagenReal(archivo.buffer);
 
   if (imgFile) {
     const { url } = await procesarYSubirImagen(imgFile.buffer, CARPETA_IMG);
@@ -296,7 +328,8 @@ eventosPublicoRouter.get('/', async (req, res, next) => {
     .from('eventos')
     .select('*')
     .eq('activo', true)
-    .order('fecha_iso', { ascending: false });
+    .order('fecha_iso', { ascending: false })
+    .order('creado_en', { ascending: true });
 
   if (error) {
     return next(errorGenerico(error, 'GET /api/eventos'));

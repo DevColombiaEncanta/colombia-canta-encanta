@@ -1,0 +1,29 @@
+.bienvenida-qr {
+  width: 180px;
+  height: 180px;
+  margin: 12px auto;
+  padding: 8px;
+  background: #fff;
+  border-radius: 8px;
+  display: block;
+}
+
+.bienvenida-secreto {
+  font-family: monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  background: var(--bg-input);
+  border: 1px solid var(--border-media);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--texto-principal);
+  word-break: break-all;
+  margin: 0 0 16px;
+}
+
+.bienvenida-link {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--azul);
+  font-weight: 600;
+}

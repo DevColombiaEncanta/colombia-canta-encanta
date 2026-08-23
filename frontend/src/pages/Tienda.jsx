@@ -58,13 +58,18 @@ export default function Tienda() {
   const cargando = cargandoProductos || cargandoColecciones || cargandoCategorias;
   const error = errorProductos || errorColecciones || errorCategorias;
 
-  // Colecciones son administrables desde el panel — se activa la primera
-  // (ya viene ordenada por `orden` desde el backend) en cuanto llegan.
-  useEffect(() => {
-    if (colecciones.length > 0 && coleccionActiva === null) {
-      setColeccionActiva(colecciones[0].id);
-    }
-  }, [colecciones, coleccionActiva]);
+  // Colecciones son administrables desde el panel — se activa la primera (ya
+  // viene ordenada por `orden` desde el backend) en cuanto llegan. Hallazgo de
+  // la auditoría de 5.4: esto vivía en un `useEffect`, con un `setState`
+  // síncrono en el cuerpo — dispara `react-hooks/set-state-in-effect`.
+  // Ajustado durante el render en vez de en un efecto, mismo criterio que ya
+  // usa este proyecto (ver Hero.jsx/Noticias.jsx/AdminSidebar.jsx y
+  // https://react.dev/learn/you-might-not-need-an-effect) — la condición
+  // `coleccionActiva === null` se vuelve falsa apenas se ejecuta, así que no
+  // hay riesgo de loop.
+  if (colecciones.length > 0 && coleccionActiva === null) {
+    setColeccionActiva(colecciones[0].id);
+  }
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -333,7 +338,7 @@ export default function Tienda() {
 
       {/* Toast */}
       {toast && (
-        <div className="tienda-toast">✓ {toast}</div>
+        <div className="tienda-toast" role="status">✓ {toast}</div>
       )}
 
       {/* Modal de producto */}

@@ -103,6 +103,7 @@ export default function Inscripciones() {
   const { cursos, cargando, error } = useCursos();
   const [openFaq, setOpenFaq] = useState(null);
   const [pasoIdx, setPasoIdx] = useState(0);
+  const [cursoCarruselIdx, setCursoCarruselIdx] = useState(0);
 
   // ── Flujo de inscripción: ver detalles de un curso, o llenar el formulario ──
   const [vistaDetalle, setVistaDetalle] = useState(null);
@@ -205,6 +206,58 @@ export default function Inscripciones() {
     return `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(lineas.join("\n"))}`;
   };
 
+  // Reutilizada por el grid (tablet/desktop) y el carrusel (mobile, <600px) —
+  // misma tarjeta, sin duplicar el markup entre los 2 layouts.
+  const renderTarjetaCurso = (c) => (
+    <div className="inscr-card">
+      <div className="inscr-card-header">
+        <span className="inscr-card-icono" aria-hidden="true">{c.emoji || "🎵"}</span>
+        <span className="inscr-card-tagline">{c.tagline}</span>
+      </div>
+
+      <div className="inscr-card-body">
+        <h3 className="inscr-card-nombre">{c.nombre}</h3>
+        {c.esPersonalizado && (
+          <span className="inscr-card-personalizado">
+            👤 Clases personalizadas{c.profesorNombre ? ` · ${c.profesorNombre}` : ''}
+          </span>
+        )}
+        <ul className="inscr-card-lista">
+          {(c.instrumentos || []).slice(0, 4).map((i) => (
+            <li key={i}>{i}</li>
+          ))}
+          {(c.instrumentos || []).length > 4 && (
+            <li className="inscr-card-mas">
+              +{c.instrumentos.length - 4} más
+            </li>
+          )}
+        </ul>
+        <div className="inscr-card-acciones">
+          <button
+            type="button"
+            className="inscr-card-btn"
+            onClick={() => manejarVerDetalles(c)}
+          >
+            Ver detalles
+          </button>
+          <button
+            type="button"
+            className="inscr-card-btn inscr-card-btn-solido"
+            onClick={() => iniciarInscripcion(c)}
+          >
+            Inscribirme
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Franjas reales del curso ya configuradas por el admin, para que el
+  // horario sea seleccionable en vez de un texto libre o 3 opciones fijas
+  // genéricas (2026-08-19, pedido del usuario). Solo si no hay ninguna franja
+  // cargada (personalizado sin horario fijo) queda el texto libre de respaldo.
+  const opcionesHorario = (formInscripcion?.horarios || []).map((h) => `${h.dia} · ${h.hora}`);
+
   return (
     <main>
       <Helmet>
@@ -248,46 +301,50 @@ export default function Inscripciones() {
           )}
 
           {!cargando && !error && cursos.length > 0 && (
+          <>
+          {/* Tablet/Desktop: grid */}
           <div className="inscr-cursos-grid">
-            {cursos.map((c) => (
-              <div key={c.id} className="inscr-card">
-                <div className="inscr-card-header">
-                  <img src={c.icono} alt="" aria-hidden="true" className="inscr-card-icono" />
-                  <span className="inscr-card-tagline">{c.tagline}</span>
-                </div>
-
-                <div className="inscr-card-body">
-                  <h3 className="inscr-card-nombre">{c.nombre}</h3>
-                  <ul className="inscr-card-lista">
-                    {c.instrumentos.slice(0, 4).map((i) => (
-                      <li key={i}>{i}</li>
-                    ))}
-                    {c.instrumentos.length > 4 && (
-                      <li className="inscr-card-mas">
-                        +{c.instrumentos.length - 4} más
-                      </li>
-                    )}
-                  </ul>
-                  <div className="inscr-card-acciones">
-                    <button
-                      type="button"
-                      className="inscr-card-btn"
-                      onClick={() => manejarVerDetalles(c)}
-                    >
-                      Ver detalles
-                    </button>
-                    <button
-                      type="button"
-                      className="inscr-card-btn inscr-card-btn-solido"
-                      onClick={() => iniciarInscripcion(c)}
-                    >
-                      Inscribirme
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+            {cursos.map((c) => <div key={c.id}>{renderTarjetaCurso(c)}</div>)}
           </div>
+
+          {/* Mobile (<600px): carrusel — mismo formato visual de tarjeta, sin la lista larga hacia abajo */}
+          <div className="inscr-cursos-carrusel">
+            <button
+              className="inscr-pasos-nav inscr-pasos-nav-prev"
+              onClick={() => setCursoCarruselIdx((i) => Math.max(0, i - 1))}
+              disabled={cursoCarruselIdx === 0}
+              aria-label="Curso anterior"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+
+            {renderTarjetaCurso(cursos[cursoCarruselIdx])}
+
+            <button
+              className="inscr-pasos-nav inscr-pasos-nav-next"
+              onClick={() => setCursoCarruselIdx((i) => Math.min(cursos.length - 1, i + 1))}
+              disabled={cursoCarruselIdx === cursos.length - 1}
+              aria-label="Siguiente curso"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </button>
+
+            <div className="inscr-pasos-dots">
+              {cursos.map((c, i) => (
+                <button
+                  key={c.id}
+                  className={`inscr-pasos-dot${i === cursoCarruselIdx ? ' activo' : ''}`}
+                  onClick={() => setCursoCarruselIdx(i)}
+                  aria-label={`Ver curso ${i + 1}: ${c.nombre}`}
+                />
+              ))}
+            </div>
+          </div>
+          </>
           )}
         </div>
       </section>
@@ -385,7 +442,7 @@ export default function Inscripciones() {
                   >
                     ✕
                   </button>
-                  <img src={vistaDetalle.icono} alt="" aria-hidden="true" className="inscr-detalle-icono" />
+                  <span className="inscr-detalle-icono" aria-hidden="true">{vistaDetalle.emoji || "🎵"}</span>
                   <div className="inscr-detalle-header-texto">
                     <span className="inscr-detalle-tagline">{vistaDetalle.tagline}</span>
                     <h3 className="inscr-detalle-nombre">{vistaDetalle.nombre}</h3>
@@ -395,16 +452,27 @@ export default function Inscripciones() {
                 <div className="inscr-detalle-body">
                   <p className="inscr-detalle-desc">{vistaDetalle.descripcion}</p>
 
-                  <div className="inscr-detalle-grupo">
-                    <span className="inscr-detalle-grupo-label">Modalidades</span>
-                    <div className="inscr-detalle-chips">
-                      {vistaDetalle.instrumentos.map((i) => (
-                        <span key={i} className="inscr-detalle-chip inscr-detalle-chip-outline">
-                          {i}
-                        </span>
-                      ))}
+                  {vistaDetalle.esPersonalizado && (
+                    <div className="inscr-detalle-grupo">
+                      <span className="inscr-detalle-grupo-label">Profesor</span>
+                      <p className="inscr-detalle-profesor">
+                        👤 {vistaDetalle.profesorNombre || 'Se coordina al inscribirte'} · clases personalizadas 1 a 1
+                      </p>
                     </div>
-                  </div>
+                  )}
+
+                  {vistaDetalle.instrumentos?.length > 0 && (
+                    <div className="inscr-detalle-grupo">
+                      <span className="inscr-detalle-grupo-label">Modalidades</span>
+                      <div className="inscr-detalle-chips">
+                        {vistaDetalle.instrumentos.map((i) => (
+                          <span key={i} className="inscr-detalle-chip inscr-detalle-chip-outline">
+                            {i}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="inscr-detalle-grupo inscr-detalle-grupo-niveles">
                     <span className="inscr-detalle-grupo-label">Niveles disponibles</span>
@@ -417,17 +485,19 @@ export default function Inscripciones() {
                     </div>
                   </div>
 
-                  <div className="inscr-detalle-grupo">
-                    <span className="inscr-detalle-grupo-label">Horarios</span>
-                    <div className="inscr-detalle-horarios">
-                      {vistaDetalle.horarios.map((h, i) => (
-                        <div key={i} className="inscr-detalle-horario-fila">
-                          <span className="inscr-detalle-dia">{h.dia}</span>
-                          <span className="inscr-detalle-hora">{h.hora}</span>
-                        </div>
-                      ))}
+                  {vistaDetalle.horarios?.length > 0 && (
+                    <div className="inscr-detalle-grupo">
+                      <span className="inscr-detalle-grupo-label">Horarios</span>
+                      <div className="inscr-detalle-horarios">
+                        {vistaDetalle.horarios.map((h, i) => (
+                          <div key={i} className="inscr-detalle-horario-fila">
+                            <span className="inscr-detalle-dia">{h.dia}</span>
+                            <span className="inscr-detalle-hora">{h.hora}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="inscr-detalle-meta">
                     <div className="inscr-detalle-meta-item">
@@ -663,18 +733,29 @@ export default function Inscripciones() {
                       <h3>Preferencias de horario</h3>
                       <div className="inscr-form-fila">
                         <div className="inscr-form-grupo">
-                          <label>Preferencia horaria *</label>
-                          <select
-                            name="horarioPreferencia"
-                            required
-                            value={formData.horarioPreferencia}
-                            onChange={handleChange}
-                          >
-                            <option value="">Selecciona una opción...</option>
-                            <option value="Mañana">Mañana</option>
-                            <option value="Tarde">Tarde</option>
-                            <option value="Sábados">Sábados</option>
-                          </select>
+                          <label>{opcionesHorario.length > 0 ? 'Horario *' : 'Horario a coordinar *'}</label>
+                          {opcionesHorario.length > 0 ? (
+                            <select
+                              name="horarioPreferencia"
+                              required
+                              value={formData.horarioPreferencia}
+                              onChange={handleChange}
+                            >
+                              <option value="">Selecciona una opción...</option>
+                              {opcionesHorario.map((h) => (
+                                <option key={h} value={h}>{h}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              name="horarioPreferencia"
+                              required
+                              value={formData.horarioPreferencia}
+                              onChange={handleChange}
+                              placeholder="Ej. Martes en la tarde, o el horario que te sirva"
+                            />
+                          )}
                         </div>
                         <div className="inscr-form-grupo">
                           <label>Barrio</label>
