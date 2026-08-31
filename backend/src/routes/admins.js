@@ -368,4 +368,58 @@ router.delete('/:id/mfa', requireCsrf, requireRole('admin_maestro'), limiterEstr
   res.json({ ok: true, factoresBorrados: factoresData.factors.length });
 });
 
+// DELETE /:id — borra definitivamente a un admin ya desactivado, a pedido del
+// usuario (2026-08-31): antes solo se podía desactivar/reactivar, sin forma
+// de sacar del todo a alguien que ya no debería aparecer en la lista (ej. una
+// persona que dejó el equipo). Solo se permite sobre alguien ya desactivado
+// -- un candado extra a propósito, no solo una comprobación técnica: evita
+// borrar por error a un admin todavía activo sin pasar primero por
+// "Desactivar" (con su propio diálogo de confirmación).
+//
+// `deleteUser` borra el usuario real de `auth.users`, y la fila de `admins`
+// cae sola por el `on delete cascade` de la FK (ver 20260721050030_create_
+// admins.sql) -- no hace falta un delete aparte a la tabla `admins`.
+router.delete('/:id', requireCsrf, requireRole('admin_maestro'), limiterEstricto, async (req, res, next) => {
+  const { id } = req.params;
+
+  const { data: targetAdmin, error: fetchError } = await supabase
+    .from('admins')
+    .select('id, rol, email, activo, user_id')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (fetchError || !targetAdmin) {
+    const err = new Error('Admin no encontrado');
+    err.status = 404;
+    return next(err);
+  }
+
+  if (targetAdmin.rol === 'admin_maestro') {
+    const err = new Error('No se puede borrar al admin maestro');
+    err.status = 403;
+    return next(err);
+  }
+
+  if (targetAdmin.activo) {
+    const err = new Error('Solo se puede borrar a un admin ya desactivado — desactívalo primero.');
+    err.status = 409;
+    return next(err);
+  }
+
+  const { error: deleteError } = await supabase.auth.admin.deleteUser(targetAdmin.user_id);
+  if (deleteError) {
+    return next(errorGenerico(deleteError, 'DELETE /api/admin/admins/:id (deleteUser)'));
+  }
+
+  await logAudit({
+    actor: req.admin,
+    accion: 'borrar',
+    entidad: 'admins',
+    entidadId: id,
+    detalle: { email: targetAdmin.email },
+  });
+
+  res.json({ ok: true });
+});
+
 export default router;

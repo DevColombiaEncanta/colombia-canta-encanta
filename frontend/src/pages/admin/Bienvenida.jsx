@@ -5,6 +5,28 @@ import '../../styles/main.css';
 import './Login.css';
 import './Bienvenida.css';
 
+// Iconos propios (SVG, sin dependencias) en vez de emoji — mismo criterio de
+// trazo fino ya usado en las flechas del carrusel de Hero.jsx, para que el
+// botón de mostrar/ocultar contraseña se vea a la altura del resto del sitio.
+function IconoOjo() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function IconoOjoTachado() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3l18 18" />
+      <path d="M10.6 5.2A10.6 10.6 0 0 1 12 5c7 0 10.5 7 10.5 7a13.9 13.9 0 0 1-3.1 3.9M6.6 6.6C3.4 8.6 1.5 12 1.5 12s3.5 7 10.5 7a10.4 10.4 0 0 0 4.4-.9" />
+      <path d="M9.5 10a3 3 0 0 0 4.2 4.2" />
+    </svg>
+  );
+}
+
 const MIN_PASSWORD = 8;
 // 2026-08-30, a pedido del usuario: piso mínimo de seguridad real (letras +
 // números) — no restringe qué otros caracteres se pueden usar (acentos,
@@ -244,7 +266,7 @@ export default function Bienvenida() {
     verificando: 'Verificando tu link…',
     error: 'Link no válido',
     'mfa-actual': 'Confirma tu código actual',
-    password: tipo === 'recovery' ? 'Elige tu nueva contraseña' : 'Bienvenido/a — elige tu contraseña',
+    password: tipo === 'recovery' ? 'Elige tu nueva contraseña' : 'Crea tu contraseña',
     mfa: 'Configura tu código de seguridad',
     listo: '¡Listo!',
   };
@@ -258,7 +280,12 @@ export default function Bienvenida() {
         <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Colombia Canta y Encanta" className="admin-login-logo" />
         <h1 aria-live="polite">{TITULOS[paso]}</h1>
         {indiceActual !== -1 && (
-          <p className="bienvenida-progreso" aria-live="polite">Paso {indiceActual + 1} de {SECUENCIA_PASOS.length}</p>
+          <div className="bienvenida-progreso" role="group" aria-label={`Paso ${indiceActual + 1} de ${SECUENCIA_PASOS.length}`}>
+            {SECUENCIA_PASOS.map((paso_, i) => (
+              <span key={paso_} className={`bienvenida-progreso-barra${i <= indiceActual ? ' activa' : ''}`} />
+            ))}
+            <span className="bienvenida-progreso-texto" aria-live="polite">Paso {indiceActual + 1} de {SECUENCIA_PASOS.length}</span>
+          </div>
         )}
 
         {paso === 'error' && (
@@ -300,6 +327,9 @@ export default function Bienvenida() {
 
         {paso === 'password' && (
           <>
+            {tipo !== 'recovery' && (
+              <p className="admin-login-hint bienvenida-saludo">Te damos la bienvenida a Colombia Canta y Encanta.</p>
+            )}
             <form onSubmit={guardarPassword} className="admin-login-form" noValidate>
               <label htmlFor="bienvenida-password">
                 Contraseña nueva
@@ -317,7 +347,7 @@ export default function Bienvenida() {
                     onClick={() => setMostrarPassword((v) => !v)}
                     aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   >
-                    {mostrarPassword ? '🙈' : '👁️'}
+                    {mostrarPassword ? <IconoOjoTachado /> : <IconoOjo />}
                   </button>
                 </div>
               </label>

@@ -20,7 +20,11 @@
 
 .admin-login-logo {
   height: 48px;
-  margin-bottom: 20px;
+  /* ⭐ Bug real (2026-08-31, encontrado por el usuario): `img { display:
+     block }` (regla global en main.css) hace que `text-align: center` del
+     contenedor deje de centrar el logo (solo centra contenido inline) —
+     necesita su propio margen automático. */
+  margin: 0 auto 20px;
 }
 
 .admin-login-card h1 {
@@ -68,6 +72,8 @@
 }
 
 .admin-login-campo-error {
+  display: block;
+  text-align: center;
   font-size: 0.78rem;
   color: var(--rojo);
   font-weight: 500;
@@ -95,8 +101,18 @@
   margin: -8px 0 0;
 }
 
+/* ⭐ Ajuste 2026-08-31 (pedido del usuario): quedaba alineado a la izquierda
+   (heredaba el `text-align: left` de `.admin-login-form`, pensado para los
+   campos, no para un aviso de error) — se le da su propia caja centrada,
+   con más peso visual que un texto rojo suelto. */
 .admin-login-error {
+  display: block;
   color: var(--rojo);
+  background: color-mix(in srgb, var(--rojo) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rojo) 30%, transparent);
+  border-radius: 8px;
+  padding: 10px 14px;
   font-size: 0.85rem;
+  text-align: center;
   margin: 0;
 }

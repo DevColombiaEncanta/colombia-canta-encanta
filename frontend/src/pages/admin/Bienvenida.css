@@ -1,10 +1,34 @@
 .bienvenida-progreso {
-  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: -8px 0 20px;
+}
+
+.bienvenida-progreso-barra {
+  height: 4px;
+  width: 32px;
+  border-radius: 999px;
+  background: var(--border-media);
+  transition: background 0.2s ease;
+}
+
+.bienvenida-progreso-barra.activa {
+  background: var(--coral);
+}
+
+.bienvenida-progreso-texto {
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--texto-secundario);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin: -8px 0 16px;
+  margin-left: 4px;
+}
+
+.bienvenida-saludo {
+  margin-top: -8px;
 }
 
 .bienvenida-password-wrap {
@@ -14,20 +38,39 @@
 
 .bienvenida-password-wrap input {
   width: 100%;
-  padding-right: 40px;
+  padding-right: 44px;
 }
 
-.bienvenida-toggle-password {
+/* Especificidad extra a propósito: `.admin-login-form button` (Login.css, el
+   botón "Continuar") también matchea este botón por ser descendiente del
+   mismo form, y con solo 1 clase acá esa regla genérica ganaba (mismo bug de
+   especificidad, no de cascada por orden de import). */
+.bienvenida-password-wrap .bienvenida-toggle-password {
   position: absolute;
   top: 50%;
-  right: 8px;
+  right: 6px;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.1rem;
-  line-height: 1;
-  padding: 4px;
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--texto-secundario);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.bienvenida-password-wrap .bienvenida-toggle-password:hover {
+  color: var(--texto-principal);
+  background: var(--bg-hover);
+}
+
+.bienvenida-password-wrap .bienvenida-toggle-password:focus-visible {
+  outline: 2px solid var(--azul);
+  outline-offset: 1px;
 }
 
 .bienvenida-apps-hint a {

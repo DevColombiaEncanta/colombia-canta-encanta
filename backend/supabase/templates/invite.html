@@ -4,30 +4,87 @@
   (Authentication → Email Templates → Invite user) — ver instrucciones en
   readme_guia.md, sección 5.7. `content_path` en config.toml solo aplica a un
   entorno local de Supabase (`supabase start`), no al proyecto real en la nube.
+
+  Variables de Supabase usadas: {{ .ConfirmationURL }} (único link real que
+  envía Supabase para este tipo de correo — no hay .SiteURL/.Token propios
+  para "invite" además de este).
 -->
-<div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #1a1a1a;">
-  <p style="font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #E63950; font-weight: bold; margin: 0 0 8px;">
-    Colombia Canta y Encanta
-  </p>
-  <h1 style="font-size: 22px; margin: 0 0 16px;">Fuiste invitado/a como administrador/a</h1>
-  <p style="font-size: 15px; line-height: 1.5; margin: 0 0 16px;">
-    Alguien del equipo de Colombia Canta y Encanta te invitó a administrar el panel del sitio web. Con este acceso vas a poder gestionar eventos, cursos, la tienda, inscripciones y más.
-  </p>
-  <p style="font-size: 15px; line-height: 1.5; margin: 0 0 24px;">
-    Para activar tu cuenta, elige tu contraseña y configura tu código de seguridad (verificación en dos pasos) desde el siguiente botón:
-  </p>
-  <p style="text-align: center; margin: 0 0 24px;">
-    <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #E63950; color: #ffffff; text-decoration: none; font-weight: bold; padding: 14px 32px; border-radius: 8px; font-size: 15px;">
-      Activar mi cuenta
-    </a>
-  </p>
-  <p style="font-size: 13px; line-height: 1.5; color: #666666; margin: 0 0 8px;">
-    Si el botón no funciona, copia y pega este link en tu navegador:
-  </p>
-  <p style="font-size: 12px; word-break: break-all; color: #666666; margin: 0 0 24px;">
-    {{ .ConfirmationURL }}
-  </p>
-  <p style="font-size: 13px; line-height: 1.5; color: #666666; margin: 0;">
-    Si no esperabas este correo, puedes ignorarlo — tu información está segura.
-  </p>
+<div style="background: #f4f2ef; padding: 32px 16px; font-family: Arial, Helvetica, sans-serif;">
+  <div style="max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #ececec; overflow: hidden;">
+
+    <!-- Encabezado -->
+    <div style="padding: 32px 32px 24px; text-align: center; border-bottom: 1px solid #f0f0f0;">
+      <img src="https://colombia-canta-encanta.vercel.app/logo.png" alt="Colombia Canta y Encanta" width="56" height="56" style="display: block; margin: 0 auto 12px; border-radius: 12px;" />
+      <p style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #ff5c8d; font-weight: bold; margin: 0;">
+        Colombia Canta y Encanta
+      </p>
+    </div>
+
+    <!-- Cuerpo -->
+    <div style="padding: 28px 32px 8px;">
+      <h1 style="font-size: 21px; color: #0a0f1e; margin: 0 0 14px; text-align: center;">
+        Te invitaron a administrar el panel
+      </h1>
+      <p style="font-size: 14.5px; line-height: 1.6; color: #454545; margin: 0 0 24px; text-align: center;">
+        Alguien del equipo de Colombia Canta y Encanta te dio acceso al panel del sitio: eventos, cursos, la tienda, inscripciones y más.
+      </p>
+
+      <!-- Pasos, en breve -->
+      <div style="background: #faf9f7; border: 1px solid #ececec; border-radius: 12px; padding: 20px 22px; margin: 0 0 28px;">
+        <p style="font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #9a9a9a; font-weight: bold; margin: 0 0 14px;">
+          En 3 pasos
+        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%;">
+          <tr>
+            <td style="padding-bottom: 12px; vertical-align: top; width: 28px;">
+              <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #ff5c8d; color: #ffffff; font-size: 12px; font-weight: bold; text-align: center;">1</span>
+            </td>
+            <td style="padding-bottom: 12px; vertical-align: top; font-size: 13.5px; color: #454545; line-height: 1.5;">
+              Activa tu cuenta con el botón de abajo.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom: 12px; vertical-align: top; width: 28px;">
+              <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #ff5c8d; color: #ffffff; font-size: 12px; font-weight: bold; text-align: center;">2</span>
+            </td>
+            <td style="padding-bottom: 12px; vertical-align: top; font-size: 13.5px; color: #454545; line-height: 1.5;">
+              Elige tu contraseña.
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: top; width: 28px;">
+              <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #ff5c8d; color: #ffffff; font-size: 12px; font-weight: bold; text-align: center;">3</span>
+            </td>
+            <td style="vertical-align: top; font-size: 13.5px; color: #454545; line-height: 1.5;">
+              Configura tu código de verificación en dos pasos con una app autenticadora (te guiamos ahí mismo).
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Botón -->
+      <p style="text-align: center; margin: 0 0 20px;">
+        <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #ff5c8d; color: #ffffff; text-decoration: none; font-weight: bold; padding: 14px 36px; border-radius: 10px; font-size: 15px;">
+          Activar mi cuenta
+        </a>
+      </p>
+      <p style="font-size: 12px; color: #9a9a9a; text-align: center; margin: 0 0 28px;">
+        Este enlace es personal y de un solo uso.
+      </p>
+    </div>
+
+    <!-- Pie -->
+    <div style="padding: 20px 32px 28px; border-top: 1px solid #f0f0f0;">
+      <p style="font-size: 12px; line-height: 1.5; color: #9a9a9a; margin: 0 0 10px;">
+        Si el botón no funciona, copia y pega este link en tu navegador:
+      </p>
+      <p style="font-size: 11.5px; word-break: break-all; color: #9a9a9a; margin: 0 0 18px;">
+        {{ .ConfirmationURL }}
+      </p>
+      <p style="font-size: 12px; line-height: 1.5; color: #9a9a9a; margin: 0;">
+        Si no esperabas este correo, puedes ignorarlo — tu información está segura.
+      </p>
+    </div>
+
+  </div>
 </div>
