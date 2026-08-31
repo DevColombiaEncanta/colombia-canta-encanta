@@ -62,7 +62,12 @@ export default function EventoDetallePage() {
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={OG_IMAGE} />
       </Helmet>
-      <EventoDetalle evento={evento} eventos={eventos} eventosFijos={eventosFijos} />
+      {/* ⭐ Hallazgo real (2026-08-28, encontrado probando el fix de fechas pasadas):
+         navegar de un evento a otro vía "otros eventos" (Link/navigate client-side,
+         sin recarga completa) no remontaba este componente — su estado interno
+         (`carruselIdx`, el show preseleccionado) quedaba pegado del evento
+         anterior. `key={evento.slug}` fuerza un montaje nuevo por cada evento. */}
+      <EventoDetalle key={evento.slug} evento={evento} eventos={eventos} eventosFijos={eventosFijos} />
     </>
   );
 }

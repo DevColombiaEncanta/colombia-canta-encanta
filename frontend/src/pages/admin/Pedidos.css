@@ -1,0 +1,190 @@
+/* 6 · Mismo esqueleto de layout que Reservas.css (lista + panel de detalle).
+   Prefijo `.pedadmin-` propio para no chocar con clases de otras hojas de
+   estilo del panel. */
+
+.pedadmin-panel-header {
+  margin-bottom: 20px;
+}
+
+.pedadmin-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.pedadmin-lista-panel {
+  position: sticky;
+  top: 116px;
+}
+
+.pedadmin-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.pedadmin-filtros input,
+.pedadmin-filtros select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-media);
+  background: var(--bg-input);
+  color: var(--texto-principal);
+  font-size: 14px;
+}
+
+.pedadmin-filtro-fecha {
+  margin: 0;
+}
+
+.pedadmin-contador {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+  margin: 0 0 10px;
+}
+
+.pedadmin-vacio {
+  color: var(--texto-secundario);
+  font-size: 14px;
+}
+
+.pedadmin-panel-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.pedadmin-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-sutil);
+  background: var(--bg-card);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.pedadmin-item:hover {
+  background: var(--bg-hover);
+}
+
+.pedadmin-item.activo {
+  border-color: var(--coral);
+  background: color-mix(in srgb, var(--coral) 10%, transparent);
+}
+
+.pedadmin-item-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-principal);
+}
+
+.pedadmin-item-meta {
+  font-size: 12px;
+  color: var(--texto-secundario);
+}
+
+.pedadmin-estado {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.pedadmin-estado-pendiente { color: #B8860B; }
+.pedadmin-estado-pagado { color: #1a8a4a; }
+.pedadmin-estado-cancelado { color: var(--rojo); }
+.pedadmin-estado-enviado { color: #2563a8; }
+
+.pedadmin-form-vacio {
+  color: var(--texto-secundario);
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.pedadmin-form-vacio .admin-form-aviso {
+  display: inline-flex;
+}
+
+.pedadmin-form-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1.2rem;
+  color: var(--texto-principal);
+  margin: 0 0 4px;
+}
+
+.pedadmin-form-sub {
+  font-size: 13px;
+  color: var(--texto-secundario);
+  margin: 0 0 20px;
+}
+
+.pedadmin-seccion-titulo {
+  font-family: var(--font-titulo);
+  font-size: 1rem;
+  color: var(--texto-principal);
+  margin: 28px 0 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-sutil);
+}
+
+.pedadmin-items-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pedadmin-item-linea {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg-body);
+  font-size: 13px;
+}
+
+.pedadmin-item-nombre {
+  color: var(--texto-principal);
+}
+
+.pedadmin-item-cantidad {
+  color: var(--texto-secundario);
+}
+
+.pedadmin-item-precio {
+  font-weight: 700;
+  color: var(--texto-principal);
+}
+
+@media (max-width: 1024px) {
+  .pedadmin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pedadmin-lista-panel {
+    position: static;
+  }
+
+  .pedadmin-panel-lista {
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 599px) {
+  .pedadmin-item-linea {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

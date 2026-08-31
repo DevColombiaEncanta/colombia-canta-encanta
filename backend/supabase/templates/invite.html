@@ -1,0 +1,33 @@
+<!--
+  Plantilla del correo de invitación para nuevos administradores del panel.
+  No se aplica sola: hay que pegar este HTML en el Dashboard de Supabase
+  (Authentication → Email Templates → Invite user) — ver instrucciones en
+  readme_guia.md, sección 5.7. `content_path` en config.toml solo aplica a un
+  entorno local de Supabase (`supabase start`), no al proyecto real en la nube.
+-->
+<div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #1a1a1a;">
+  <p style="font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #E63950; font-weight: bold; margin: 0 0 8px;">
+    Colombia Canta y Encanta
+  </p>
+  <h1 style="font-size: 22px; margin: 0 0 16px;">Fuiste invitado/a como administrador/a</h1>
+  <p style="font-size: 15px; line-height: 1.5; margin: 0 0 16px;">
+    Alguien del equipo de Colombia Canta y Encanta te invitó a administrar el panel del sitio web. Con este acceso vas a poder gestionar eventos, cursos, la tienda, inscripciones y más.
+  </p>
+  <p style="font-size: 15px; line-height: 1.5; margin: 0 0 24px;">
+    Para activar tu cuenta, elige tu contraseña y configura tu código de seguridad (verificación en dos pasos) desde el siguiente botón:
+  </p>
+  <p style="text-align: center; margin: 0 0 24px;">
+    <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #E63950; color: #ffffff; text-decoration: none; font-weight: bold; padding: 14px 32px; border-radius: 8px; font-size: 15px;">
+      Activar mi cuenta
+    </a>
+  </p>
+  <p style="font-size: 13px; line-height: 1.5; color: #666666; margin: 0 0 8px;">
+    Si el botón no funciona, copia y pega este link en tu navegador:
+  </p>
+  <p style="font-size: 12px; word-break: break-all; color: #666666; margin: 0 0 24px;">
+    {{ .ConfirmationURL }}
+  </p>
+  <p style="font-size: 13px; line-height: 1.5; color: #666666; margin: 0;">
+    Si no esperabas este correo, puedes ignorarlo — tu información está segura.
+  </p>
+</div>

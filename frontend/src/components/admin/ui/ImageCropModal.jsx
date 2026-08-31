@@ -96,6 +96,15 @@ export default function ImageCropModal({ archivo, aspecto, progreso, onListo, on
 
   function iniciarArrastre(e) {
     e.preventDefault();
+    // ⭐ Hallazgo real del usuario (2026-08-28): el `preventDefault()` de
+    // arriba es necesario (evita seleccionar texto/scrollear la página al
+    // arrastrar), pero como efecto secundario también le impide al navegador
+    // darle foco de teclado al marco al hacer clic — aunque tenga `tabIndex`.
+    // Sin este `.focus()` manual, el foco se quedaba en el botón "Cancelar"
+    // (enfocado al abrir el diálogo) y las flechas del teclado nunca le
+    // llegaban a `manejarTeclaMarco`, cayendo en el scroll por defecto de la
+    // página de atrás en vez de mover la foto.
+    marcoRef.current?.focus();
     // Pointer Events unifica mouse/touch/lápiz — no hace falta distinguir.
     arrastreRef.current = { startX: e.clientX, startY: e.clientY, offsetInicial: offset };
     window.addEventListener('pointermove', moverArrastre);
@@ -117,6 +126,24 @@ export default function ImageCropModal({ archivo, aspecto, progreso, onListo, on
     arrastreRef.current = null;
     window.removeEventListener('pointermove', moverArrastre);
     window.removeEventListener('pointerup', terminarArrastre);
+  }
+
+  // Accesibilidad (2026-08-28, pedido del usuario): el zoom ya tenía control de
+  // teclado (es un <input type="range">), pero reposicionar la foto solo se
+  // podía hacer arrastrando con mouse/touch. Las flechas mueven la foto en la
+  // misma dirección que arrastrarla a mano (flecha derecha = mismo efecto que
+  // arrastrar hacia la derecha), con Shift para un paso más grande.
+  function manejarTeclaMarco(e) {
+    const paso = e.shiftKey ? 40 : 10;
+    let dx = 0;
+    let dy = 0;
+    if (e.key === 'ArrowLeft') dx = -paso;
+    else if (e.key === 'ArrowRight') dx = paso;
+    else if (e.key === 'ArrowUp') dy = -paso;
+    else if (e.key === 'ArrowDown') dy = paso;
+    else return;
+    e.preventDefault();
+    setOffset((o) => clamp({ x: o.x + dx, y: o.y + dy }, dispW, dispH));
   }
 
   function cambiarZoom(nuevoZoom) {
@@ -161,7 +188,7 @@ export default function ImageCropModal({ archivo, aspecto, progreso, onListo, on
         onKeyDown={manejarTecla}
       >
         <h3 id="admin-crop-titulo">Ajustar foto{progreso ? ` (${progreso})` : ''}</h3>
-        <p>Arrastra para mover, usa el control para acercar. Así se va a ver en el sitio.</p>
+        <p>Arrastra para mover (o usa las flechas del teclado), usa el control para acercar. Así se va a ver en el sitio.</p>
 
         {error ? (
           <p className="admin-page-error">No se pudo previsualizar la foto para recortar — se va a subir tal cual.</p>
@@ -171,6 +198,10 @@ export default function ImageCropModal({ archivo, aspecto, progreso, onListo, on
             className="admin-crop-marco"
             style={{ width: anchoMarco, height: altoMarco }}
             onPointerDown={iniciarArrastre}
+            tabIndex={imagenLista ? 0 : -1}
+            role="group"
+            aria-label="Posición de la foto dentro del marco. Usa las flechas del teclado para moverla."
+            onKeyDown={manejarTeclaMarco}
           >
             {/* `urlObjeto` empieza en null hasta que el hook la crea (un
                render después de montar) — recién ahí se monta el <img>, para

@@ -42,10 +42,14 @@ export function CarritoProvider({ children }) {
     setItems(prev => prev.filter(item => item.id !== id));
   };
 
+  const vaciar = () => {
+    setItems([]);
+  };
+
   const totalItems = items.reduce((sum, item) => sum + item.cantidad, 0);
 
   return (
-    <CarritoContext.Provider value={{ items, agregar, actualizarCantidad, eliminar, totalItems }}>
+    <CarritoContext.Provider value={{ items, agregar, actualizarCantidad, eliminar, vaciar, totalItems }}>
       {children}
     </CarritoContext.Provider>
   );

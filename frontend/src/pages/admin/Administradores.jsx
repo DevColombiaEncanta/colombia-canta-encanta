@@ -24,7 +24,7 @@ export default function Administradores() {
   const [invitando, setInvitando] = useState(false);
   const [errorInvitar, setErrorInvitar] = useState('');
 
-  const [confirmandoAccion, setConfirmandoAccion] = useState(null); // { tipo: 'reset'|'desactivar'|'activar', fila } | null
+  const [confirmandoAccion, setConfirmandoAccion] = useState(null); // { tipo: 'reset'|'desactivar'|'activar'|'reenviar', fila } | null
   const [procesando, setProcesando] = useState(false);
   const [errorFila, setErrorFila] = useState('');
 
@@ -93,6 +93,12 @@ export default function Administradores() {
         setAviso(data.factoresBorrados > 0
           ? `Se reseteó el MFA de ${fila.email} — va a tener que configurarlo de nuevo en su próximo inicio de sesión.`
           : `${fila.email} ya no tenía ningún MFA activo — nada que resetear.`);
+      } else if (tipo === 'reenviar') {
+        // El id cambia (por dentro se borra el usuario sin confirmar y se crea
+        // uno nuevo) — se reemplaza la fila vieja por la nueva en su lugar.
+        const data = await adminFetch(`/api/admin/admins/${fila.id}/reenviar`, { method: 'POST' });
+        setAdmins((prev) => prev.map((a) => (a.id === fila.id ? data.admin : a)));
+        setAviso(`Se reenvió la invitación a ${fila.email}.`);
       } else {
         const activo = tipo === 'activar';
         const data = await adminFetch(`/api/admin/admins/${fila.id}`, { method: 'PATCH', body: { activo } });
@@ -112,18 +118,21 @@ export default function Administradores() {
     reset: (f) => `¿Resetear el MFA de ${f.email}?`,
     desactivar: (f) => `¿Desactivar a ${f.email}?`,
     activar: (f) => `¿Reactivar a ${f.email}?`,
+    reenviar: (f) => `¿Reenviar la invitación a ${f.email}?`,
   };
   const MENSAJES_CONFIRMACION = {
     reset: (f) => `${f.email} va a perder el acceso con su código actual y va a tener que configurar uno nuevo la próxima vez que inicie sesión. Úsalo solo si esa persona de verdad perdió su celular o app de autenticación.`,
     desactivar: (f) => `${f.email} no va a poder iniciar sesión en el panel hasta que se lo reactive.`,
     activar: (f) => `${f.email} va a poder volver a iniciar sesión en el panel.`,
+    reenviar: (f) => `El link de invitación anterior de ${f.email} queda inválido y se manda uno nuevo. Solo funciona si esa persona todavía no inició sesión ni una vez.`,
   };
-  // Este diálogo nació para borrados ("Sí, borrar") — ninguna de estas 3
+  // Este diálogo nació para borrados ("Sí, borrar") — ninguna de estas 4
   // acciones borra nada, así que el texto del botón se ajusta por tipo.
   const TEXTOS_BOTON_CONFIRMAR = {
     reset: { confirmar: 'Sí, resetear', confirmando: 'Reseteando…' },
     desactivar: { confirmar: 'Sí, desactivar', confirmando: 'Desactivando…' },
     activar: { confirmar: 'Sí, reactivar', confirmando: 'Reactivando…' },
+    reenviar: { confirmar: 'Sí, reenviar', confirmando: 'Reenviando…' },
   };
 
   if (!esMaestro) {
@@ -186,6 +195,7 @@ export default function Administradores() {
               </div>
               {a.rol !== 'admin_maestro' && (
                 <div className="adminsadmin-fila-acciones">
+                  <Button type="button" variant="secundario" onClick={() => pedirConfirmacion('reenviar', a)}>Reenviar invitación</Button>
                   <Button type="button" variant="secundario" onClick={() => pedirConfirmacion('reset', a)}>Resetear MFA</Button>
                   {a.activo ? (
                     <Button type="button" variant="peligro" onClick={() => pedirConfirmacion('desactivar', a)}>Desactivar</Button>

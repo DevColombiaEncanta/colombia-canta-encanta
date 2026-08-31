@@ -190,9 +190,9 @@ export default function Footer() {
               © {new Date().getFullYear()} Colombia Canta y Encanta · Medellín, Colombia
             </span>
             <div className="footer-legal">
-              <Link to="#">Términos</Link>
-              <Link to="#">Privacidad</Link>
-              <Link to="#">Devoluciones</Link>
+              <Link to="/terminos-y-condiciones">Términos y condiciones</Link>
+              <Link to="/politicas-eventos-gratuitos">Eventos gratuitos</Link>
+              <Link to="/politicas-eventos-pago">Eventos de pago</Link>
             </div>
           </div>
 

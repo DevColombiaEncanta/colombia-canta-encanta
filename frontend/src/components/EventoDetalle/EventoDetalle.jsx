@@ -4,8 +4,24 @@ import EventCard from '../CarruselEventos/EventCard';
 import ContactoSection from '../Contacto/Contacto';
 import Footer from '../Footer/Footer';
 import ReservaModal from '../ReservaModal/ReservaModal';
+import { fechaLocalDesdeISO } from '../../utils/formato';
 import './EventoDetalle.css';
 import '../CarruselEventos/CarruselEventos.css';
+
+// ⭐ Bug real (auditoría 2026-08-30): `new Date(fechaISO)` interpreta una
+// fecha "YYYY-MM-DD" como medianoche UTC — en Colombia (UTC-5) eso muestra el
+// día anterior durante buena parte del día real. Mismo hallazgo que ya se
+// había resuelto en `utils/formato.js` (`fechaLocalDesdeISO`) para el resto
+// del sitio, pero no se reusó acá al escribir el fix de "primer show
+// futuro" — reproducía el bug que estaba corrigiendo. Comparación a nivel de
+// DÍA (no de instante exacto), mismo criterio que `hoyColombia()` en el
+// backend: un show de HOY sigue siendo válido a cualquier hora del día.
+function esFechaPasada(fechaISO) {
+  if (!fechaISO) return false;
+  const hoyMedianoche = new Date();
+  hoyMedianoche.setHours(0, 0, 0, 0);
+  return fechaLocalDesdeISO(fechaISO) < hoyMedianoche;
+}
 
 // Hallazgo real (2026-08-16, encontrado tocando este archivo por otra razón):
 // estaban declarados DENTRO del componente — se recreaban en cada render, lo
@@ -40,7 +56,13 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
       const idx = prog.findIndex(p => p.fechaISO === fechaParam);
       if (idx >= 0) return idx;
     }
-    return 0;
+    // ⭐ Hallazgo real del usuario (2026-08-28): antes siempre arrancaba en el
+    // show de la posición 0, sin importar si ya había pasado — dejaba
+    // preseleccionada (y reservable) una función vieja. Ahora busca el primer
+    // show que NO haya pasado; si no encuentra ninguno (toda la programación
+    // quedó en el pasado), no preselecciona nada.
+    const primerFuturo = prog.findIndex(p => !esFechaPasada(p.fechaISO));
+    return primerFuturo >= 0 ? primerFuturo : null;
   });
   const trackRef = useRef(null);
   const cardRefs = useRef([]);
@@ -74,11 +96,18 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
   const ctaLabelCorto = esProximamente ? 'Próximamente' : (evento.ctaWa ?? evento.cta ?? 'Reservar');
   const waLink = evento.waLink ?? `https://wa.me/573015315119?text=Hola%2C+quiero+informaci%C3%B3n+sobre+${encodeURIComponent(evento.titulo)}.`;
 
-  const esPasado = evento.fechaISO ? new Date(evento.fechaISO) < new Date() : false;
+  const esPasado = esFechaPasada(evento.fechaISO);
   const galTotal = evento.galeria?.length ?? 0;
   const galPrev = () => setGalIdx(i => (i - 1 + galTotal) % galTotal);
   const galNext = () => setGalIdx(i => (i + 1) % galTotal);
   const hasProg = (evento.programacion?.length ?? 0) > 0;
+  // Programación (Salas) con TODOS sus shows ya pasados — el default de
+  // `carruselIdx` de arriba solo cae en `null` cuando no encontró ningún show
+  // futuro (nunca por falta de programación, ese caso ya está cubierto por
+  // `!prog?.length` antes). Distinto de `esPasado` (que es para eventos con
+  // una sola fecha propia, no aplica a eventos_fijos).
+  const sinFuncionesFuturas = hasProg && carruselIdx === null;
+  const noDisponible = esPasado || sinFuncionesFuturas;
   const itemSeleccionado = hasProg && carruselIdx !== null
     ? evento.programacion[carruselIdx]
     : null;
@@ -111,20 +140,17 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
   const inscripcionLabelCorto = evento.cta ?? 'Inscribirme';
   const inscripcionCerrada = evento.inscripcionCerrada ?? false;
 
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-
   const otrosEventos = [
     ...eventos.map(e => ({ ...e, _permanente: false })),
     ...eventosFijos.map(e => ({
       ...e,
       _permanente: true,
       descripcion: e.descripcionCorta,
-      precio: e.pills.find(p => p.texto.toLowerCase().includes('libre'))?.texto ?? 'Consultar',
+      precio: e.pills?.find(p => p.texto.toLowerCase().includes('libre'))?.texto ?? 'Consultar',
     })),
   ]
     .filter(e => e.slug !== evento.slug)
-    .filter(e => !e.fechaISO || new Date(e.fechaISO) >= hoy)
+    .filter(e => !e.fechaISO || !esFechaPasada(e.fechaISO))
     .slice(0, 3);
 
   return (
@@ -154,7 +180,7 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
       </div>
 
       {/* BLOQUE 2 — STICKY BAR */}
-      {!esPasado && (
+      {!noDisponible && (
         <div className={`sticky-cta-bar${stickyVisible ? ' visible' : ''}`}>
           <span className="sticky-titulo">{evento.titulo}</span>
           <span className="sticky-meta">
@@ -227,7 +253,7 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
                     <div className="prog-strip-track" ref={trackRef}>
                       {evento.programacion.map((item, i) => {
                         const [diaSem, diaNum] = (item.dia ?? '').split(' ');
-                        const pasado = item.fechaISO && new Date(item.fechaISO) < new Date();
+                        const pasado = esFechaPasada(item.fechaISO);
                         const activo = carruselIdx === i;
                         return (
                           <div
@@ -333,11 +359,17 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
 
         {/* Columna derecha — card de compra o aviso de finalizado */}
         <div className="compra-card-wrap">
-          {esPasado ? (
+          {noDisponible ? (
             <div className="compra-card compra-card--finalizado">
               <div className="compra-card-fin-icono">🎶</div>
-              <h3 className="compra-card-fin-titulo">Este evento ya finalizó</h3>
-              <p className="compra-card-fin-desc">Gracias a todos los que fueron parte de esta experiencia. Mantente atento a nuestros próximos eventos.</p>
+              <h3 className="compra-card-fin-titulo">
+                {esPasado ? 'Este evento ya finalizó' : 'No hay próximas funciones programadas'}
+              </h3>
+              <p className="compra-card-fin-desc">
+                {esPasado
+                  ? 'Gracias a todos los que fueron parte de esta experiencia. Mantente atento a nuestros próximos eventos.'
+                  : 'Todavía no se cargó la próxima fecha de esta experiencia. Vuelve pronto o escríbenos para más información.'}
+              </p>
               <Link to="/eventos" className="btn btn-azul compra-card-fin-btn">Ver próximos eventos →</Link>
             </div>
           ) : (
@@ -459,7 +491,7 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
         </div>
       </section>
 
-      {!esPasado && (
+      {!noDisponible && (
         <div className="mobile-cta-fixed">
           {inscripcionCerrada ? (
             <button className="compra-btn compra-btn--cerrado" disabled>Inscripciones cerradas</button>
@@ -484,7 +516,7 @@ export default function EventoDetalle({ evento, eventos, eventosFijos }) {
 
       <ContactoSection />
       <Footer />
-      {!esPasado && <div className="mobile-cta-fixed-spacer" />}
+      {!noDisponible && <div className="mobile-cta-fixed-spacer" />}
 
       {modalAbierto && (
         <ReservaModal

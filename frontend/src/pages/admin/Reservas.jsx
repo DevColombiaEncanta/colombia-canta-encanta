@@ -21,12 +21,36 @@ function fechaEfectiva(reserva) {
   return reserva.eventos?.fecha_iso || reserva.show_seleccionado?.fecha_iso || null;
 }
 
+// ⭐ Hallazgo real (pedido del usuario, 2026-08-23): "Salas de Colombia Canta"
+// pasa un show distinto cada semana (mismo `evento_fijo_id`, `show_seleccionado`
+// distinto) — agrupar el filtro solo por evento_fijo mezclaba todas las
+// funciones juntas, sin forma de buscar "quién reservó para el show del 20 de
+// julio" en particular. Se usa `fecha_iso` del show (no el nombre) para
+// distinguir cada función, porque un mismo nombre de show puede repetirse en
+// fechas distintas. "Colombia me enamora" no tiene programación (sin
+// `show_seleccionado`), así que sigue agrupada por evento_fijo entero — no
+// hay show que distinguir ahí.
 function claveEvento(reserva) {
-  return reserva.evento_id ? `evento:${reserva.evento_id}` : `fijo:${reserva.evento_fijo_id}`;
+  if (reserva.evento_id) return `evento:${reserva.evento_id}`;
+  const fechaShow = reserva.show_seleccionado?.fecha_iso;
+  return fechaShow ? `fijo:${reserva.evento_fijo_id}:${fechaShow}` : `fijo:${reserva.evento_fijo_id}`;
 }
 
 function nombreEvento(reserva) {
   return reserva.eventos?.titulo || reserva.eventos_fijos?.titulo || '—';
+}
+
+// Nombre completo para mostrar/buscar: incluye el show puntual cuando existe,
+// para que el personal pueda encontrarlo sin tener que abrir cada reserva.
+function nombreEventoConShow(reserva) {
+  const base = nombreEvento(reserva);
+  const show = reserva.show_seleccionado;
+  // Hallazgo real (auditoría 2026-08-30): una reserva antigua/malformada con
+  // `show_seleccionado` pero sin `nombre` propio renderizaba literalmente
+  // "undefined" en la lista y el filtro — el schema actual exige `nombre`
+  // para escrituras nuevas, pero esto sigue siendo dato legado real.
+  if (!show || !show.nombre) return base;
+  return `${base} — ${show.nombre} (${formatearFechaSolo(show.fecha_iso)})`;
 }
 
 // Panel de detalle/edición, montado con `key` por reserva seleccionada (mismo
@@ -198,13 +222,15 @@ export default function Reservas() {
 
   const eventosDisponibles = useMemo(() => {
     const mapa = new Map();
-    reservas.forEach((r) => mapa.set(claveEvento(r), nombreEvento(r)));
+    reservas.forEach((r) => mapa.set(claveEvento(r), nombreEventoConShow(r)));
     return Array.from(mapa, ([key, titulo]) => ({ key, titulo })).sort((a, b) => a.titulo.localeCompare(b.titulo));
   }, [reservas]);
 
   const reservasFiltradas = useMemo(() => {
+    const textoBuscado = busqueda.toLowerCase();
     return reservas.filter((r) => {
-      const coincideTexto = r.nombre.toLowerCase().includes(busqueda.toLowerCase());
+      const coincideTexto = r.nombre.toLowerCase().includes(textoBuscado)
+        || nombreEventoConShow(r).toLowerCase().includes(textoBuscado);
       const coincideEvento = filtroEvento === 'todos' || claveEvento(r) === filtroEvento;
       const coincideEstado = filtroEstado === 'todos' || r.estado === filtroEstado;
       const coincideFecha = !filtroFecha || fechaEfectiva(r) === filtroFecha;
@@ -255,7 +281,7 @@ export default function Reservas() {
             <div className="resadmin-filtros">
               <input
                 type="text"
-                placeholder="🔎 Buscar por comprador…"
+                placeholder="🔎 Buscar por comprador, evento o show…"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
               />
@@ -289,7 +315,7 @@ export default function Reservas() {
                 >
                   <span className="resadmin-item-titulo">{r.nombre}</span>
                   <span className="resadmin-item-meta">
-                    {nombreEvento(r)} · <span className={`resadmin-estado resadmin-estado-${r.estado}`}>{r.estado}</span>
+                    {nombreEventoConShow(r)} · <span className={`resadmin-estado resadmin-estado-${r.estado}`}>{r.estado}</span>
                   </span>
                   <span className="resadmin-item-meta">
                     {fechaEfectiva(r) ? formatearFechaSolo(fechaEfectiva(r)) : 'Sin fecha fija'} · {r.cantidad} entrada{r.cantidad === 1 ? '' : 's'}

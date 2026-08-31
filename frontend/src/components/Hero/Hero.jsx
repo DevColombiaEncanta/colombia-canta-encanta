@@ -78,6 +78,7 @@ export default function Hero() {
               className="hero-bg-img"
               loading={i === 0 ? "eager" : "lazy"}
               decoding="async"
+              style={{ objectPosition: `${slide.posicionX ?? 50}% ${slide.posicionY ?? 50}%` }}
             />
           </div>
         ))}

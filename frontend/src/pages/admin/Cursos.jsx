@@ -23,13 +23,13 @@ function formularioDesdeCurso(curso, ordenSugerido) {
   if (!curso) {
     return {
       nombre: '', tagline: '', color: '#1A56DB', emoji: '', descripcion: '',
-      duracion: '', precio: '', precioNumerico: '', orden: ordenSugerido,
+      duracion: '', precio: '', precioNumerico: '', matriculaNumerico: '', orden: ordenSugerido,
       esPersonalizado: false, profesorNombre: '', nivelesIds: [], activo: true,
     };
   }
   return {
     nombre: curso.nombre, tagline: curso.tagline || '', color: curso.color || '#1A56DB', emoji: curso.emoji || '', descripcion: curso.descripcion,
-    duracion: curso.duracion || '', precio: curso.precio || '', precioNumerico: curso.precio_numerico ?? '', orden: curso.orden ?? 0,
+    duracion: curso.duracion || '', precio: curso.precio || '', precioNumerico: curso.precio_numerico ?? '', matriculaNumerico: curso.matricula_numerico ?? '', orden: curso.orden ?? 0,
     esPersonalizado: curso.es_personalizado || false, profesorNombre: curso.profesor_nombre || '',
     nivelesIds: (curso.niveles || []).map((n) => n.id), activo: curso.activo,
   };
@@ -105,7 +105,9 @@ function CursoForm({ curso, niveles, ordenSugerido, onGuardado, onBorrado, onAvi
         // Opción A (reemplazo completo, mismo criterio que variantes de Producto):
         // se manda siempre, incluso vacía, para poder desasignar todo.
         instrumentos: instrumentos.items.filter((i) => i.trim()),
-        horarios: horarios.items.filter((h) => h.dia.trim() && h.hora.trim()),
+        horarios: horarios.items
+          .filter((h) => h.dia.trim() && h.hora.trim())
+          .map((h) => ({ dia: h.dia, hora: h.hora, edad: h.edad?.trim() || null })),
         niveles: form.nivelesIds,
       };
       if (form.color) body.color = form.color;
@@ -120,6 +122,7 @@ function CursoForm({ curso, niveles, ordenSugerido, onGuardado, onBorrado, onAvi
         body.duracion = form.duracion || null;
         body.precio = form.precio || null;
         body.precio_numerico = form.precioNumerico ? Number(form.precioNumerico) : null;
+        body.matricula_numerico = form.matriculaNumerico ? Number(form.matriculaNumerico) : null;
         body.profesor_nombre = form.esPersonalizado ? form.profesorNombre : null;
         body.activo = form.activo;
       } else {
@@ -129,6 +132,7 @@ function CursoForm({ curso, niveles, ordenSugerido, onGuardado, onBorrado, onAvi
         if (form.duracion) body.duracion = form.duracion;
         if (form.precio) body.precio = form.precio;
         if (form.precioNumerico) body.precio_numerico = Number(form.precioNumerico);
+        if (form.matriculaNumerico) body.matricula_numerico = Number(form.matriculaNumerico);
         if (form.esPersonalizado) body.profesor_nombre = form.profesorNombre;
       }
 
@@ -257,13 +261,21 @@ function CursoForm({ curso, niveles, ordenSugerido, onGuardado, onBorrado, onAvi
             <HelpTooltip
               texto={form.esPersonalizado
                 ? 'El horario fijo del profesor, o déjalo vacío si se coordina directo con el estudiante.'
-                : 'Los bloques de horario en los que se dicta este curso — el estudiante elige uno de estos al inscribirse, así que hace falta al menos 1.'}
-              ejemplo={form.esPersonalizado ? 'Martes · 4:00 PM' : 'Sábados · 10:00 AM'}
+                : 'Los bloques de horario en los que se dicta este curso — el estudiante elige uno de estos al inscribirse, así que hace falta al menos 1. La edad es opcional, para cuando el mismo curso ofrece horarios distintos según la edad.'}
+              ejemplo={form.esPersonalizado ? 'Martes · 4:00 PM' : '6 a 8 años · Sábados · 9:00 AM'}
             />
           </p>
           {horarios.items.map((h, idx) => (
             <div key={idx}>
               <div className="cursos-horario-fila">
+                <input
+                  type="text"
+                  placeholder="Edad (opcional)"
+                  aria-label="Edad"
+                  maxLength={40}
+                  value={h.edad || ''}
+                  onChange={(e) => horarios.actualizar(idx, 'edad', e.target.value)}
+                />
                 <input
                   type="text"
                   placeholder="Día"
@@ -286,7 +298,7 @@ function CursoForm({ curso, niveles, ordenSugerido, onGuardado, onBorrado, onAvi
               {errores.horarios?.[idx] && <span className="admin-field-error" role="alert">{errores.horarios[idx]}</span>}
             </div>
           ))}
-          <Button type="button" variant="secundario" onClick={() => horarios.agregar({ dia: '', hora: '' })}>+ Agregar</Button>
+          <Button type="button" variant="secundario" onClick={() => horarios.agregar({ dia: '', hora: '', edad: '' })}>+ Agregar</Button>
         </div>
 
         {/* ── Niveles ── */}
@@ -314,14 +326,24 @@ function CursoForm({ curso, niveles, ordenSugerido, onGuardado, onBorrado, onAvi
             <input type="text" value={form.precio} onChange={(e) => actualizarCampo('precio', e.target.value)} />
           </FormField>
         </div>
-        <FormField label="Precio numérico" hint="opcional — el valor real por mes, usado para autocompletar las cuotas de cada inscripción">
-          <input
-            type="text"
-            inputMode="numeric"
-            value={formatMiles(form.precioNumerico)}
-            onChange={(e) => actualizarCampo('precioNumerico', soloDigitos(e.target.value))}
-          />
-        </FormField>
+        <div className="admin-field-fila">
+          <FormField label="Precio numérico" hint="opcional — el valor real por mes, usado para autocompletar las cuotas de cada inscripción">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={formatMiles(form.precioNumerico)}
+              onChange={(e) => actualizarCampo('precioNumerico', soloDigitos(e.target.value))}
+            />
+          </FormField>
+          <FormField label="Matrícula" hint="opcional — cobro anual aparte del precio del semestre">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={formatMiles(form.matriculaNumerico)}
+              onChange={(e) => actualizarCampo('matriculaNumerico', soloDigitos(e.target.value))}
+            />
+          </FormField>
+        </div>
 
         {errorGeneral && <p className="admin-page-error">{errorGeneral}</p>}
 

@@ -16,6 +16,7 @@ import AdminProductos from './pages/admin/Productos';
 import AdminCursos from './pages/admin/Cursos';
 import AdminInscripciones from './pages/admin/Inscripciones';
 import AdminReservas from './pages/admin/Reservas';
+import AdminPedidos from './pages/admin/Pedidos';
 import AdminHistorial from './pages/admin/Historial';
 import Navbar from './components/Navbar/Navbar';
 import ScrollToTop from './components/ScrollToTop';
@@ -32,6 +33,9 @@ import NoticiasPage from './pages/Noticias';
 import NoticiaDetallePage from './pages/NoticiaDetallePage';
 import PagoConfirmacion from './pages/PagoConfirmacion';
 import PagoCancelado from './pages/PagoCancelado';
+import TerminosCondiciones from './pages/TerminosCondiciones';
+import PoliticasEventosGratuitos from './pages/PoliticasEventosGratuitos';
+import PoliticasEventosPago from './pages/PoliticasEventosPago';
 import NotFound from './pages/NotFound';
 import './styles/main.css';
 
@@ -68,6 +72,9 @@ export default function App() {
                 <Route path="/noticias/:slug" element={<NoticiaDetallePage />} />
                 <Route path="/confirmacion" element={<PagoConfirmacion />} />
                 <Route path="/pago-cancelado" element={<PagoCancelado />} />
+                <Route path="/terminos-y-condiciones" element={<TerminosCondiciones />} />
+                <Route path="/politicas-eventos-gratuitos" element={<PoliticasEventosGratuitos />} />
+                <Route path="/politicas-eventos-pago" element={<PoliticasEventosPago />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/bienvenida" element={<AdminBienvenida />} />
                 <Route path="/admin" element={<Navigate to="/admin/hero" replace />} />
@@ -79,6 +86,7 @@ export default function App() {
                 <Route path="/admin/cursos" element={<RequireAuth><AdminCursos /></RequireAuth>} />
                 <Route path="/admin/inscripciones" element={<RequireAuth><AdminInscripciones /></RequireAuth>} />
                 <Route path="/admin/reservas" element={<RequireAuth><AdminReservas /></RequireAuth>} />
+                <Route path="/admin/pedidos" element={<RequireAuth><AdminPedidos /></RequireAuth>} />
                 <Route path="/admin/historial" element={<RequireAuth><AdminHistorial /></RequireAuth>} />
                 <Route path="/admin/administradores" element={<RequireAuth><AdminAdministradores /></RequireAuth>} />
                 <Route path="/404" element={<NotFound />} />

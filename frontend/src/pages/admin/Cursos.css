@@ -200,7 +200,7 @@
 /* ── Horarios ── */
 .cursos-horario-fila {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr auto;
   gap: 10px;
   align-items: center;
   margin-bottom: 10px;

@@ -6,8 +6,10 @@ import FormField from '../../components/admin/ui/FormField';
 import Checkbox from '../../components/admin/ui/Checkbox';
 import Button from '../../components/admin/ui/Button';
 import ImageUploadField from '../../components/admin/ui/ImageUploadField';
+import ImagePositionPicker from '../../components/admin/ui/ImagePositionPicker';
 import ConfirmDialog from '../../components/admin/ui/ConfirmDialog';
 import HelpTooltip from '../../components/admin/ui/HelpTooltip';
+import { useObjectUrl } from '../../hooks/useObjectUrl';
 import './Hero.css';
 
 const CTA_VACIO = () => ({ label: '', to: '', primario: false });
@@ -33,7 +35,7 @@ function pareceUrlAbsoluta(to) {
 
 function formularioDesdeSlide(slide, ordenSugerido) {
   if (!slide) {
-    return { label: '', titulo: '', descripcion: '', orden: ordenSugerido, activo: true, ctas: [] };
+    return { label: '', titulo: '', descripcion: '', orden: ordenSugerido, activo: true, ctas: [], posicionX: 50, posicionY: 50 };
   }
   return {
     label: slide.label,
@@ -42,6 +44,8 @@ function formularioDesdeSlide(slide, ordenSugerido) {
     orden: slide.orden,
     activo: slide.activo,
     ctas: Array.isArray(slide.ctas) ? slide.ctas : [],
+    posicionX: slide.posicion_x ?? 50,
+    posicionY: slide.posicion_y ?? 50,
   };
 }
 
@@ -64,6 +68,12 @@ function HeroForm({ slide, ordenSugerido, onGuardado, onBorrado, onAviso, aviso,
   const [guardando, setGuardando] = useState(false);
   const [confirmandoBorrar, setConfirmandoBorrar] = useState(false);
   const [borrando, setBorrando] = useState(false);
+
+  // Preview para el picker de posición: la foto recién elegida (todavía sin
+  // subir) tiene prioridad sobre la ya guardada — mismo criterio que el resto
+  // del panel para mostrar "lo que se va a ver" antes de guardar.
+  const previewImagenNueva = useObjectUrl(archivoImagen);
+  const previewImagen = previewImagenNueva || slide?.imagen || null;
 
   function actualizarCampo(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }));
@@ -117,6 +127,8 @@ function HeroForm({ slide, ordenSugerido, onGuardado, onBorrado, onAviso, aviso,
       fd.append('descripcion', form.descripcion);
       fd.append('orden', String(form.orden));
       fd.append('ctas', JSON.stringify(form.ctas.filter((c) => c.label || c.to)));
+      fd.append('posicion_x', String(form.posicionX));
+      fd.append('posicion_y', String(form.posicionY));
       if (slide) fd.append('activo', String(form.activo));
       if (archivoImagen) fd.append('imagen', archivoImagen);
 
@@ -257,6 +269,20 @@ function HeroForm({ slide, ordenSugerido, onGuardado, onBorrado, onAviso, aviso,
           error={errores.imagen}
           requerido={!slide}
         />
+
+        {previewImagen && (
+          <FormField
+            label="Posición de la foto"
+            hint="Arrastra (o usa las flechas del teclado) para elegir qué parte queda centrada — la foto completa se sube igual, sin recortar."
+          >
+            <ImagePositionPicker
+              imagenUrl={previewImagen}
+              x={form.posicionX}
+              y={form.posicionY}
+              onChange={(x, y) => setForm((f) => ({ ...f, posicionX: x, posicionY: y }))}
+            />
+          </FormField>
+        )}
 
         {errorGeneral && <p className="admin-page-error">{errorGeneral}</p>}
 

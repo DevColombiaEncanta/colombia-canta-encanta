@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../config/supabaseClient';
 import '../../styles/main.css';
@@ -6,6 +6,10 @@ import './Login.css';
 import './Bienvenida.css';
 
 const MIN_PASSWORD = 8;
+// 2026-08-30, a pedido del usuario: piso mínimo de seguridad real (letras +
+// números) — no restringe qué otros caracteres se pueden usar (acentos,
+// símbolos, emoji siguen aceptados), solo exige que no sea solo un tipo.
+const REGEX_PASSWORD_SEGURA = /^(?=.*[A-Za-z])(?=.*[0-9]).+$/;
 
 // ⭐ Hallazgo real (probado con un link de invitación real de Supabase, no
 // asumido): el link del correo NO trae `?token_hash=...` como query param
@@ -46,14 +50,39 @@ export default function Bienvenida() {
 
   const [password, setPassword] = useState('');
   const [confirmar, setConfirmar] = useState('');
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+
+  // 2026-08-29, optimización a pedido del usuario: indicador de progreso.
+  // Los 2 caminos posibles tienen 2 pasos cada uno, pero en distinto orden —
+  // se sabe cuál de los dos es apenas se sale de "verificando" (si el primer
+  // paso real es 'mfa-actual' en vez de 'password', es el camino de
+  // recuperación con MFA ya activo).
+  const [viaConfirmacionPrevia, setViaConfirmacionPrevia] = useState(false);
 
   const [factorId, setFactorId] = useState(null);
   const [qrCode, setQrCode] = useState('');
   const [secret, setSecret] = useState('');
   const [codigo, setCodigo] = useState('');
 
+  // ⭐ Bug real encontrado (2026-08-30, probado con Playwright): React
+  // StrictMode (activo en `main.jsx`) monta este efecto 2 veces en
+  // desarrollo. La primera pasada lee el fragmento de la URL (token real) y
+  // lo borra con `history.replaceState` antes de que termine su propio
+  // `await` — para cuando la SEGUNDA pasada corre, el fragmento ya no está,
+  // así que esa segunda pasada concluía "link inválido" y dejaba ese error
+  // pegado en pantalla aunque la primera pasada, más tarde, terminara bien y
+  // avanzara a "password". No es el `cancelObj` de siempre (acá no hay 2
+  // fetches del mismo dato — solo UNA de las 2 pasadas tiene el token real,
+  // la otra ve la URL ya limpia) — se soluciona con un `ref` que sobrevive
+  // entre ambas pasadas de StrictMode (a diferencia de una variable local del
+  // efecto) para que la segunda pasada no haga nada en absoluto.
+  const fragmentoConsumidoRef = useRef(false);
+
   useEffect(() => {
     async function verificar() {
+      if (fragmentoConsumidoRef.current) return;
+      fragmentoConsumidoRef.current = true;
+
       const params = leerParamsDeAuth();
       const type = params.get('type');
       const errorDescripcion = params.get('error_description');
@@ -68,7 +97,7 @@ export default function Bienvenida() {
       window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#/admin/bienvenida`);
 
       if (errorDescripcion) {
-        setError('Este link ya no es válido o venció. Pedí uno nuevo.');
+        setError('Este link ya no es válido o venció. Pide uno nuevo.');
         setPaso('error');
         return;
       }
@@ -89,7 +118,7 @@ export default function Bienvenida() {
       }
 
       if (verifyError) {
-        setError('Este link ya no es válido o venció. Pedí uno nuevo.');
+        setError('Este link ya no es válido o venció. Pide uno nuevo.');
         setPaso('error');
         return;
       }
@@ -113,6 +142,7 @@ export default function Bienvenida() {
         if (factorVerificado) {
           setFactorId(factorVerificado.id);
           setPaso('mfa-actual');
+          setViaConfirmacionPrevia(true);
           return;
         }
       }
@@ -144,6 +174,10 @@ export default function Bienvenida() {
 
     if (password.length < MIN_PASSWORD) {
       setError(`La contraseña debe tener al menos ${MIN_PASSWORD} caracteres`);
+      return;
+    }
+    if (!REGEX_PASSWORD_SEGURA.test(password)) {
+      setError('La contraseña debe combinar letras y números');
       return;
     }
     if (password !== confirmar) {
@@ -209,17 +243,23 @@ export default function Bienvenida() {
   const TITULOS = {
     verificando: 'Verificando tu link…',
     error: 'Link no válido',
-    'mfa-actual': 'Confirmá tu código actual',
-    password: tipo === 'recovery' ? 'Elegí tu nueva contraseña' : 'Bienvenido/a — elegí tu contraseña',
+    'mfa-actual': 'Confirma tu código actual',
+    password: tipo === 'recovery' ? 'Elige tu nueva contraseña' : 'Bienvenido/a — elige tu contraseña',
     mfa: 'Configura tu código de seguridad',
     listo: '¡Listo!',
   };
+
+  const SECUENCIA_PASOS = viaConfirmacionPrevia ? ['mfa-actual', 'password'] : ['password', 'mfa'];
+  const indiceActual = SECUENCIA_PASOS.indexOf(paso);
 
   return (
     <div className="admin-login-page">
       <div className="admin-login-card">
         <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Colombia Canta y Encanta" className="admin-login-logo" />
         <h1 aria-live="polite">{TITULOS[paso]}</h1>
+        {indiceActual !== -1 && (
+          <p className="bienvenida-progreso" aria-live="polite">Paso {indiceActual + 1} de {SECUENCIA_PASOS.length}</p>
+        )}
 
         {paso === 'error' && (
           <>
@@ -230,7 +270,7 @@ export default function Bienvenida() {
 
         {paso === 'mfa-actual' && (
           <>
-            <p className="admin-login-hint">Por tu seguridad, antes de cambiar la contraseña necesitamos confirmar que todavía tenés acceso a tu app de autenticación.</p>
+            <p className="admin-login-hint">Por tu seguridad, antes de cambiar la contraseña necesitamos confirmar que todavía tienes acceso a tu app de autenticación.</p>
             <form onSubmit={(e) => confirmarCodigo(e, 'password')} className="admin-login-form" noValidate>
               <label htmlFor="bienvenida-codigo-actual">
                 Código de 6 dígitos
@@ -254,7 +294,7 @@ export default function Bienvenida() {
                verdad perdió el celular con su app de autenticación quedaba
                sin ninguna salida en esta pantalla — un input de código y
                nada más. */}
-            <p className="admin-login-hint">¿Perdiste el acceso a tu app de autenticación? Esta pantalla no puede ayudarte — pedile a la persona que administra la cuenta de Supabase del proyecto que resetee tu MFA desde el dashboard.</p>
+            <p className="admin-login-hint">¿Perdiste el acceso a tu app de autenticación? Esta pantalla no puede ayudarte — pídele a la persona que administra la cuenta de Supabase del proyecto que resetee tu MFA desde el dashboard.</p>
           </>
         )}
 
@@ -263,23 +303,36 @@ export default function Bienvenida() {
             <form onSubmit={guardarPassword} className="admin-login-form" noValidate>
               <label htmlFor="bienvenida-password">
                 Contraseña nueva
-                <input
-                  id="bienvenida-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoFocus
-                />
+                <div className="bienvenida-password-wrap">
+                  <input
+                    id="bienvenida-password"
+                    type={mostrarPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="bienvenida-toggle-password"
+                    onClick={() => setMostrarPassword((v) => !v)}
+                    aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  >
+                    {mostrarPassword ? '🙈' : '👁️'}
+                  </button>
+                </div>
               </label>
               <label htmlFor="bienvenida-confirmar">
                 Confirmar contraseña
-                <input
-                  id="bienvenida-confirmar"
-                  type="password"
-                  value={confirmar}
-                  onChange={(e) => setConfirmar(e.target.value)}
-                />
+                <div className="bienvenida-password-wrap">
+                  <input
+                    id="bienvenida-confirmar"
+                    type={mostrarPassword ? 'text' : 'password'}
+                    value={confirmar}
+                    onChange={(e) => setConfirmar(e.target.value)}
+                  />
+                </div>
               </label>
+              <p className="admin-login-hint">Mínimo {MIN_PASSWORD} caracteres, combinando letras y números.</p>
               {error && <p className="admin-login-error" role="alert">{error}</p>}
               <button type="submit" disabled={enviando}>{enviando ? 'Guardando…' : 'Continuar'}</button>
             </form>
@@ -288,15 +341,30 @@ export default function Bienvenida() {
 
         {paso === 'mfa' && (
           <>
-            <p className="admin-login-hint">Escanea este código con una app de autenticación (Google Authenticator, Authy, o similar) en tu celular.</p>
+            <p className="admin-login-hint">Escanea este código con una app de autenticación en tu celular.</p>
+            <p className="admin-login-hint bienvenida-apps-hint">
+              ¿No tienes una instalada? Descarga{' '}
+              <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank" rel="noopener noreferrer">Google Authenticator (Android)</a>
+              {', '}
+              <a href="https://apps.apple.com/app/google-authenticator/id388497605" target="_blank" rel="noopener noreferrer">Google Authenticator (iPhone)</a>
+              {' o '}
+              <a href="https://authy.com/download/" target="_blank" rel="noopener noreferrer">Authy</a>.
+            </p>
+            {/* ⭐ Bug real encontrado (2026-08-29): `data.totp.qr_code` de Supabase
+               ya viene como data URI completa ("data:image/svg+xml;utf-8,<svg...")
+               — envolverla otra vez acá producía un data URI anidado que el
+               navegador no podía parsear como imagen (naturalWidth 0, roto en
+               silencio). Nunca se había notado porque el respaldo de escribir el
+               secreto a mano siempre funcionó, y las pruebas anteriores solo
+               confirmaron el código, no la imagen del QR en sí. */}
             {qrCode && (
               <img
                 className="bienvenida-qr"
-                src={`data:image/svg+xml;utf-8,${encodeURIComponent(qrCode)}`}
+                src={qrCode}
                 alt="Código QR para configurar tu segundo factor de autenticación"
               />
             )}
-            <p className="admin-login-hint">¿No podés escanearlo? Escribí este código a mano en la app:</p>
+            <p className="admin-login-hint">¿No puedes escanearlo? Escribe este código a mano en la app:</p>
             <p className="bienvenida-secreto">{secret}</p>
             <form onSubmit={(e) => confirmarCodigo(e, 'listo')} className="admin-login-form" noValidate>
               <label htmlFor="bienvenida-codigo">
@@ -325,7 +393,7 @@ export default function Bienvenida() {
             <p className="admin-login-hint">
               {tipo === 'recovery'
                 ? 'Tu contraseña quedó actualizada.'
-                : 'Tu cuenta quedó configurada.'} Ya podés iniciar sesión normalmente.
+                : 'Tu cuenta quedó configurada.'} Ya puedes iniciar sesión normalmente.
             </p>
             <Link to="/admin/login" className="bienvenida-link">Ir al inicio de sesión</Link>
           </>

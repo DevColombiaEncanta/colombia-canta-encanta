@@ -435,6 +435,11 @@
   cursor: grabbing;
 }
 
+.admin-crop-marco:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+}
+
 .admin-crop-marco img {
   position: absolute;
   top: 0;
@@ -453,6 +458,53 @@
 
 .admin-crop-zoom input[type="range"] {
   flex: 1;
+}
+
+/* --- Posición de imagen (Hero, sin recorte) --- */
+.admin-posicion-picker {
+  margin-bottom: 16px;
+}
+
+.admin-posicion-marco {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--border-media);
+  background: #000;
+  margin: 0 auto 8px;
+  cursor: grab;
+  touch-action: none;
+  max-width: 100%;
+}
+
+.admin-posicion-marco:active {
+  cursor: grabbing;
+}
+
+.admin-posicion-marco:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+}
+
+.admin-posicion-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.admin-posicion-centrar {
+  display: block;
+  margin: 0 auto;
+  background: none;
+  border: none;
+  color: var(--azul);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
 }
 
 /* --- Subida de imagen --- */

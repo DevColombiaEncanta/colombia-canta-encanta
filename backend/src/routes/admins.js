@@ -72,7 +72,7 @@ router.post('/', requireCsrf, requireRole('admin_maestro'), limiterEstricto, asy
     // real, considerar conectar un proveedor SMTP propio (ver Resend en
     // CLAUDE.md, ya evaluado para los correos transaccionales de Fase 6).
     if (inviteError.code === 'over_email_send_rate_limit') {
-      const err = new Error('Se alcanzó el límite de correos que se pueden enviar en este momento. Esperá unos minutos e intentá de nuevo.');
+      const err = new Error('Se alcanzó el límite de correos que se pueden enviar en este momento. Espera unos minutos e intenta de nuevo.');
       err.status = 429;
       return next(err);
     }
@@ -119,6 +119,151 @@ router.post('/', requireCsrf, requireRole('admin_maestro'), limiterEstricto, asy
   });
 
   res.status(201).json({ ok: true, admin: adminRow });
+});
+
+// POST /:id/reenviar — 5.7, optimización real (2026-08-29): no existía forma de
+// reenviar una invitación a alguien que no la completó (ej. nunca le llegó el
+// correo, o se trabó a mitad de camino) — reintentar con el mismo email desde
+// "Invitar un admin nuevo" siempre fallaba con "Ya existe una cuenta con ese
+// correo" (`email_exists`). `inviteUserByEmail` rechaza con ese mismo código
+// SIEMPRE que el email ya tenga un usuario en Supabase, sin importar si llegó
+// a confirmar algo — no hay ningún método nativo para "reenviar" sobre un
+// usuario existente.
+//
+// ⭐ Hallazgo real (probado con Playwright, no asumido): un primer diseño que
+// borraba el usuario viejo ANTES de re-invitar dejaba a la persona sin ningún
+// admin — ni el viejo ni uno nuevo — si `inviteUserByEmail` fallaba después
+// (límite de correos, dominio inválido). Se corrigió con un paso intermedio
+// reversible: primero se LIBERA el email real cambiándolo a uno temporal
+// (`updateUserById`, sin borrar nada todavía), se intenta invitar sobre el
+// email real ya libre, y solo si eso funciona se borra el usuario viejo (ya
+// con el email temporal) y se crea la fila nueva. Si la invitación falla, se
+// revierte el email temporal al real y el admin pendiente queda exactamente
+// como estaba antes de intentar el reenvío — nunca se pierde.
+router.post('/:id/reenviar', requireCsrf, requireRole('admin_maestro'), limiterEstricto, async (req, res, next) => {
+  const { id } = req.params;
+
+  const { data: targetAdmin, error: fetchError } = await supabase
+    .from('admins')
+    .select('id, email, rol, activo, user_id')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (fetchError || !targetAdmin) {
+    const err = new Error('Admin no encontrado');
+    err.status = 404;
+    return next(err);
+  }
+
+  if (targetAdmin.rol === 'admin_maestro') {
+    const err = new Error('No se puede reenviar una invitación al admin maestro');
+    err.status = 403;
+    return next(err);
+  }
+
+  const { data: userData, error: userError } = await supabase.auth.admin.getUserById(targetAdmin.user_id);
+  if (userError) {
+    return next(errorGenerico(userError, 'POST /api/admin/admins/:id/reenviar (getUserById)'));
+  }
+
+  // Si ya inició sesión alguna vez, ya tiene contraseña y MFA propios reales —
+  // reenviar acá lo dejaría sin acceso a su cuenta actual sin necesidad. El
+  // camino correcto para esa persona es "¿Olvidaste tu contraseña?" del login.
+  if (userData.user.last_sign_in_at) {
+    const err = new Error('Esta persona ya inició sesión antes — no se puede reenviar la invitación. Si perdió el acceso, tiene que usar "¿Olvidaste tu contraseña?" en el login.');
+    err.status = 409;
+    return next(err);
+  }
+
+  const emailTemporal = `expirado-${targetAdmin.user_id}@invalido.colombiacanta.local`;
+  const { error: renameError } = await supabase.auth.admin.updateUserById(targetAdmin.user_id, { email: emailTemporal });
+  if (renameError) {
+    return next(errorGenerico(renameError, 'POST /api/admin/admins/:id/reenviar (liberar email)'));
+  }
+
+  const { data: invited, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(targetAdmin.email, {
+    redirectTo: urlBienvenida(),
+  });
+
+  if (inviteError) {
+    // Revertir: el usuario viejo recupera su email real, sigue existiendo tal
+    // cual estaba — no se perdió nada por este intento fallido.
+    const { error: revertError } = await supabase.auth.admin.updateUserById(targetAdmin.user_id, { email: targetAdmin.email });
+    if (revertError) {
+      console.error(
+        'POST /api/admin/admins/:id/reenviar: la re-invitación falló Y no se pudo revertir el email temporal -',
+        revertError.message,
+        '- user_id a revisar a mano:',
+        targetAdmin.user_id
+      );
+    }
+    if (inviteError.code === 'email_address_invalid') {
+      const err = new Error('No se pudo reenviar: ese correo ya no es válido o su dominio no existe.');
+      err.status = 400;
+      return next(err);
+    }
+    if (inviteError.code === 'over_email_send_rate_limit') {
+      const err = new Error('Se alcanzó el límite de correos que se pueden enviar en este momento. La invitación pendiente de esta persona no se tocó — espera unos minutos e intenta reenviar de nuevo.');
+      err.status = 429;
+      return next(err);
+    }
+    // ⭐ Hallazgo real (auditoría 2026-08-30): 2 reenvíos casi simultáneos
+    // sobre el mismo admin (doble clic en 2 pestañas, o 2 sesiones de
+    // maestro) pasan igual el chequeo de `last_sign_in_at` y ambos liberan el
+    // mismo email temporal — recién acá, en `inviteUserByEmail`, Supabase
+    // hace de árbitro real (unicidad de email) y el que pierde la carrera
+    // recibe `email_exists`, no por un typo. Sin este caso, caía en el
+    // mensaje genérico de error inesperado para algo que en realidad es
+    // benigno (el otro intento ya lo resolvió). El email temporal ya se
+    // revirtió arriba, así que el admin pendiente sigue intacto.
+    if (inviteError.code === 'email_exists') {
+      const err = new Error('Ya se generó una invitación nueva para este correo (probablemente desde otra pestaña o sesión) — revisa la lista, puede que ya se haya actualizado.');
+      err.status = 409;
+      return next(err);
+    }
+    return next(errorGenerico(inviteError, 'POST /api/admin/admins/:id/reenviar (inviteUserByEmail)'));
+  }
+
+  // Recién acá es seguro borrar el usuario viejo — ya hay uno nuevo, real e
+  // invitado, con el email de verdad.
+  const { error: deleteError } = await supabase.auth.admin.deleteUser(targetAdmin.user_id);
+  if (deleteError) {
+    console.error(
+      'POST /api/admin/admins/:id/reenviar: la re-invitación funcionó pero no se pudo borrar el usuario viejo (con email temporal) -',
+      deleteError.message,
+      '- user_id a revisar a mano:',
+      targetAdmin.user_id
+    );
+  }
+
+  const { data: adminRow, error: insertError } = await supabase
+    .from('admins')
+    .insert({ user_id: invited.user.id, email: targetAdmin.email, rol: targetAdmin.rol, activo: targetAdmin.activo })
+    .select()
+    .single();
+
+  if (insertError) {
+    const { error: cleanupError } = await supabase.auth.admin.deleteUser(invited.user.id);
+    if (cleanupError) {
+      console.error(
+        'POST /api/admin/admins/:id/reenviar: fallo el insert en admins Y la limpieza del usuario huérfano -',
+        cleanupError.message,
+        '- user_id a revisar a mano:',
+        invited.user.id
+      );
+    }
+    return next(errorGenerico(insertError, 'POST /api/admin/admins/:id/reenviar (insert admins)'));
+  }
+
+  await logAudit({
+    actor: req.admin,
+    accion: 'editar',
+    entidad: 'admins',
+    entidadId: adminRow.id,
+    detalle: { email: targetAdmin.email, reenviado: true, idAnterior: id },
+  });
+
+  res.json({ ok: true, admin: adminRow });
 });
 
 // PATCH /:id — Desactivar/reactivar un admin. Solo acepta { activo }, nada más. Nunca al admin_maestro.

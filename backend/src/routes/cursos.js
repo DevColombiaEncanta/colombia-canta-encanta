@@ -12,6 +12,10 @@ const router = Router();
 const horarioSchema = z.object({
   dia: z.string().trim().min(1, 'horarios[].dia es obligatorio'),
   hora: z.string().trim().min(1, 'horarios[].hora es obligatoria'),
+  // Opcional (2026-08-28, contenido real compartido por el usuario): rango de
+  // edad de esa franja puntual, ej. "6 a 8 años" — un mismo curso grupal puede
+  // ofrecer horarios distintos según la edad del estudiante.
+  edad: z.string().trim().max(40, 'horarios[].edad no puede superar 40 caracteres').optional().nullable(),
 });
 
 const nivelesArraySchema = z.array(z.string().uuid('cada nivel debe ser un uuid válido'))
@@ -49,6 +53,10 @@ const baseCursoSchema = z.object({
   duracion: z.string().trim().optional().nullable(),
   precio: z.string().trim().optional().nullable(),
   precio_numerico: z.union([z.null(), z.coerce.number().positive('precio_numerico debe ser mayor a 0')]).optional(),
+  // Cobro aparte del precio/cuotas del semestre (2026-08-28, contenido real
+  // compartido por el usuario) — mismo union que precio_numerico y mismo
+  // motivo: `z.coerce.number()` convertiría `null` en 0 antes de `.positive()`.
+  matricula_numerico: z.union([z.null(), z.coerce.number().positive('matricula_numerico debe ser mayor a 0')]).optional(),
   orden: z.coerce.number().int('orden debe ser un entero'),
   niveles: nivelesArraySchema,
   // 5.5 · Cursos personalizados con profesor (ej. clases 1 a 1 de guitarra) —

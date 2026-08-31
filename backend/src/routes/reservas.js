@@ -6,6 +6,7 @@ import { limiterEstricto } from '../middleware/rateLimiters.js';
 import { logAudit } from '../lib/auditLog.js';
 import { stripUndefined } from '../lib/zodMultipart.js';
 import { errorGenerico } from '../lib/errores.js';
+import { hoyColombia } from '../lib/fechas.js';
 
 const ESTADOS = ['pendiente', 'pagada', 'cancelada', 'libre'];
 
@@ -46,6 +47,7 @@ const datosComprador = {
   celular: z.string().trim().min(7, 'Ingresa un número de celular válido'),
   email: z.string().trim().email('Ingresa un correo electrónico válido'),
   cantidad: z.coerce.number().int('cantidad debe ser un entero').positive('cantidad debe ser mayor a 0'),
+  acepta_terminos: z.literal(true, { message: 'Debes aceptar los términos y condiciones' }),
 };
 
 const showSeleccionadoSchema = z.object({
@@ -87,7 +89,7 @@ reservasPublicRouter.post('/', limiterEstricto, async (req, res, next) => {
   if ('evento_id' in datos) {
     const { data: evento, error: eventoError } = await supabase
       .from('eventos')
-      .select('id, max_entradas')
+      .select('id, max_entradas, fecha_iso')
       .eq('id', datos.evento_id)
       .eq('activo', true)
       .eq('accion_tipo', 'libre')
@@ -95,6 +97,17 @@ reservasPublicRouter.post('/', limiterEstricto, async (req, res, next) => {
 
     if (eventoError || !evento) {
       const err = new Error('El evento indicado no existe, no está activo, o no acepta reservas gratuitas');
+      err.status = 400;
+      return next(err);
+    }
+
+    // ⭐ Hallazgo real del usuario (2026-08-28): nada impedía reservar para un
+    // evento con fecha ya pasada — la UI no lo permitía, pero esta ruta pública
+    // nunca lo validaba de verdad. Comparación de strings (no `new Date()`)
+    // porque `fecha_iso` ya es `YYYY-MM-DD` — evita el mismo bug de timezone
+    // que motivó `fechaLocalDesdeISO` en el frontend.
+    if (evento.fecha_iso < hoyColombia()) {
+      const err = new Error('Este evento ya pasó y no admite más reservas');
       err.status = 400;
       return next(err);
     }
@@ -145,6 +158,15 @@ reservasPublicRouter.post('/', limiterEstricto, async (req, res, next) => {
     );
     if (!coincide) {
       const err = new Error('El show seleccionado no existe en la programación actual de este evento');
+      err.status = 400;
+      return next(err);
+    }
+
+    // ⭐ Mismo hallazgo real de arriba, aplicado a Salas: el show puede seguir
+    // en `programacion` (no se borran los ya pasados) pero eso no significa
+    // que todavía admita reservas.
+    if (datos.show_seleccionado.fecha_iso < hoyColombia()) {
+      const err = new Error('Esta función ya pasó y no admite más reservas');
       err.status = 400;
       return next(err);
     }

@@ -53,7 +53,8 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  object-position: center;
+  /* object-position se aplica inline por slide (Hero.jsx) — default 50%/50%
+     (centrado) cuando la fila no tiene posición propia guardada. */
   display: block;
 }
 

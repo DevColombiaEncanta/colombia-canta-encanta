@@ -18,6 +18,7 @@ import eventosRouter, { eventosPublicoRouter } from './routes/eventos.js';
 import eventosFijosRouter, { eventosFijosPublicoRouter } from './routes/eventosFijos.js';
 import inscripcionesRouter, { inscripcionesPublicRouter } from './routes/inscripciones.js';
 import reservasRouter, { reservasPublicRouter } from './routes/reservas.js';
+import pedidosRouter, { pedidosPublicRouter } from './routes/pedidos.js';
 import auditLogRouter from './routes/auditLog.js';
 
 dotenv.config();
@@ -61,6 +62,7 @@ app.use('/api/admin/eventos', requireAdmin, eventosRouter);
 app.use('/api/admin/eventos-fijos', requireAdmin, eventosFijosRouter);
 app.use('/api/admin/inscripciones', requireAdmin, inscripcionesRouter);
 app.use('/api/admin/reservas', requireAdmin, reservasRouter);
+app.use('/api/admin/pedidos', requireAdmin, pedidosRouter);
 app.use('/api/admin/audit-log', requireAdmin, auditLogRouter);
 
 // Endpoints públicos (sin sesión) de solo lectura — Fase 4.0, para que el sitio real
@@ -80,6 +82,7 @@ app.use('/api/eventos-fijos', eventosFijosPublicoRouter);
 // además llevan su propio limiterEstricto (ver inscripciones.js/reservas.js).
 app.use('/api/inscripciones', inscripcionesPublicRouter);
 app.use('/api/reservas', reservasPublicRouter);
+app.use('/api/pedidos', pedidosPublicRouter);
 
 // Multer usa mensajes genéricos en inglés (ej. "Unexpected field" cuando se supera
 // el límite de archivos) — se traducen los códigos más comunes a algo legible.

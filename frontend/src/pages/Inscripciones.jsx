@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useCursos } from "../hooks/useCursos";
 import Footer from "../components/Footer/Footer";
 import "../styles/main.css";
 import { BASE_URL, OG_IMAGE } from "../utils/seo";
 import { apiFetch } from "../utils/api";
+import { formatCOP } from "../utils/formato";
 
 const PAGE_TITLE = "Inscripciones | Colombia Canta y Encanta";
 const PAGE_DESC =
@@ -256,7 +258,7 @@ export default function Inscripciones() {
   // horario sea seleccionable en vez de un texto libre o 3 opciones fijas
   // genéricas (2026-08-19, pedido del usuario). Solo si no hay ninguna franja
   // cargada (personalizado sin horario fijo) queda el texto libre de respaldo.
-  const opcionesHorario = (formInscripcion?.horarios || []).map((h) => `${h.dia} · ${h.hora}`);
+  const opcionesHorario = (formInscripcion?.horarios || []).map((h) => (h.edad ? `${h.edad} · ${h.dia} · ${h.hora}` : `${h.dia} · ${h.hora}`));
 
   return (
     <main>
@@ -491,6 +493,7 @@ export default function Inscripciones() {
                       <div className="inscr-detalle-horarios">
                         {vistaDetalle.horarios.map((h, i) => (
                           <div key={i} className="inscr-detalle-horario-fila">
+                            {h.edad && <span className="inscr-detalle-edad">{h.edad}</span>}
                             <span className="inscr-detalle-dia">{h.dia}</span>
                             <span className="inscr-detalle-hora">{h.hora}</span>
                           </div>
@@ -508,6 +511,12 @@ export default function Inscripciones() {
                       <span className="inscr-detalle-meta-label">Inversión</span>
                       <span className="inscr-detalle-meta-valor">{vistaDetalle.precio}</span>
                     </div>
+                    {vistaDetalle.matriculaNumerico && (
+                      <div className="inscr-detalle-meta-item">
+                        <span className="inscr-detalle-meta-label">Matrícula anual</span>
+                        <span className="inscr-detalle-meta-valor">{formatCOP(vistaDetalle.matriculaNumerico)}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="inscr-detalle-acciones">
@@ -776,7 +785,9 @@ export default function Inscripciones() {
                           checked={formData.aceptaTerminos}
                           onChange={handleChange}
                         />
-                        Acepto los términos y la política de datos personales.
+                        Acepto los{' '}
+                        <Link to="/terminos-y-condiciones" target="_blank" rel="noopener noreferrer">términos y condiciones</Link>
+                        {' '}y la política de datos personales.
                       </label>
 
                       {errorEnvio && (

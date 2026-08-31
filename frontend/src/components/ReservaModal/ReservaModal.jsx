@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import { EMAIL_REGEX } from '../../utils/validacion';
 import './ReservaModal.css';
@@ -15,6 +16,7 @@ function validateField(field, value) {
 export default function ReservaModal({ evento, itemSeleccionado, onClose }) {
   const [form, setForm] = useState({ nombre: '', celular: '', email: '', cantidad: 1 });
   const [zonaSeleccionada, setZonaSeleccionada] = useState(() => evento.zonas?.[0] ?? null);
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [errors, setErrors]   = useState({});
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -34,6 +36,12 @@ export default function ReservaModal({ evento, itemSeleccionado, onClose }) {
   const puedeReservarDeVerdad = esLibre || esEventoFijo;
   const esPago = !puedeReservarDeVerdad && evento.precio &&
     !['Entrada libre', 'Próximamente', 'Convocatoria abierta'].includes(evento.precio);
+
+  // Eventos de pago se rigen por su propia política; gratis y Salas/Enamoras
+  // (que no tienen concepto de pago en su esquema) caen bajo la de eventos
+  // gratuitos.
+  const rutaPolitica = esPago ? '/politicas-eventos-pago' : '/politicas-eventos-gratuitos';
+  const nombrePolitica = esPago ? 'Políticas de Eventos de Pago' : 'Políticas de Eventos Gratuitos';
 
   const maxEntradas = evento.maxEntradas ?? 20;
 
@@ -86,7 +94,7 @@ export default function ReservaModal({ evento, itemSeleccionado, onClose }) {
     };
     setTouched(allTouched);
     setErrors(allErrors);
-    if (Object.values(allErrors).some(Boolean)) return;
+    if (Object.values(allErrors).some(Boolean) || !aceptaTerminos) return;
 
     setErrorEnvio(null);
     setLoading(true);
@@ -104,6 +112,7 @@ export default function ReservaModal({ evento, itemSeleccionado, onClose }) {
       celular: form.celular,
       email: form.email,
       cantidad: form.cantidad,
+      acepta_terminos: true,
     };
 
     const body = esEventoFijo
@@ -139,7 +148,7 @@ export default function ReservaModal({ evento, itemSeleccionado, onClose }) {
   };
 
   const canSubmit = !Object.values(errors).some(Boolean)
-    && form.nombre.trim() && form.celular.trim() && form.email.trim();
+    && form.nombre.trim() && form.celular.trim() && form.email.trim() && aceptaTerminos;
 
   return (
     <div className="rm-overlay" ref={overlayRef} onClick={handleOverlay}>
@@ -268,6 +277,18 @@ export default function ReservaModal({ evento, itemSeleccionado, onClose }) {
                     </div>
                   )}
                 </div>
+
+                <label className="rm-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={aceptaTerminos}
+                    onChange={(e) => setAceptaTerminos(e.target.checked)}
+                  />
+                  <span>
+                    He leído y acepto las{' '}
+                    <Link to={rutaPolitica} target="_blank" rel="noopener noreferrer">{nombrePolitica}</Link>.
+                  </span>
+                </label>
 
                 {errorEnvio && (
                   <p className="rm-field-error" role="alert">{errorEnvio}</p>

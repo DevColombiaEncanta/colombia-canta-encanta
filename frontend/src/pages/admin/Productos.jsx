@@ -294,7 +294,7 @@ function ProductoForm({ producto, colecciones, categorias, onGuardado, onBorrado
         <h3 className="prod-seccion-titulo">
           Respaldo visual
           <HelpTooltip
-            texto="Este degradado es el fondo detrás de la foto en la tarjeta de la tienda, en el modal de detalle y en el carrito. Mientras el producto no tenga ninguna foto subida, es lo único que se ve (junto con el emoji) — apenas subís la primera foto, queda tapado."
+            texto="Este degradado es el fondo detrás de la foto en la tarjeta de la tienda, en el modal de detalle y en el carrito. Mientras el producto no tenga ninguna foto subida, es lo único que se ve (junto con el emoji) — apenas subes la primera foto, queda tapado."
             ejemplo="ej. rojo a azul, como usa el resto de productos de referencia"
           />
         </h3>

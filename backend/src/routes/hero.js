@@ -38,6 +38,10 @@ const baseHeroSchema = z.object({
   descripcion: z.string().optional(),
   orden: z.coerce.number().int('orden debe ser un entero'),
   ctas: jsonArrayField(ctaSchema).optional(),
+  // 2026-08-31 · Reposicionar sin recortar (Hero usa object-fit: contain a
+  // propósito) — porcentaje de object-position, no un recorte real.
+  posicion_x: z.coerce.number().min(0).max(100).optional(),
+  posicion_y: z.coerce.number().min(0).max(100).optional(),
 });
 
 const createHeroSchema = baseHeroSchema;
@@ -77,7 +81,7 @@ router.post('/', requireCsrf, uploadMiddleware.single('imagen'), async (req, res
   if (!result.success) {
     return next(zodError(result));
   }
-  const { label, titulo, descripcion, orden, ctas } = result.data;
+  const { label, titulo, descripcion, orden, ctas, posicion_x, posicion_y } = result.data;
 
   await validarImagenReal(req.file.buffer);
   const { url } = await procesarYSubirImagen(req.file.buffer, CARPETA);
@@ -91,6 +95,8 @@ router.post('/', requireCsrf, uploadMiddleware.single('imagen'), async (req, res
       descripcion: descripcion || null,
       imagen: url,
       ctas: ctas ?? null,
+      posicion_x: posicion_x ?? 50,
+      posicion_y: posicion_y ?? 50,
     })
     .select()
     .single();

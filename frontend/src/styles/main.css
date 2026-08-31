@@ -2716,8 +2716,8 @@ h5 {
 
 .inscr-detalle-horario-fila {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 10px;
   padding: 10px 16px;
   font-size: 13px;
   border-bottom: 1px solid var(--border-sutil);
@@ -2727,12 +2727,23 @@ h5 {
   border-bottom: none;
 }
 
+.inscr-detalle-edad {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--coral);
+  background: color-mix(in srgb, var(--coral) 12%, transparent);
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
 .inscr-detalle-dia {
   font-weight: 600;
   color: var(--texto-principal);
 }
 
 .inscr-detalle-hora {
+  margin-left: auto;
   color: var(--texto-secundario);
 }
 
@@ -2956,6 +2967,11 @@ h5 {
 .inscr-checkbox-label input {
   margin-top: 2px;
   flex-shrink: 0;
+}
+
+.inscr-checkbox-label a {
+  color: var(--coral);
+  font-weight: 600;
 }
 
 .inscr-form-error {

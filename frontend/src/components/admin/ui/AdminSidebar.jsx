@@ -14,6 +14,7 @@ const SECCIONES = [
   { to: '/admin/cursos', label: 'Cursos', emoji: '🎓' },
   { to: '/admin/inscripciones', label: 'Inscripciones', emoji: '📝' },
   { to: '/admin/reservas', label: 'Reservas', emoji: '🎟️' },
+  { to: '/admin/pedidos', label: 'Pedidos', emoji: '📦' },
   { to: '/admin/historial', label: 'Historial', emoji: '🕓' },
 ];
 
