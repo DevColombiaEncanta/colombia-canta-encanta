@@ -24,6 +24,17 @@ import auditLogRouter from './routes/auditLog.js';
 dotenv.config();
 
 const app = express();
+// ⭐ Bug real de producción (2026-08-31, encontrado por el usuario intentando
+// iniciar sesión en Render): sin esto, Express no confía en el
+// `X-Forwarded-For` que pone el proxy de Render delante del backend —
+// `express-rate-limit` rechaza la petición entera con
+// `ERR_ERL_UNEXPECTED_X_FORWARDED_FOR` en vez de solo advertir, porque sin
+// saber en cuál proxy confiar, cualquiera podría falsificar ese header para
+// saltarse el límite de intentos. `1` = confiar en el primer salto de proxy
+// (el de Render) — correcto acá porque el backend nunca se expone directo a
+// internet, siempre pasa por esa única capa. En desarrollo local no hay
+// proxy de por medio, así que esto no cambia nada ahí.
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const allowedOrigins = (process.env.FRONTEND_URL || '')
   .split(',')
