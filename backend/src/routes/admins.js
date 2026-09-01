@@ -25,7 +25,7 @@ function urlBienvenida() {
 router.get('/', requireRole('admin_maestro'), async (req, res, next) => {
   const { data, error } = await supabase
     .from('admins')
-    .select('id, email, rol, activo, creado_en')
+    .select('id, email, nombre, rol, activo, creado_en')
     .order('creado_en', { ascending: true });
 
   if (error) {

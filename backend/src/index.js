@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { limiterGeneral } from './middleware/rateLimiters.js';
 import { requireAdmin } from './middleware/requireAdmin.js';
+import { requireRole } from './middleware/requireRole.js';
 import sessionRouter from './routes/session.js';
 import adminsRouter from './routes/admins.js';
 import heroRouter, { heroPublicoRouter } from './routes/hero.js';
@@ -20,6 +21,7 @@ import inscripcionesRouter, { inscripcionesPublicRouter } from './routes/inscrip
 import reservasRouter, { reservasPublicRouter } from './routes/reservas.js';
 import pedidosRouter, { pedidosPublicRouter } from './routes/pedidos.js';
 import auditLogRouter from './routes/auditLog.js';
+import perfilRouter from './routes/perfil.js';
 
 dotenv.config();
 
@@ -74,7 +76,15 @@ app.use('/api/admin/eventos-fijos', requireAdmin, eventosFijosRouter);
 app.use('/api/admin/inscripciones', requireAdmin, inscripcionesRouter);
 app.use('/api/admin/reservas', requireAdmin, reservasRouter);
 app.use('/api/admin/pedidos', requireAdmin, pedidosRouter);
-app.use('/api/admin/audit-log', requireAdmin, auditLogRouter);
+// A pedido del usuario (2026-08-31): el historial completo de acciones (quién
+// hizo qué en todo el panel) queda restringido al maestro, mismo criterio que
+// ya usa Administradores — un admin normal no necesita ver la actividad del
+// resto, solo la propia.
+app.use('/api/admin/audit-log', requireAdmin, requireRole('admin_maestro'), auditLogRouter);
+// Sin `requireAdmin`: este router valida su propio JWT de Supabase por ruta
+// (ver perfil.js) — se llama ANTES de que exista la cookie de sesión propia
+// del panel, durante el onboarding en Bienvenida.jsx.
+app.use('/api/admin/perfil', perfilRouter);
 
 // Endpoints públicos (sin sesión) de solo lectura — Fase 4.0, para que el sitio real
 // (visitantes anónimos) pueda leer el contenido ya publicado. Cada uno filtra solo

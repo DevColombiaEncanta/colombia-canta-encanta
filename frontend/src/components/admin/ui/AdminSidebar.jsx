@@ -15,13 +15,18 @@ const SECCIONES = [
   { to: '/admin/inscripciones', label: 'Inscripciones', emoji: '📝' },
   { to: '/admin/reservas', label: 'Reservas', emoji: '🎟️' },
   { to: '/admin/pedidos', label: 'Pedidos', emoji: '📦' },
-  { to: '/admin/historial', label: 'Historial', emoji: '🕓' },
 ];
 
-// 5.7 · Aparte del array de arriba porque esta entrada no es para todos los
-// admins — solo el maestro puede invitar/desactivar/resetear MFA de otros, así
-// que es la única sección del panel que no se muestra por igual a las 5 cuentas.
-const SECCION_MAESTRO = { to: '/admin/administradores', label: 'Administradores', emoji: '👤' };
+// 5.7 · Aparte del array de arriba porque estas entradas no son para todos los
+// admins. Administradores: solo el maestro puede invitar/desactivar/resetear
+// MFA de otros. Historial (agregado 2026-08-31, a pedido del usuario): ve la
+// actividad de TODOS los admins, no solo la propia, así que se restringe al
+// mismo criterio (también reforzado server-side, ver `requireRole` en
+// `backend/src/index.js` — esto no es solo un ajuste visual).
+const SECCIONES_MAESTRO = [
+  { to: '/admin/administradores', label: 'Administradores', emoji: '👤' },
+  { to: '/admin/historial', label: 'Historial', emoji: '🕓' },
+];
 
 // ⭐ Ajuste 5.2 (2026-08-14, pedido tras probar el panel real): en tablet/
 // mobile (≤1024px, mismo corte que ya usa el Navbar del sitio público — ver
@@ -125,19 +130,26 @@ export default function AdminSidebar() {
               </Link>
             );
           })}
-          {admin?.rol === 'admin_maestro' && (
+          {admin?.rol === 'admin_maestro' && SECCIONES_MAESTRO.map((s) => (
             <Link
-              to={SECCION_MAESTRO.to}
-              className={`admin-sidebar-link${location.pathname.startsWith(SECCION_MAESTRO.to) ? ' activo' : ''}`}
+              key={s.to}
+              to={s.to}
+              className={`admin-sidebar-link${location.pathname.startsWith(s.to) ? ' activo' : ''}`}
             >
-              <span className="admin-sidebar-emoji" aria-hidden="true">{SECCION_MAESTRO.emoji}</span>
-              {SECCION_MAESTRO.label}
+              <span className="admin-sidebar-emoji" aria-hidden="true">{s.emoji}</span>
+              {s.label}
             </Link>
-          )}
+          ))}
         </nav>
 
         <div className="admin-sidebar-footer">
-          <p className="admin-sidebar-usuario" title={admin?.email}>{admin?.email}</p>
+          {/* 2026-08-31, a pedido del usuario: saludo persistente y visible
+             mientras se navega el panel — el email queda como respaldo para
+             las cuentas que todavía no tienen `nombre` guardado (ver
+             Bienvenida.jsx) y como tooltip completo en cualquier caso. */}
+          <p className="admin-sidebar-usuario" title={admin?.email}>
+            {admin?.nombre ? `¡Hola, ${admin.nombre}!` : admin?.email}
+          </p>
           <button className="admin-sidebar-logout" onClick={manejarLogout}>Cerrar sesión</button>
         </div>
       </aside>

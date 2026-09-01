@@ -27,6 +27,8 @@ function IconoOjoTachado() {
   );
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+const MAX_NOMBRE = 80;
 const MIN_PASSWORD = 8;
 // 2026-08-30, a pedido del usuario: piso mínimo de seguridad real (letras +
 // números) — no restringe qué otros caracteres se pueden usar (acentos,
@@ -70,6 +72,7 @@ export default function Bienvenida() {
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
 
+  const [nombre, setNombre] = useState('');
   const [password, setPassword] = useState('');
   const [confirmar, setConfirmar] = useState('');
   const [mostrarPassword, setMostrarPassword] = useState(false);
@@ -178,6 +181,32 @@ export default function Bienvenida() {
     if (paso === 'listo') supabase.auth.signOut().catch(() => {});
   }, [paso]);
 
+  // 2026-08-31, a pedido del usuario: se guarda el nombre para poder saludar
+  // por nombre en el panel (ver AdminSidebar.jsx). Solo aplica a una
+  // invitación nueva (`tipo === 'invite'`) -- una recuperación de contraseña
+  // es alguien que ya es admin, no tiene sentido volver a pedírselo acá. Se
+  // manda recién cuando la sesión ya está en aal2 (justo antes de 'listo'),
+  // reusando el mismo candado de `verifyAdminToken` que protege cualquier otro
+  // cambio sensible de la cuenta -- ver backend/src/routes/perfil.js.
+  async function guardarNombreSiCorresponde() {
+    if (tipo === 'recovery' || !nombre.trim()) return;
+    try {
+      const { data: sesionActual } = await supabase.auth.getSession();
+      const token = sesionActual?.session?.access_token;
+      if (!token) return;
+      await fetch(`${API_URL}/api/admin/perfil/nombre`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ nombre: nombre.trim() }),
+      });
+    } catch {
+      // No bloquea el onboarding por esto -- el nombre es un saludo
+      // cosmético, no algo crítico como la contraseña o el MFA. Si falla, el
+      // admin queda sin nombre guardado (el panel simplemente muestra su
+      // correo en vez del saludo), sin perder acceso a la cuenta.
+    }
+  }
+
   async function iniciarEnrolamientoMfa() {
     const { data, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
     if (enrollError) {
@@ -194,6 +223,10 @@ export default function Bienvenida() {
     e.preventDefault();
     setError('');
 
+    if (tipo !== 'recovery' && !nombre.trim()) {
+      setError('Ingresa tu nombre');
+      return;
+    }
     if (password.length < MIN_PASSWORD) {
       setError(`La contraseña debe tener al menos ${MIN_PASSWORD} caracteres`);
       return;
@@ -218,6 +251,7 @@ export default function Bienvenida() {
       const yaTieneFactorVerificado = factores?.totp?.some((f) => f.status === 'verified');
 
       if (yaTieneFactorVerificado) {
+        await guardarNombreSiCorresponde();
         setPaso('listo');
       } else {
         await iniciarEnrolamientoMfa();
@@ -244,6 +278,8 @@ export default function Bienvenida() {
 
       const { error: verifyError } = await supabase.auth.mfa.verify({ factorId, challengeId: challenge.id, code: codigo });
       if (verifyError) throw new Error('Código incorrecto, intenta de nuevo');
+
+      if (pasoSiguiente === 'listo') await guardarNombreSiCorresponde();
 
       setCodigo('');
       setPaso(pasoSiguiente);
@@ -331,6 +367,19 @@ export default function Bienvenida() {
               <p className="admin-login-hint bienvenida-saludo">Te damos la bienvenida a Colombia Canta y Encanta.</p>
             )}
             <form onSubmit={guardarPassword} className="admin-login-form" noValidate>
+              {tipo !== 'recovery' && (
+                <label htmlFor="bienvenida-nombre">
+                  Tu nombre
+                  <input
+                    id="bienvenida-nombre"
+                    type="text"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    maxLength={MAX_NOMBRE}
+                    autoFocus
+                  />
+                </label>
+              )}
               <label htmlFor="bienvenida-password">
                 Contraseña nueva
                 <div className="bienvenida-password-wrap">
@@ -339,7 +388,7 @@ export default function Bienvenida() {
                     type={mostrarPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    autoFocus
+                    autoFocus={tipo === 'recovery'}
                   />
                   <button
                     type="button"

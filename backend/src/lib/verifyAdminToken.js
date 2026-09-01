@@ -29,7 +29,7 @@ export async function verifyAdminToken(token) {
 
   const { data: adminRow, error: adminError } = await supabase
     .from('admins')
-    .select('id, rol, email, activo')
+    .select('id, rol, email, nombre, activo')
     .eq('user_id', userData.user.id)
     .maybeSingle();
 
@@ -43,6 +43,7 @@ export async function verifyAdminToken(token) {
       userId: userData.user.id,
       rol: adminRow.rol,
       email: adminRow.email,
+      nombre: adminRow.nombre,
     },
     reason: null,
   };

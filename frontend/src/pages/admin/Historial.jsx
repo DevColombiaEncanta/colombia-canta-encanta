@@ -52,7 +52,8 @@ function construirParams(filtros, offset) {
 }
 
 export default function Historial() {
-  const { adminFetch } = useAdminAuth();
+  const { adminFetch, admin } = useAdminAuth();
+  const esMaestro = admin?.rol === 'admin_maestro';
   const [entradas, setEntradas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [cargandoMas, setCargandoMas] = useState(false);
@@ -61,7 +62,11 @@ export default function Historial() {
   const [filtros, setFiltros] = useState(FILTROS_VACIOS);
   const [borrador, setBorrador] = useState({ email: '', desde: '', hasta: '' });
 
+  // Si no es maestro, el componente corta antes con un `return` propio (ver
+  // abajo) sin llegar nunca a disparar este fetch — mismo criterio que
+  // Administradores.jsx.
   useEffect(() => {
+    if (!esMaestro) return;
     const cancelObj = { cancelado: false };
     adminFetch(`/api/admin/audit-log?${construirParams(filtros, 0)}`)
       .then((data) => {
@@ -72,7 +77,7 @@ export default function Historial() {
       .catch((err) => { if (!cancelObj.cancelado) setErrorCarga(err.message); })
       .finally(() => { if (!cancelObj.cancelado) setCargando(false); });
     return () => { cancelObj.cancelado = true; };
-  }, [adminFetch, filtros]);
+  }, [adminFetch, filtros, esMaestro]);
 
   const cargarMas = useCallback(async () => {
     setCargandoMas(true);
@@ -109,6 +114,15 @@ export default function Historial() {
 
   function reintentar() {
     cambiarFiltro({});
+  }
+
+  if (!esMaestro) {
+    return (
+      <AdminLayout>
+        <h1 className="admin-page-titulo">Historial</h1>
+        <p className="admin-page-sub">Esta sección solo está disponible para el admin maestro.</p>
+      </AdminLayout>
+    );
   }
 
   return (
