@@ -7,6 +7,7 @@ import { logAudit } from '../lib/auditLog.js';
 import { stripUndefined } from '../lib/zodMultipart.js';
 import { errorGenerico } from '../lib/errores.js';
 import { hoyColombia } from '../lib/fechas.js';
+import { paginacionSchema, aplicarRango, empaquetarPagina } from '../lib/paginacion.js';
 
 const ESTADOS = ['pendiente', 'pagada', 'cancelada', 'libre'];
 
@@ -208,17 +209,27 @@ const updateSchema = z
   .strict();
 
 // GET / — listar todas las reservas, con el evento ya embebido
+// ⭐ Paginación real agregada (auditoría Fase 5, 2026-09-01): igual criterio
+// que inscripciones.js — se alimenta de envíos públicos, crece sin límite.
 router.get('/', async (req, res, next) => {
-  const { data, error } = await supabase
+  const result = paginacionSchema.safeParse(req.query);
+  if (!result.success) {
+    return next(zodError(result));
+  }
+  const { offset, limit } = result.data;
+
+  const query = supabase
     .from('reservas')
     .select('*, eventos(titulo, slug, fecha, fecha_iso), eventos_fijos(titulo, slug)')
     .order('creado_en', { ascending: false });
+
+  const { data, error } = await aplicarRango(query, offset, limit);
 
   if (error) {
     return next(errorGenerico(error, 'GET /api/admin/reservas'));
   }
 
-  res.json({ ok: true, data });
+  res.json({ ok: true, ...empaquetarPagina(data, limit) });
 });
 
 // PATCH /:id — el admin puede corregir datos del comprador, cambiar estado

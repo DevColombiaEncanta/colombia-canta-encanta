@@ -145,7 +145,7 @@ router.post('/:id/reenviar', requireCsrf, requireRole('admin_maestro'), limiterE
 
   const { data: targetAdmin, error: fetchError } = await supabase
     .from('admins')
-    .select('id, email, rol, activo, user_id')
+    .select('id, email, rol, nombre, activo, user_id')
     .eq('id', id)
     .maybeSingle();
 
@@ -236,9 +236,14 @@ router.post('/:id/reenviar', requireCsrf, requireRole('admin_maestro'), limiterE
     );
   }
 
+  // ⭐ Bug real encontrado en auditoría (2026-08-31): antes no se preservaba
+  // `nombre` acá -- hoy es difícil de disparar en la práctica (arriba se exige
+  // `!last_sign_in_at`, y `nombre` solo se guarda al final de un onboarding ya
+  // completo), pero si ese orden cambiara más adelante, un reenvío accidental
+  // habría borrado el nombre ya guardado sin ningún aviso.
   const { data: adminRow, error: insertError } = await supabase
     .from('admins')
-    .insert({ user_id: invited.user.id, email: targetAdmin.email, rol: targetAdmin.rol, activo: targetAdmin.activo })
+    .insert({ user_id: invited.user.id, email: targetAdmin.email, rol: targetAdmin.rol, nombre: targetAdmin.nombre, activo: targetAdmin.activo })
     .select()
     .single();
 

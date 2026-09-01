@@ -22,6 +22,22 @@ export function jsonArrayField(itemSchema) {
   }, z.array(itemSchema));
 }
 
+// ⭐ Agregado en auditoría de Fase 5 (2026-08-31): mismo problema que ya se
+// resolvió en `cursos.js` (`precio_numerico`/`matricula_numerico`, ahí con
+// JSON real, `null` nativo) pero para rutas multipart, donde TODO llega como
+// texto — no existe un `null` real que mandar, solo strings. Sin este
+// preprocess, mandar `''` para "borrar el límite" caía en `z.coerce.number()`
+// (`Number('') === 0`, falla `.positive()`) en vez de matchear `z.null()`.
+// Convierte `''`/`null` crudo a `null` real ANTES de que el `z.union` decida,
+// dejando `undefined` (campo ausente del todo) pasar tal cual.
+export function nullableNumberFromString(numberSchema) {
+  return z.preprocess((raw) => {
+    if (raw === undefined) return undefined;
+    if (raw === null || raw === '') return null;
+    return raw;
+  }, z.union([z.null(), numberSchema]));
+}
+
 // Elimina claves con valor `undefined` de un objeto ya parseado por un schema `.partial()` —
 // Zod puede materializar una clave opcional ausente como `{ clave: undefined }` en vez de
 // omitirla del todo, y eso rompe la semántica de PATCH (solo tocar lo que el body sí mandó).

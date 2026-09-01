@@ -59,6 +59,12 @@
   overflow-y: auto;
 }
 
+.insadmin-cargar-mas {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
 .insadmin-item {
   display: flex;
   flex-direction: column;
@@ -98,7 +104,10 @@
   text-transform: capitalize;
 }
 
-.insadmin-estado-pendiente { color: #B8860B; }
+/* ⭐ Hallazgo real (auditoría Fase 5, 2026-08-31): #B8860B sobre blanco da
+   ~3.26:1, no cumple WCAG AA (4.5:1 para texto normal) — #8a6508 (misma
+   familia de color, más oscuro) da ~5.3:1. */
+.insadmin-estado-pendiente { color: #8a6508; }
 .insadmin-estado-confirmada { color: #1a8a4a; }
 .insadmin-estado-cancelada { color: var(--rojo); }
 

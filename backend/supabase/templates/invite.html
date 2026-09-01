@@ -8,6 +8,14 @@
   Variables de Supabase usadas: {{ .ConfirmationURL }} (único link real que
   envía Supabase para este tipo de correo — no hay .SiteURL/.Token propios
   para "invite" además de este).
+
+  ⭐ Auditoría de accesibilidad (2026-08-31): el coral real de la marca
+  (`--coral: #ff5c8d`) da ~2.9:1 de contraste sobre blanco/como fondo con
+  texto blanco encima — no cumple WCAG AA (4.5:1 para texto normal). Se usa
+  acá `#b5285a` (misma familia de color, más oscuro) en su lugar, solo para
+  este correo — el resto del panel sigue usando el coral real donde el
+  contraste no es un problema (fondos grandes, acentos). El gris de textos
+  secundarios también se oscureció de `#9a9a9a` (~2.8:1) a `#6b6b6b` (~5.3:1).
 -->
 <div style="background: #f4f2ef; padding: 32px 16px; font-family: Arial, Helvetica, sans-serif;">
   <div style="max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #ececec; overflow: hidden;">
@@ -15,7 +23,7 @@
     <!-- Encabezado -->
     <div style="padding: 32px 32px 24px; text-align: center; border-bottom: 1px solid #f0f0f0;">
       <img src="https://colombia-canta-encanta.vercel.app/logo.png" alt="Colombia Canta y Encanta" width="56" height="56" style="display: block; margin: 0 auto 12px; border-radius: 12px;" />
-      <p style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #ff5c8d; font-weight: bold; margin: 0;">
+      <p style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #b5285a; font-weight: bold; margin: 0;">
         Colombia Canta y Encanta
       </p>
     </div>
@@ -31,13 +39,13 @@
 
       <!-- Pasos, en breve -->
       <div style="background: #faf9f7; border: 1px solid #ececec; border-radius: 12px; padding: 20px 22px; margin: 0 0 28px;">
-        <p style="font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #9a9a9a; font-weight: bold; margin: 0 0 14px;">
+        <p style="font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #6b6b6b; font-weight: bold; margin: 0 0 14px;">
           En 3 pasos
         </p>
         <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%;">
           <tr>
             <td style="padding-bottom: 12px; vertical-align: top; width: 28px;">
-              <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #ff5c8d; color: #ffffff; font-size: 12px; font-weight: bold; text-align: center;">1</span>
+              <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #b5285a; color: #ffffff; font-size: 12px; font-weight: bold; text-align: center;">1</span>
             </td>
             <td style="padding-bottom: 12px; vertical-align: top; font-size: 13.5px; color: #454545; line-height: 1.5;">
               Activa tu cuenta con el botón de abajo.
@@ -45,7 +53,7 @@
           </tr>
           <tr>
             <td style="padding-bottom: 12px; vertical-align: top; width: 28px;">
-              <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #ff5c8d; color: #ffffff; font-size: 12px; font-weight: bold; text-align: center;">2</span>
+              <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #b5285a; color: #ffffff; font-size: 12px; font-weight: bold; text-align: center;">2</span>
             </td>
             <td style="padding-bottom: 12px; vertical-align: top; font-size: 13.5px; color: #454545; line-height: 1.5;">
               Elige tu contraseña.
@@ -53,7 +61,7 @@
           </tr>
           <tr>
             <td style="vertical-align: top; width: 28px;">
-              <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #ff5c8d; color: #ffffff; font-size: 12px; font-weight: bold; text-align: center;">3</span>
+              <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #b5285a; color: #ffffff; font-size: 12px; font-weight: bold; text-align: center;">3</span>
             </td>
             <td style="vertical-align: top; font-size: 13.5px; color: #454545; line-height: 1.5;">
               Configura tu código de verificación en dos pasos con una app autenticadora (te guiamos ahí mismo).
@@ -64,24 +72,24 @@
 
       <!-- Botón -->
       <p style="text-align: center; margin: 0 0 20px;">
-        <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #ff5c8d; color: #ffffff; text-decoration: none; font-weight: bold; padding: 14px 36px; border-radius: 10px; font-size: 15px;">
+        <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #b5285a; color: #ffffff; text-decoration: none; font-weight: bold; padding: 14px 36px; border-radius: 10px; font-size: 15px;">
           Activar mi cuenta
         </a>
       </p>
-      <p style="font-size: 12px; color: #9a9a9a; text-align: center; margin: 0 0 28px;">
+      <p style="font-size: 12px; color: #6b6b6b; text-align: center; margin: 0 0 28px;">
         Este enlace es personal y de un solo uso.
       </p>
     </div>
 
     <!-- Pie -->
     <div style="padding: 20px 32px 28px; border-top: 1px solid #f0f0f0;">
-      <p style="font-size: 12px; line-height: 1.5; color: #9a9a9a; margin: 0 0 10px;">
+      <p style="font-size: 12px; line-height: 1.5; color: #6b6b6b; margin: 0 0 10px;">
         Si el botón no funciona, copia y pega este link en tu navegador:
       </p>
-      <p style="font-size: 11.5px; word-break: break-all; color: #9a9a9a; margin: 0 0 18px;">
+      <p style="font-size: 11.5px; word-break: break-all; color: #6b6b6b; margin: 0 0 18px;">
         {{ .ConfirmationURL }}
       </p>
-      <p style="font-size: 12px; line-height: 1.5; color: #9a9a9a; margin: 0;">
+      <p style="font-size: 12px; line-height: 1.5; color: #6b6b6b; margin: 0;">
         Si no esperabas este correo, puedes ignorarlo — tu información está segura.
       </p>
     </div>

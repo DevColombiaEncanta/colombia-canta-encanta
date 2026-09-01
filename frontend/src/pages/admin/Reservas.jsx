@@ -7,6 +7,7 @@ import FormField from '../../components/admin/ui/FormField';
 import Button from '../../components/admin/ui/Button';
 import ConfirmDialog from '../../components/admin/ui/ConfirmDialog';
 import { formatearFechaHora, formatearFechaSolo } from '../../utils/formato';
+import { EMAIL_REGEX } from '../../utils/validacion';
 import './Reservas.css';
 
 const ESTADOS = ['pendiente', 'pagada', 'cancelada', 'libre'];
@@ -63,13 +64,31 @@ function ReservaForm({ reserva, onGuardado, onBorrado, onAviso, aviso, adminFetc
   const [cantidad, setCantidad] = useState(reserva.cantidad);
   const [estado, setEstado] = useState(reserva.estado);
   const [referenciaMp, setReferenciaMp] = useState(reserva.referencia_mp || '');
+  const [errores, setErrores] = useState({});
   const [errorGeneral, setErrorGeneral] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [confirmandoBorrar, setConfirmandoBorrar] = useState(false);
   const [borrando, setBorrando] = useState(false);
 
+  // ⭐ Bug real (auditoría Fase 5, 2026-08-31): el formulario tenía `noValidate`
+  // (correcto, evita el globo nativo del navegador) pero además `required`/
+  // `minLength` en los inputs como si esos validaran solos -- sin `validar()`,
+  // esos atributos no hacían nada, y cualquier error terminaba en
+  // `errorGeneral` (mensaje genérico) en vez de señalar el campo, a
+  // diferencia del resto del panel (Hero/Noticias/Eventos/Cursos/Productos).
+  function validar() {
+    const nuevosErrores = {};
+    if (nombre.trim().length < 2) nuevosErrores.nombre = 'Ingresa el nombre completo';
+    if (celular.trim().length < 7) nuevosErrores.celular = 'Ingresa un número de celular válido';
+    if (!EMAIL_REGEX.test(email.trim())) nuevosErrores.email = 'Ingresa un correo electrónico válido';
+    if (!Number.isInteger(Number(cantidad)) || Number(cantidad) <= 0) nuevosErrores.cantidad = 'Debe ser un número entero mayor a 0';
+    setErrores(nuevosErrores);
+    return Object.keys(nuevosErrores).length === 0;
+  }
+
   async function guardar(e) {
     e.preventDefault();
+    if (!validar()) return;
     setGuardando(true);
     setErrorGeneral('');
     try {
@@ -130,19 +149,19 @@ function ReservaForm({ reserva, onGuardado, onBorrado, onAviso, aviso, adminFetc
         {/* ── Gestión del admin ── */}
         <h3 className="resadmin-seccion-titulo">Datos del comprador</h3>
         <div className="admin-field-fila">
-          <FormField label="Nombre">
-            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required minLength={2} />
+          <FormField label="Nombre" error={errores.nombre}>
+            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} className={errores.nombre ? 'invalido' : ''} />
           </FormField>
-          <FormField label="Celular">
-            <input type="text" value={celular} onChange={(e) => setCelular(e.target.value)} required minLength={7} />
+          <FormField label="Celular" error={errores.celular}>
+            <input type="text" value={celular} onChange={(e) => setCelular(e.target.value)} className={errores.celular ? 'invalido' : ''} />
           </FormField>
         </div>
         <div className="admin-field-fila">
-          <FormField label="Email">
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <FormField label="Email" error={errores.email}>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={errores.email ? 'invalido' : ''} />
           </FormField>
-          <FormField label="Cantidad de entradas">
-            <input type="number" min="1" value={cantidad} onChange={(e) => setCantidad(e.target.value)} required />
+          <FormField label="Cantidad de entradas" error={errores.cantidad}>
+            <input type="number" min="1" value={cantidad} onChange={(e) => setCantidad(e.target.value)} className={errores.cantidad ? 'invalido' : ''} />
           </FormField>
         </div>
 
@@ -199,6 +218,15 @@ export default function Reservas() {
   const [filtroEvento, setFiltroEvento] = useState('todos');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [filtroFecha, setFiltroFecha] = useState('');
+  // ⭐ Paginación real agregada (auditoría Fase 5, 2026-09-01): el backend ya
+  // no devuelve la tabla entera de una vez (ver reservas.js). Los filtros de
+  // arriba (búsqueda/evento/estado/fecha) siguen siendo del lado del cliente,
+  // sobre lo que ya se cargó — buscan algo que todavía no se cargó, "Cargar
+  // más" lo trae. Con el volumen real de hoy (muy por debajo del límite de
+  // página) esto no se nota; documentado acá para no perderlo de vista si el
+  // volumen crece mucho más adelante.
+  const [hayMas, setHayMas] = useState(false);
+  const [cargandoMas, setCargandoMas] = useState(false);
   const formPanelRef = useScrollAlSeleccionar(seleccionadoId, !cargando);
 
   const reservaSeleccionada = reservas.find((r) => r.id === seleccionadoId) || null;
@@ -208,6 +236,7 @@ export default function Reservas() {
       .then((data) => {
         if (cancelObj?.cancelado) return;
         setReservas(data.data);
+        setHayMas(data.hayMas);
         setErrorCarga('');
       })
       .catch((err) => { if (!cancelObj?.cancelado) setErrorCarga(err.message); })
@@ -219,6 +248,19 @@ export default function Reservas() {
     cargar(cancelObj);
     return () => { cancelObj.cancelado = true; };
   }, [cargar]);
+
+  const cargarMas = useCallback(async () => {
+    setCargandoMas(true);
+    try {
+      const data = await adminFetch(`/api/admin/reservas?offset=${reservas.length}`);
+      setReservas((prev) => [...prev, ...data.data]);
+      setHayMas(data.hayMas);
+    } catch (err) {
+      setErrorCarga(err.message);
+    } finally {
+      setCargandoMas(false);
+    }
+  }, [adminFetch, reservas.length]);
 
   const eventosDisponibles = useMemo(() => {
     const mapa = new Map();
@@ -323,6 +365,14 @@ export default function Reservas() {
                 </button>
               ))}
             </div>
+
+            {hayMas && (
+              <div className="resadmin-cargar-mas">
+                <Button type="button" variant="secundario" onClick={cargarMas} disabled={cargandoMas}>
+                  {cargandoMas ? 'Cargando…' : 'Cargar más'}
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="resadmin-form-panel" ref={formPanelRef}>

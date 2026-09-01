@@ -177,7 +177,7 @@ function HeroForm({ slide, ordenSugerido, onGuardado, onBorrado, onAviso, aviso,
               className={errores.label ? 'invalido' : ''}
             />
           </FormField>
-          <FormField label="Posición de orden">
+          <FormField label="Posición de orden" error={errores.orden}>
             <input
               type="number"
               value={form.orden}

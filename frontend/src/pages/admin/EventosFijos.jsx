@@ -58,14 +58,24 @@ function horaDesde24h(hora24) {
   return `${h}:${min} ${ampm}`;
 }
 
+// ⭐ Bug real (auditoría Fase 5, 2026-09-01): cada fila necesita una
+// identidad estable propia (`_key`), independiente de su posición en el
+// array — `ImageUploadField` abre un modal de recorte asíncrono, y su
+// `onChange` cerraba sobre el `idx` de render (ver más abajo); si se borraba
+// una fila anterior MIENTRAS ese modal seguía abierto, el `idx` capturado
+// pasaba a apuntar a otro show, y la foto recortada se le asignaba al show
+// equivocado en silencio. Solo de mouse esto es inalcanzable (el fondo del
+// modal bloquea cualquier clic fuera de él mientras está abierto), pero se
+// corrige igual por las dudas de otro dispositivo de entrada.
 function showVacio() {
-  return { hora: '', fechaISO: '', nombre: '', descripcion: '', foto: '', archivoNuevo: null };
+  return { _key: crypto.randomUUID(), hora: '', fechaISO: '', nombre: '', descripcion: '', foto: '', archivoNuevo: null };
 }
 
 // Traduce un show ya guardado (formato del backend) al formato que usa el
 // formulario — separado para poder recargarlo igual después de guardar.
 function showDesdeBackend(s) {
   return {
+    _key: crypto.randomUUID(),
     hora: horaA24h(s.hora || ''),
     fechaISO: s.fechaISO || '',
     nombre: s.nombre || '',
@@ -229,7 +239,7 @@ function ExperienciaFija({ experiencia, adminFetch, onActualizado }) {
         </h3>
 
         {shows.items.map((s, idx) => (
-          <div className="evfijos-show-fila" key={idx}>
+          <div className="evfijos-show-fila" key={s._key}>
             <div className="evfijos-show-foto">
               <ImageUploadField
                 label="Foto"
@@ -237,7 +247,15 @@ function ExperienciaFija({ experiencia, adminFetch, onActualizado }) {
                 aspecto={ASPECTO_FOTO_SHOW}
                 valorActual={s.foto}
                 archivo={s.archivoNuevo}
-                onChange={(archivo) => shows.actualizar(idx, 'archivoNuevo', archivo)}
+                onChange={(archivo) => {
+                  // No se usa el `idx` capturado en este cierre -- si esta
+                  // fila cambió de posición mientras el modal de recorte
+                  // estaba abierto (ver comentario de `showVacio`), `idx`
+                  // podría ya no apuntar a ESTE show. Se busca la posición
+                  // real por `_key` recién al confirmar, no al abrir.
+                  const posicionActual = shows.items.findIndex((x) => x._key === s._key);
+                  if (posicionActual !== -1) shows.actualizar(posicionActual, 'archivoNuevo', archivo);
+                }}
               />
             </div>
             <div className="evfijos-show-campos">

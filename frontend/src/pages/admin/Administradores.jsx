@@ -192,7 +192,9 @@ export default function Administradores() {
           {admins.map((a) => (
             <div className="adminsadmin-fila" key={a.id}>
               <div className="adminsadmin-fila-info">
-                <span className="adminsadmin-email">{a.nombre ? `${a.nombre} · ${a.email}` : a.email}</span>
+                <span className="adminsadmin-email" title={a.nombre ? `${a.nombre} · ${a.email}` : a.email}>
+                  {a.nombre ? `${a.nombre} · ${a.email}` : a.email}
+                </span>
                 <span className="adminsadmin-meta">
                   <span className={`adminsadmin-rol adminsadmin-rol-${a.rol}`}>{ROL_LABELS[a.rol] || a.rol}</span>
                   {' · '}

@@ -6,6 +6,7 @@ import { limiterEstricto } from '../middleware/rateLimiters.js';
 import { logAudit } from '../lib/auditLog.js';
 import { stripUndefined } from '../lib/zodMultipart.js';
 import { errorGenerico } from '../lib/errores.js';
+import { paginacionSchema, aplicarRango, empaquetarPagina } from '../lib/paginacion.js';
 
 const ESTADOS = ['pendiente', 'pagado', 'cancelado', 'enviado'];
 
@@ -122,6 +123,23 @@ pedidosPublicRouter.post('/', limiterEstricto, async (req, res, next) => {
     total += precio * item.cantidad;
   }
 
+  // ⭐ Bug real corregido (auditoría Fase 5, 2026-08-31/09-01): el chequeo de
+  // arriba (`item.cantidad > variante.stock`) es solo una validación rápida
+  // con el dato leído hace un instante — nunca restaba nada de verdad, así
+  // que 2 compras casi simultáneas podían las 2 pasar esa validación y
+  // sobrevender. `descontar_stock_pedido` (ver migración) hace el descuento
+  // real de forma atómica en la base para TODOS los items del pedido a la
+  // vez — si cualquiera ya no tiene stock suficiente en ese instante exacto,
+  // aborta sin dejar ningún item a medio descontar.
+  const { error: stockError } = await supabase.rpc('descontar_stock_pedido', {
+    p_items: itemsAgrupados,
+  });
+  if (stockError) {
+    const err = new Error('Uno de los productos de tu carrito ya no tiene stock suficiente — alguien más lo compró justo antes. Actualiza tu carrito e intenta de nuevo.');
+    err.status = 409;
+    return next(err);
+  }
+
   const { data: pedido, error: pedidoError } = await supabase
     .from('pedidos')
     .insert({
@@ -139,6 +157,11 @@ pedidosPublicRouter.post('/', limiterEstricto, async (req, res, next) => {
     .single();
 
   if (pedidoError) {
+    // El stock ya se descontó — si el pedido no se puede crear, hay que
+    // devolverlo (compensación manual: no hay una transacción real que
+    // envuelva el RPC de arriba y este insert, son 2 llamadas separadas a
+    // PostgREST).
+    await supabase.rpc('restaurar_stock_pedido', { p_items: itemsAgrupados });
     return next(traducirError(pedidoError));
   }
 
@@ -147,8 +170,10 @@ pedidosPublicRouter.post('/', limiterEstricto, async (req, res, next) => {
 
   if (itemsError) {
     // El pedido ya se creó — si las líneas fallan, no dejamos un pedido sin
-    // items (mismo criterio que productos.js con producto+variantes).
+    // items (mismo criterio que productos.js con producto+variantes). Mismo
+    // criterio de compensación que arriba para el stock ya descontado.
     await supabase.from('pedidos').delete().eq('id', pedido.id);
+    await supabase.rpc('restaurar_stock_pedido', { p_items: itemsAgrupados });
     return next(errorGenerico(itemsError, 'POST /api/pedidos (items)'));
   }
 
@@ -171,18 +196,28 @@ const updateSchema = z
   })
   .strict();
 
-// GET / — listar todos los pedidos, con sus líneas embebidas
+// GET / — listar pedidos (paginados), con sus líneas embebidas. ⭐ Paginación
+// real agregada (auditoría Fase 5, 2026-09-01) — igual criterio que
+// inscripciones/reservas: se alimenta de compras públicas, crece sin límite.
 router.get('/', async (req, res, next) => {
-  const { data, error } = await supabase
+  const result = paginacionSchema.safeParse(req.query);
+  if (!result.success) {
+    return next(zodError(result));
+  }
+  const { offset, limit } = result.data;
+
+  const query = supabase
     .from('pedidos')
     .select('*, pedido_items(*)')
     .order('creado_en', { ascending: false });
+
+  const { data, error } = await aplicarRango(query, offset, limit);
 
   if (error) {
     return next(errorGenerico(error, 'GET /api/admin/pedidos'));
   }
 
-  res.json({ ok: true, data });
+  res.json({ ok: true, ...empaquetarPagina(data, limit) });
 });
 
 // PATCH /:id — el admin corrige datos del comprador/envío, cambia estado
@@ -192,7 +227,7 @@ router.patch('/:id', requireCsrf, async (req, res, next) => {
 
   const { data: actual, error: fetchError } = await supabase
     .from('pedidos')
-    .select('*')
+    .select('*, pedido_items(producto_variante_id, cantidad)')
     .eq('id', id)
     .maybeSingle();
 
@@ -208,6 +243,27 @@ router.patch('/:id', requireCsrf, async (req, res, next) => {
   }
 
   const updates = stripUndefined(result.data);
+
+  // ⭐ Ajuste real (auditoría Fase 5, 2026-08-31/09-01): el stock se descuenta
+  // de verdad al crear el pedido (ver POST de arriba) -- acá se le da la
+  // vuelta al cambiar el estado hacia/desde "cancelado", para que un pedido
+  // cancelado le devuelva su stock al catálogo, y uno que se "descancela"
+  // vuelva a descontarlo (puede fallar si ya no queda stock mientras tanto,
+  // en cuyo caso se rechaza el cambio de estado en vez de dejar el stock en
+  // negativo).
+  const itemsParaStock = (actual.pedido_items || []).map((it) => ({ variante_id: it.producto_variante_id, cantidad: it.cantidad }));
+  if (updates.estado && updates.estado !== actual.estado) {
+    if (updates.estado === 'cancelado') {
+      await supabase.rpc('restaurar_stock_pedido', { p_items: itemsParaStock });
+    } else if (actual.estado === 'cancelado') {
+      const { error: stockError } = await supabase.rpc('descontar_stock_pedido', { p_items: itemsParaStock });
+      if (stockError) {
+        const err = new Error('No se puede reactivar este pedido — ya no hay stock suficiente de uno o más productos.');
+        err.status = 409;
+        return next(err);
+      }
+    }
+  }
 
   if (Object.keys(updates).length > 0) {
     const { error } = await supabase.from('pedidos').update(updates).eq('id', id);
@@ -236,7 +292,7 @@ router.delete('/:id', requireCsrf, async (req, res, next) => {
 
   const { data: actual, error: fetchError } = await supabase
     .from('pedidos')
-    .select('*')
+    .select('*, pedido_items(producto_variante_id, cantidad)')
     .eq('id', id)
     .maybeSingle();
 
@@ -249,6 +305,15 @@ router.delete('/:id', requireCsrf, async (req, res, next) => {
   const { error } = await supabase.from('pedidos').delete().eq('id', id);
   if (error) {
     return next(errorGenerico(error, 'DELETE /api/admin/pedidos/:id'));
+  }
+
+  // ⭐ Ajuste real (auditoría Fase 5): si el pedido borrado no estaba ya
+  // cancelado, su stock nunca se había devuelto -- devolverlo acá (ej. un
+  // duplicado o un pedido cargado por error, ver el comentario de esta ruta).
+  // Si ya estaba cancelado, el stock ya se restauró en el PATCH que lo canceló.
+  if (actual.estado !== 'cancelado') {
+    const itemsParaStock = (actual.pedido_items || []).map((it) => ({ variante_id: it.producto_variante_id, cantidad: it.cantidad }));
+    await supabase.rpc('restaurar_stock_pedido', { p_items: itemsParaStock });
   }
 
   await logAudit({

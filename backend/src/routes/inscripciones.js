@@ -6,6 +6,7 @@ import { limiterEstricto } from '../middleware/rateLimiters.js';
 import { logAudit } from '../lib/auditLog.js';
 import { stripUndefined } from '../lib/zodMultipart.js';
 import { errorGenerico } from '../lib/errores.js';
+import { paginacionSchema, aplicarRango, empaquetarPagina } from '../lib/paginacion.js';
 
 const ESTADOS = ['pendiente', 'confirmada', 'cancelada'];
 const fechaISO = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'fecha_pago debe tener formato YYYY-MM-DD');
@@ -77,7 +78,7 @@ const publicSchema = z
     acudiente_parentesco: z.string().trim().optional(),
     horario_preferencia: z.string().trim().min(1, 'horario_preferencia es obligatoria'),
     barrio: z.string().trim().optional(),
-    acepta_terminos: z.literal(true, { errorMap: () => ({ message: 'Debés aceptar los términos' }) }),
+    acepta_terminos: z.literal(true, { errorMap: () => ({ message: 'Debes aceptar los términos' }) }),
   })
   .strict()
   .refine(
@@ -168,17 +169,29 @@ const updateSchema = z
   .strict();
 
 // GET / — listar todas las inscripciones, con el nombre de curso/nivel y las cuotas ya embebidas
+// ⭐ Paginación real agregada (auditoría Fase 5, 2026-09-01): esta tabla se
+// alimenta de envíos públicos (el formulario de inscripción), no de contenido
+// que el admin cargue a mano — igual razonamiento que ya tenía `audit_log`
+// para no traer la tabla entera sin límite. Ver `lib/paginacion.js`.
 router.get('/', async (req, res, next) => {
-  const { data, error } = await supabase
+  const result = paginacionSchema.safeParse(req.query);
+  if (!result.success) {
+    return next(zodError(result));
+  }
+  const { offset, limit } = result.data;
+
+  const query = supabase
     .from('inscripciones')
     .select('*, cursos(nombre, duracion, precio_numerico), niveles(nombre), inscripcion_pagos(*)')
     .order('creado_en', { ascending: false });
+
+  const { data, error } = await aplicarRango(query, offset, limit);
 
   if (error) {
     return next(errorGenerico(error, 'GET /api/admin/inscripciones'));
   }
 
-  res.json({ ok: true, data });
+  res.json({ ok: true, ...empaquetarPagina(data, limit) });
 });
 
 // PATCH /:id — el admin puede corregir cualquier dato, cambiar estado, asignar nivel

@@ -261,6 +261,12 @@ export default function Inscripciones() {
   const [busqueda, setBusqueda] = useState('');
   const [filtroCurso, setFiltroCurso] = useState('todos');
   const [filtroEstado, setFiltroEstado] = useState('todos');
+  // ⭐ Paginación real agregada (auditoría Fase 5, 2026-09-01): mismo criterio
+  // que Reservas.jsx — el backend ya no trae la tabla entera (ver
+  // inscripciones.js). Los filtros de abajo siguen siendo del lado del
+  // cliente sobre lo ya cargado; "Cargar más" trae inscripciones más viejas.
+  const [hayMas, setHayMas] = useState(false);
+  const [cargandoMas, setCargandoMas] = useState(false);
   const formPanelRef = useScrollAlSeleccionar(seleccionadoId, !cargando);
 
   const inscripcionSeleccionada = inscripciones.find((i) => i.id === seleccionadoId) || null;
@@ -273,6 +279,7 @@ export default function Inscripciones() {
       .then(([ins, cur]) => {
         if (cancelObj?.cancelado) return;
         setInscripciones(ins.data);
+        setHayMas(ins.hayMas);
         setCursos(cur.data);
         setErrorCarga('');
       })
@@ -285,6 +292,19 @@ export default function Inscripciones() {
     cargarTodo(cancelObj);
     return () => { cancelObj.cancelado = true; };
   }, [cargarTodo]);
+
+  const cargarMas = useCallback(async () => {
+    setCargandoMas(true);
+    try {
+      const data = await adminFetch(`/api/admin/inscripciones?offset=${inscripciones.length}`);
+      setInscripciones((prev) => [...prev, ...data.data]);
+      setHayMas(data.hayMas);
+    } catch (err) {
+      setErrorCarga(err.message);
+    } finally {
+      setCargandoMas(false);
+    }
+  }, [adminFetch, inscripciones.length]);
 
   const inscripcionesFiltradas = useMemo(() => {
     return inscripciones.filter((i) => {
@@ -390,6 +410,14 @@ export default function Inscripciones() {
                 );
               })}
             </div>
+
+            {hayMas && (
+              <div className="insadmin-cargar-mas">
+                <Button type="button" variant="secundario" onClick={cargarMas} disabled={cargandoMas}>
+                  {cargandoMas ? 'Cargando…' : 'Cargar más'}
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="insadmin-form-panel" ref={formPanelRef}>

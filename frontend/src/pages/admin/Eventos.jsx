@@ -332,8 +332,16 @@ function EventoForm({ evento, tiposSugeridos, onGuardado, onBorrado, onAviso, av
       // Convocatoria y Próximamente no reservan entradas acá adentro (pedido
       // del usuario, 2026-08-16) — no tiene sentido mandar un límite que
       // nunca se usa.
-      if (form.maxEntradas && (form.accionTipo === 'libre' || form.accionTipo === 'pago')) {
-        fd.append('max_entradas', String(form.maxEntradas));
+      //
+      // ⭐ Bug real (auditoría Fase 5, 2026-08-31): al editar, si el campo
+      // queda vacío hay que mandar explícitamente `''` (el backend lo trata
+      // como "borrar", ver `nullableNumberFromString` en zodMultipart.js) —
+      // si solo se manda cuando hay valor, un límite ya guardado nunca se
+      // puede volver a borrar desde acá (mismo hallazgo ya resuelto en
+      // Cursos con precio/matrícula).
+      if (form.accionTipo === 'libre' || form.accionTipo === 'pago') {
+        if (form.maxEntradas) fd.append('max_entradas', String(form.maxEntradas));
+        else if (evento) fd.append('max_entradas', '');
       }
       fd.append('destacado_hero', String(form.destacadoHero));
       if (evento) fd.append('activo', String(form.activo));
@@ -410,6 +418,7 @@ function EventoForm({ evento, tiposSugeridos, onGuardado, onBorrado, onAviso, av
               onChange={(e) => actualizarCampo('tipo', e.target.value)}
               className={errores.tipo ? 'invalido' : ''}
               placeholder="Ej. Gira USA"
+              maxLength={60}
             />
             <datalist id="eventos-tipos-sugeridos">
               {tiposSugeridos.map((t) => <option key={t} value={t} />)}

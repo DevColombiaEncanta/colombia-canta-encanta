@@ -7,6 +7,7 @@ import FormField from '../../components/admin/ui/FormField';
 import Button from '../../components/admin/ui/Button';
 import ConfirmDialog from '../../components/admin/ui/ConfirmDialog';
 import { formatearFechaHora, formatCOP } from '../../utils/formato';
+import { EMAIL_REGEX } from '../../utils/validacion';
 import './Pedidos.css';
 
 const ESTADOS = ['pendiente', 'pagado', 'cancelado', 'enviado'];
@@ -29,13 +30,29 @@ function PedidoForm({ pedido, onGuardado, onBorrado, onAviso, aviso, adminFetch 
   const [direccionAdicional, setDireccionAdicional] = useState(pedido.direccion_adicional || '');
   const [estado, setEstado] = useState(pedido.estado);
   const [referenciaMp, setReferenciaMp] = useState(pedido.referencia_mp || '');
+  const [errores, setErrores] = useState({});
   const [errorGeneral, setErrorGeneral] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [confirmandoBorrar, setConfirmandoBorrar] = useState(false);
   const [borrando, setBorrando] = useState(false);
 
+  // ⭐ Bug real (auditoría Fase 5, 2026-08-31): mismo hallazgo que en
+  // Reservas.jsx — `noValidate` + `required`/`minLength` decorativos sin
+  // ningún `validar()` real detrás.
+  function validar() {
+    const nuevosErrores = {};
+    if (nombre.trim().length < 2) nuevosErrores.nombre = 'Ingresa el nombre completo';
+    if (celular.trim().length < 7) nuevosErrores.celular = 'Ingresa un número de celular válido';
+    if (!EMAIL_REGEX.test(email.trim())) nuevosErrores.email = 'Ingresa un correo electrónico válido';
+    if (direccion.trim().length < 5) nuevosErrores.direccion = 'Ingresa una dirección de envío válida';
+    if (ciudad.trim().length < 2) nuevosErrores.ciudad = 'Ingresa una ciudad válida';
+    setErrores(nuevosErrores);
+    return Object.keys(nuevosErrores).length === 0;
+  }
+
   async function guardar(e) {
     e.preventDefault();
+    if (!validar()) return;
     setGuardando(true);
     setErrorGeneral('');
     try {
@@ -101,24 +118,24 @@ function PedidoForm({ pedido, onGuardado, onBorrado, onAviso, aviso, adminFetch 
         {/* ── Gestión del admin ── */}
         <h3 className="pedadmin-seccion-titulo">Datos del comprador</h3>
         <div className="admin-field-fila">
-          <FormField label="Nombre">
-            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required minLength={2} />
+          <FormField label="Nombre" error={errores.nombre}>
+            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} className={errores.nombre ? 'invalido' : ''} />
           </FormField>
-          <FormField label="Celular">
-            <input type="text" value={celular} onChange={(e) => setCelular(e.target.value)} required minLength={7} />
-          </FormField>
-        </div>
-        <div className="admin-field-fila">
-          <FormField label="Email">
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          </FormField>
-          <FormField label="Ciudad">
-            <input type="text" value={ciudad} onChange={(e) => setCiudad(e.target.value)} required minLength={2} />
+          <FormField label="Celular" error={errores.celular}>
+            <input type="text" value={celular} onChange={(e) => setCelular(e.target.value)} className={errores.celular ? 'invalido' : ''} />
           </FormField>
         </div>
         <div className="admin-field-fila">
-          <FormField label="Dirección de envío">
-            <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} required minLength={5} />
+          <FormField label="Email" error={errores.email}>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={errores.email ? 'invalido' : ''} />
+          </FormField>
+          <FormField label="Ciudad" error={errores.ciudad}>
+            <input type="text" value={ciudad} onChange={(e) => setCiudad(e.target.value)} className={errores.ciudad ? 'invalido' : ''} />
+          </FormField>
+        </div>
+        <div className="admin-field-fila">
+          <FormField label="Dirección de envío" error={errores.direccion}>
+            <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} className={errores.direccion ? 'invalido' : ''} />
           </FormField>
           <FormField label="Apto / referencia" hint="opcional">
             <input type="text" value={direccionAdicional} onChange={(e) => setDireccionAdicional(e.target.value)} />
@@ -177,6 +194,12 @@ export default function Pedidos() {
   const [busqueda, setBusqueda] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [filtroFecha, setFiltroFecha] = useState('');
+  // ⭐ Paginación real agregada (auditoría Fase 5, 2026-09-01): mismo criterio
+  // que Reservas.jsx/Inscripciones.jsx — el backend ya no trae la tabla
+  // entera (ver pedidos.js). Los filtros de abajo siguen siendo del lado del
+  // cliente sobre lo ya cargado; "Cargar más" trae pedidos más viejos.
+  const [hayMas, setHayMas] = useState(false);
+  const [cargandoMas, setCargandoMas] = useState(false);
   const formPanelRef = useScrollAlSeleccionar(seleccionadoId, !cargando);
 
   const pedidoSeleccionado = pedidos.find((p) => p.id === seleccionadoId) || null;
@@ -186,6 +209,7 @@ export default function Pedidos() {
       .then((data) => {
         if (cancelObj?.cancelado) return;
         setPedidos(data.data);
+        setHayMas(data.hayMas);
         setErrorCarga('');
       })
       .catch((err) => { if (!cancelObj?.cancelado) setErrorCarga(err.message); })
@@ -197,6 +221,19 @@ export default function Pedidos() {
     cargar(cancelObj);
     return () => { cancelObj.cancelado = true; };
   }, [cargar]);
+
+  const cargarMas = useCallback(async () => {
+    setCargandoMas(true);
+    try {
+      const data = await adminFetch(`/api/admin/pedidos?offset=${pedidos.length}`);
+      setPedidos((prev) => [...prev, ...data.data]);
+      setHayMas(data.hayMas);
+    } catch (err) {
+      setErrorCarga(err.message);
+    } finally {
+      setCargandoMas(false);
+    }
+  }, [adminFetch, pedidos.length]);
 
   const pedidosFiltrados = pedidos.filter((p) => {
     const textoBuscado = busqueda.toLowerCase();
@@ -288,6 +325,14 @@ export default function Pedidos() {
                 </button>
               ))}
             </div>
+
+            {hayMas && (
+              <div className="pedadmin-cargar-mas">
+                <Button type="button" variant="secundario" onClick={cargarMas} disabled={cargandoMas}>
+                  {cargandoMas ? 'Cargando…' : 'Cargar más'}
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="pedadmin-form-panel" ref={formPanelRef}>

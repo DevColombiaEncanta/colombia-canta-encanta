@@ -191,6 +191,15 @@
     top: 68px;
     left: 0;
     bottom: 0;
+    /* ⭐ Bug real (encontrado en auditoría, 2026-08-31): la regla base de
+       arriba fija `height: 100vh` para el sticky de desktop — sin resetearla
+       acá, un elemento `fixed` con `top` + `height` + `bottom` los 3 a la vez
+       queda sobre-restringido (la spec de CSS ignora `bottom` en ese caso), y
+       la caja termina midiendo 100vh a partir de top:68px — 68px más alta que
+       la pantalla real. Con `document.body.style.overflow: hidden` mientras el
+       drawer está abierto, esa parte de abajo (justo el pie con el saludo y
+       "Cerrar sesión") quedaba inalcanzable en mobile/tablet. */
+    height: auto;
     z-index: 960;
     width: min(280px, 82vw);
     padding: 20px 16px 24px;

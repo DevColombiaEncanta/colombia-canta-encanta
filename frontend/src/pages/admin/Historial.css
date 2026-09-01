@@ -75,7 +75,9 @@
 }
 
 .histadmin-accion-crear { color: #1a8a4a; background: color-mix(in srgb, #1a8a4a 14%, transparent); }
-.histadmin-accion-editar { color: #B8860B; background: color-mix(in srgb, #B8860B 14%, transparent); }
+/* ⭐ Hallazgo real (auditoría Fase 5, 2026-08-31): mismo problema de contraste
+   que en Reservas/Pedidos/Inscripciones (#B8860B ~3.26:1 sobre blanco). */
+.histadmin-accion-editar { color: #8a6508; background: color-mix(in srgb, #8a6508 14%, transparent); }
 .histadmin-accion-borrar { color: var(--rojo); background: color-mix(in srgb, var(--rojo) 14%, transparent); }
 
 .histadmin-entidad {

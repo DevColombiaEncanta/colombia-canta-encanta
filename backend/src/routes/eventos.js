@@ -4,7 +4,7 @@ import { supabase } from '../config/supabaseClient.js';
 import { requireCsrf } from '../middleware/requireCsrf.js';
 import { logAudit } from '../lib/auditLog.js';
 import { uploadMiddleware, validarImagenReal, procesarYSubirImagen, borrarImagenPorUrl } from '../lib/imageUpload.js';
-import { booleanFromString, jsonArrayField, stripUndefined } from '../lib/zodMultipart.js';
+import { booleanFromString, jsonArrayField, nullableNumberFromString, stripUndefined } from '../lib/zodMultipart.js';
 import { generarSlugUnico } from '../lib/slug.js';
 import { toCamelCase } from '../lib/camelCase.js';
 import { errorGenerico } from '../lib/errores.js';
@@ -72,7 +72,14 @@ const baseEventoSchema = z.object({
   precio: z.string().trim().min(1, 'precio es obligatorio'),
   precio_detalle: z.string().trim().optional(),
   zonas: jsonArrayField(zonaSchema).optional(),
-  max_entradas: z.coerce.number().int('max_entradas debe ser un entero').positive('max_entradas debe ser mayor a 0').optional(),
+  // ⭐ Bug real encontrado en auditoría (2026-08-31): con solo `.optional()`,
+  // el frontend no puede volver a borrar el límite una vez puesto (si no se
+  // manda la clave, `stripUndefined` la descarta y el valor viejo queda
+  // pegado) -- mismo problema ya resuelto en cursos.js con `precio_numerico`/
+  // `matricula_numerico`. Acá esta ruta es multipart (por la imagen), así que
+  // se usa `nullableNumberFromString` en vez del `z.union` directo que usa
+  // cursos.js (JSON real) -- ver `zodMultipart.js`.
+  max_entradas: nullableNumberFromString(z.coerce.number().int('max_entradas debe ser un entero').positive('max_entradas debe ser mayor a 0')).optional(),
   cta: z.string().trim().min(1, 'cta es obligatorio').max(35, 'cta no puede pasar de 35 caracteres'),
   cta_wa: z.string().trim().max(18, 'cta_wa no puede pasar de 18 caracteres').optional(),
   color: hexColor,
@@ -300,6 +307,16 @@ router.delete('/:id', requireCsrf, async (req, res, next) => {
 
   const { error } = await supabase.from('eventos').delete().eq('id', id);
   if (error) {
+    // ⭐ Bug real (auditoría Fase 5, 2026-08-31): `reservas.evento_id` tiene
+    // `on delete restrict` (20260804140000_create_reservas.sql) — sin esto,
+    // borrar un evento con reservas reales caía en el mensaje genérico de
+    // `errorGenerico` en vez de explicar por qué. Mismo criterio ya usado en
+    // cursos.js (`traducirErrorCurso`) para su propio 23503 al borrar.
+    if (error.code === '23503') {
+      const err = new Error('No se puede borrar — hay reservas que dependen de este evento');
+      err.status = 409;
+      return next(err);
+    }
     return next(errorGenerico(error, 'DELETE /api/admin/eventos/:id'));
   }
 

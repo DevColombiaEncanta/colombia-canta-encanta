@@ -45,12 +45,23 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  /* ⭐ Hallazgo real (auditoría 2026-08-31): "Nombre · correo" (agregado hoy)
+     puede ser bastante más largo que un correo solo — sin `min-width: 0` acá,
+     un flex item nunca se encoge más allá del ancho de su contenido, así que
+     empujaba los botones de acciones fuera de la fila en vez de truncarse
+     (mismo criterio de truncado que ya usa `.admin-sidebar-usuario`). */
+  flex: 1 1 240px;
+  min-width: 0;
 }
 
 .adminsadmin-email {
   font-size: 14px;
   font-weight: 600;
   color: var(--texto-principal);
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .adminsadmin-meta {

@@ -76,6 +76,14 @@ export default function Bienvenida() {
   const [password, setPassword] = useState('');
   const [confirmar, setConfirmar] = useState('');
   const [mostrarPassword, setMostrarPassword] = useState(false);
+  // ⭐ Hallazgo real (auditoría 2026-08-31): el mensaje de error de este paso
+  // es uno solo, compartido entre nombre/contraseña/confirmar, y se mostraba
+  // al final del formulario sin ninguna asociación explícita a un campo — un
+  // lector de pantalla anunciaba el texto, pero no a qué input se refería.
+  // Se guarda acá a qué campo corresponde el error actual (mismo criterio de
+  // `aria-invalid`/`aria-describedby` que ya usa Login.jsx) sin reescribir la
+  // validación en sí (sigue siendo al enviar el formulario, no por campo).
+  const [campoError, setCampoError] = useState(null); // 'nombre' | 'password' | 'confirmar' | null
 
   // 2026-08-29, optimización a pedido del usuario: indicador de progreso.
   // Los 2 caminos posibles tienen 2 pasos cada uno, pero en distinto orden —
@@ -194,16 +202,21 @@ export default function Bienvenida() {
       const { data: sesionActual } = await supabase.auth.getSession();
       const token = sesionActual?.session?.access_token;
       if (!token) return;
-      await fetch(`${API_URL}/api/admin/perfil/nombre`, {
+      const res = await fetch(`${API_URL}/api/admin/perfil/nombre`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ nombre: nombre.trim() }),
       });
-    } catch {
-      // No bloquea el onboarding por esto -- el nombre es un saludo
-      // cosmético, no algo crítico como la contraseña o el MFA. Si falla, el
-      // admin queda sin nombre guardado (el panel simplemente muestra su
-      // correo en vez del saludo), sin perder acceso a la cuenta.
+      // ⭐ Hallazgo real (auditoría 2026-08-31): `fetch` solo rechaza (cae al
+      // catch) ante una falla de RED — una respuesta 400/401/429/500 resuelve
+      // normalmente y antes se ignoraba por completo, sin loguear nada. No se
+      // bloquea el onboarding por esto (el nombre es un saludo cosmético, no
+      // algo crítico como la contraseña o el MFA), pero al menos queda
+      // diagnosticable en la consola si alguien reporta "no me aparece mi
+      // nombre" más adelante.
+      if (!res.ok) console.error('No se pudo guardar el nombre del admin -', res.status);
+    } catch (err) {
+      console.error('No se pudo guardar el nombre del admin -', err.message);
     }
   }
 
@@ -222,21 +235,26 @@ export default function Bienvenida() {
   async function guardarPassword(e) {
     e.preventDefault();
     setError('');
+    setCampoError(null);
 
     if (tipo !== 'recovery' && !nombre.trim()) {
       setError('Ingresa tu nombre');
+      setCampoError('nombre');
       return;
     }
     if (password.length < MIN_PASSWORD) {
       setError(`La contraseña debe tener al menos ${MIN_PASSWORD} caracteres`);
+      setCampoError('password');
       return;
     }
     if (!REGEX_PASSWORD_SEGURA.test(password)) {
       setError('La contraseña debe combinar letras y números');
+      setCampoError('password');
       return;
     }
     if (password !== confirmar) {
       setError('Las contraseñas no coinciden');
+      setCampoError('confirmar');
       return;
     }
 
@@ -258,6 +276,7 @@ export default function Bienvenida() {
       }
     } catch (err) {
       setError(err.message);
+      setCampoError('password');
     } finally {
       setEnviando(false);
     }
@@ -377,6 +396,8 @@ export default function Bienvenida() {
                     onChange={(e) => setNombre(e.target.value)}
                     maxLength={MAX_NOMBRE}
                     autoFocus
+                    aria-invalid={campoError === 'nombre'}
+                    aria-describedby={campoError === 'nombre' ? 'bienvenida-password-error' : undefined}
                   />
                 </label>
               )}
@@ -389,6 +410,8 @@ export default function Bienvenida() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoFocus={tipo === 'recovery'}
+                    aria-invalid={campoError === 'password'}
+                    aria-describedby={campoError === 'password' ? 'bienvenida-password-error' : undefined}
                   />
                   <button
                     type="button"
@@ -408,11 +431,13 @@ export default function Bienvenida() {
                     type={mostrarPassword ? 'text' : 'password'}
                     value={confirmar}
                     onChange={(e) => setConfirmar(e.target.value)}
+                    aria-invalid={campoError === 'confirmar'}
+                    aria-describedby={campoError === 'confirmar' ? 'bienvenida-password-error' : undefined}
                   />
                 </div>
               </label>
               <p className="admin-login-hint">Mínimo {MIN_PASSWORD} caracteres, combinando letras y números.</p>
-              {error && <p className="admin-login-error" role="alert">{error}</p>}
+              {error && <p id="bienvenida-password-error" className="admin-login-error" role="alert">{error}</p>}
               <button type="submit" disabled={enviando}>{enviando ? 'Guardando…' : 'Continuar'}</button>
             </form>
           </>

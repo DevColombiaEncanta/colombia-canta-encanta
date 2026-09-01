@@ -6,10 +6,13 @@ import Button from '../../components/admin/ui/Button';
 import { formatearFechaHoraCompleta } from '../../utils/formato';
 import './Historial.css';
 
+// ⭐ Bug real (auditoría Fase 5, 2026-08-31): faltaba 'pedidos' -- el filtro
+// de "Sección" nunca ofrecía esa opción aunque el backend ya registraba y
+// (ahora) acepta filtrar por ella.
 const ENTIDADES = [
   'hero_slides', 'noticias', 'eventos', 'eventos_fijos', 'colecciones',
   'categorias_producto', 'productos', 'niveles', 'cursos', 'inscripciones',
-  'admins', 'reservas',
+  'admins', 'reservas', 'pedidos',
 ];
 const ACCIONES = ['crear', 'editar', 'borrar'];
 
@@ -26,6 +29,7 @@ const ENTIDAD_LABELS = {
   inscripciones: 'Inscripciones',
   admins: 'Administradores',
   reservas: 'Reservas',
+  pedidos: 'Pedidos',
 };
 
 const ACCION_LABELS = { crear: 'Creado', editar: 'Editado', borrar: 'Borrado' };

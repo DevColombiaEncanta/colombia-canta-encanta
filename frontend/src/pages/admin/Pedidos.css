@@ -62,6 +62,12 @@
   overflow-y: auto;
 }
 
+.pedadmin-cargar-mas {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
 .pedadmin-item {
   display: flex;
   flex-direction: column;
@@ -101,7 +107,10 @@
   text-transform: capitalize;
 }
 
-.pedadmin-estado-pendiente { color: #B8860B; }
+/* ⭐ Hallazgo real (auditoría Fase 5, 2026-08-31): #B8860B sobre blanco da
+   ~3.26:1, no cumple WCAG AA (4.5:1 para texto normal) — #8a6508 (misma
+   familia de color, más oscuro) da ~5.3:1. */
+.pedadmin-estado-pendiente { color: #8a6508; }
 .pedadmin-estado-pagado { color: #1a8a4a; }
 .pedadmin-estado-cancelado { color: var(--rojo); }
 .pedadmin-estado-enviado { color: #2563a8; }
