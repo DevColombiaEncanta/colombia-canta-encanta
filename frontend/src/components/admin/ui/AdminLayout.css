@@ -11,6 +11,19 @@
   flex-direction: column;
   padding: 116px 16px 24px;
   border-right: 1px solid var(--border-sutil);
+  /* ⭐ Bug real (2026-08-31, encontrado por el usuario): sin position/height
+     acá, este flex item se estira tanto como `.admin-contenido` (comportamiento
+     por default de un flex row, `align-items: stretch`) — en cualquier pantalla
+     con contenido más largo que una pantalla (Cursos, Productos, etc.) el pie
+     con el saludo y "Cerrar sesión" (`margin-top: auto`) terminaba MUY abajo,
+     al final de esa altura estirada, no del viewport — había que scrollear
+     toda la página para verlo. Con `sticky` + `height: 100vh` el sidebar queda
+     fijo a la altura visible de la pantalla sin importar cuánto mida el
+     contenido de al lado, así que el pie queda siempre a la vista. */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .admin-sidebar-footer {

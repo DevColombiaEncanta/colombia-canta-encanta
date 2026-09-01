@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 import ImageCropModal from './ImageCropModal';
+import ImagePositionModal from './ImagePositionModal';
+import Button from './Button';
 import { useObjectUrl } from '../../../hooks/useObjectUrl';
 
 // 5.2 · Subida de imagen con vista previa — reemplaza el campo "URL" del
@@ -20,10 +22,24 @@ import { useObjectUrl } from '../../../hooks/useObjectUrl';
 // cover` del sitio público sin que el admin lo vea venir (pedido del
 // usuario, 2026-08-16). Sin `aspecto` (ej. el Hero, que nunca recorta) se
 // mantiene el comportamiento de siempre.
-export default function ImageUploadField({ label, hint, recomendado, aspecto, valorActual, archivo, onChange, error, requerido }) {
+// `pedirPosicion` (booleano, 2026-08-31, pedido del usuario): mismo formato
+// de ventana modal que `aspecto`, pero sin recortar — para Hero, que guarda
+// la posición como 2 números aparte (`posicionX`/`posicionY`) en vez de
+// transformar el archivo. Mutuamente excluyente con `aspecto` en la
+// práctica (ninguna sección hoy necesita las dos cosas a la vez). A
+// diferencia del recorte, acá `onChange(archivo)` se llama de inmediato al
+// elegir la foto (el centrado 50/50 por defecto ya es válido) — el modal solo
+// AJUSTA la posición, cancelarlo no descarta la foto elegida. También se
+// puede reabrir en cualquier momento con el botón "Ajustar posición de la
+// foto", incluso sobre una imagen ya guardada, sin volver a subir nada.
+export default function ImageUploadField({
+  label, hint, recomendado, aspecto, valorActual, archivo, onChange, error, requerido,
+  pedirPosicion, posicionX, posicionY, onPosicionChange,
+}) {
   const inputRef = useRef(null);
   const [arrastrando, setArrastrando] = useState(false);
   const [archivoParaRecortar, setArchivoParaRecortar] = useState(null);
+  const [ajustandoPosicion, setAjustandoPosicion] = useState(false);
   const previewUrl = useObjectUrl(archivo);
 
   const imagenAMostrar = previewUrl || valorActual;
@@ -31,8 +47,12 @@ export default function ImageUploadField({ label, hint, recomendado, aspecto, va
   function manejarArchivos(files) {
     const nuevo = files?.[0];
     if (!nuevo) return;
-    if (aspecto) setArchivoParaRecortar(nuevo);
-    else onChange(nuevo);
+    if (aspecto) {
+      setArchivoParaRecortar(nuevo);
+    } else {
+      onChange(nuevo);
+      if (pedirPosicion) setAjustandoPosicion(true);
+    }
   }
 
   return (
@@ -93,12 +113,29 @@ export default function ImageUploadField({ label, hint, recomendado, aspecto, va
       {!archivo && !valorActual && requerido && <p className="admin-upload-nombre">Todavía no se ha subido ninguna foto</p>}
       {error && <span className="admin-field-error" role="alert">{error}</span>}
 
+      {pedirPosicion && imagenAMostrar && (
+        <Button type="button" variant="secundario" className="admin-upload-ajustar-posicion" onClick={() => setAjustandoPosicion(true)}>
+          Ajustar posición de la foto
+        </Button>
+      )}
+
       {archivoParaRecortar && (
         <ImageCropModal
           archivo={archivoParaRecortar}
           aspecto={aspecto}
           onListo={(recortado) => { onChange(recortado); setArchivoParaRecortar(null); }}
           onCancelar={() => setArchivoParaRecortar(null)}
+        />
+      )}
+
+      {ajustandoPosicion && (
+        <ImagePositionModal
+          archivo={archivo}
+          imagenUrl={valorActual}
+          x={posicionX}
+          y={posicionY}
+          onListo={(x, y) => { onPosicionChange(x, y); setAjustandoPosicion(false); }}
+          onCancelar={() => setAjustandoPosicion(false)}
         />
       )}
     </div>

@@ -6,10 +6,8 @@ import FormField from '../../components/admin/ui/FormField';
 import Checkbox from '../../components/admin/ui/Checkbox';
 import Button from '../../components/admin/ui/Button';
 import ImageUploadField from '../../components/admin/ui/ImageUploadField';
-import ImagePositionPicker from '../../components/admin/ui/ImagePositionPicker';
 import ConfirmDialog from '../../components/admin/ui/ConfirmDialog';
 import HelpTooltip from '../../components/admin/ui/HelpTooltip';
-import { useObjectUrl } from '../../hooks/useObjectUrl';
 import './Hero.css';
 
 const CTA_VACIO = () => ({ label: '', to: '', primario: false });
@@ -68,12 +66,6 @@ function HeroForm({ slide, ordenSugerido, onGuardado, onBorrado, onAviso, aviso,
   const [guardando, setGuardando] = useState(false);
   const [confirmandoBorrar, setConfirmandoBorrar] = useState(false);
   const [borrando, setBorrando] = useState(false);
-
-  // Preview para el picker de posición: la foto recién elegida (todavía sin
-  // subir) tiene prioridad sobre la ya guardada — mismo criterio que el resto
-  // del panel para mostrar "lo que se va a ver" antes de guardar.
-  const previewImagenNueva = useObjectUrl(archivoImagen);
-  const previewImagen = previewImagenNueva || slide?.imagen || null;
 
   function actualizarCampo(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }));
@@ -268,21 +260,11 @@ function HeroForm({ slide, ordenSugerido, onGuardado, onBorrado, onAviso, aviso,
           onChange={setArchivoImagen}
           error={errores.imagen}
           requerido={!slide}
+          pedirPosicion
+          posicionX={form.posicionX}
+          posicionY={form.posicionY}
+          onPosicionChange={(x, y) => setForm((f) => ({ ...f, posicionX: x, posicionY: y }))}
         />
-
-        {previewImagen && (
-          <FormField
-            label="Posición de la foto"
-            hint="Arrastra (o usa las flechas del teclado) para elegir qué parte queda centrada — la foto completa se sube igual, sin recortar."
-          >
-            <ImagePositionPicker
-              imagenUrl={previewImagen}
-              x={form.posicionX}
-              y={form.posicionY}
-              onChange={(x, y) => setForm((f) => ({ ...f, posicionX: x, posicionY: y }))}
-            />
-          </FormField>
-        )}
 
         {errorGeneral && <p className="admin-page-error">{errorGeneral}</p>}
 

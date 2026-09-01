@@ -559,6 +559,11 @@
   margin: 8px 0 0;
 }
 
+/* --- Posición sin recortar (Hero, ImagePositionModal.jsx, 2026-08-31) --- */
+.admin-upload-ajustar-posicion {
+  margin-top: 10px;
+}
+
 /* --- Subida de galería (varias fotos, ver GaleriaUploadField.jsx, 5.3a) --- */
 .admin-upload-compacto .admin-upload-vacio {
   padding: 24px 16px;
