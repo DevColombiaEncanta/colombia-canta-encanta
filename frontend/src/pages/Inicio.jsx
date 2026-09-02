@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { BASE_URL, OG_IMAGE } from '../utils/seo';
 import Hero from '../components/Hero/Hero';
+import SeparadorTribal from '../components/SeparadorTribal/SeparadorTribal';
 
 const PAGE_TITLE = 'Colombia Canta y Encanta | Asociación Cultural en Medellín';
 const PAGE_DESC = 'Asociación cultural colombiana en Medellín. Escuela de música, eventos y folclor: bambuco, pasillo, cumbia y más. Sede en el Sector Estadio.';
@@ -42,6 +43,7 @@ export default function Inicio() {
         <meta name="twitter:image" content={OG_IMAGE} />
       </Helmet>
       <Hero />
+      <SeparadorTribal />
       <Historia />
       <CarruselEventos />
       <Escuela />

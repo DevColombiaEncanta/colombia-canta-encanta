@@ -1,13 +1,15 @@
-﻿import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+﻿import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import ProductoModal from '../components/ProductoModal/ProductoModal';
+import TiendaHero from '../components/TiendaHero/TiendaHero';
+import TiendaPaneles from '../components/TiendaPaneles/TiendaPaneles';
 import ContactoSection from '../components/Contacto/Contacto';
 import Footer from '../components/Footer/Footer';
 import { useProductos } from '../hooks/useProductos';
 import { useColecciones } from '../hooks/useColecciones';
 import { useCategoriasProducto } from '../hooks/useCategoriasProducto';
 import { formatCOP } from '../utils/formato';
+import { scrollSuaveA } from '../utils/scroll';
 import { BASE_URL, OG_IMAGE } from '../utils/seo';
 import './Tienda.css';
 
@@ -16,33 +18,9 @@ const PAGE_DESC = 'Merch oficial de Colombia Canta y Encanta: camisetas, hoodies
 
 const CATEGORIA_TODOS = 'Todos';
 
-const heroSlides = [
-  {
-    img: 'tienda-hero/sonidos-que-nos-unen.webp',
-    tagline: 'SONIDOS QUE NOS UNEN',
-    parrafo: 'Piezas que cuentan historias, inspiradas en lo que somos, en nuestra gente y en la música que nos mueve.',
-    cta: 'VER COLECCIÓN',
-  },
-  {
-    img: 'tienda-hero/viste-lo-que-sientes-1.webp',
-    tagline: 'VISTE LO QUE SIENTES',
-    parrafo: 'Diseños únicos para llevar contigo tu orgullo, a donde quiera que vayas.',
-    cta: 'COMPRAR AHORA',
-  },
-  {
-    img: 'tienda-hero/viste-lo-que-sientes-2.webp',
-    tagline: 'VISTE LO QUE SIENTES',
-    parrafo: 'Diseños únicos para llevar contigo tu orgullo, a donde quiera que vayas.',
-    cta: 'COMPRAR AHORA',
-  },
-];
-
-const visteImgs = [
-  'tienda-hero/viste-lo-que-sientes-1.webp',
-  'tienda-hero/viste-lo-que-sientes-2.webp',
-];
-
 export default function Tienda() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { productos, cargando: cargandoProductos, error: errorProductos } = useProductos();
   const { colecciones, cargando: cargandoColecciones, error: errorColecciones } = useColecciones();
   const { categorias, cargando: cargandoCategorias, error: errorCategorias } = useCategoriasProducto();
@@ -50,10 +28,42 @@ export default function Tienda() {
   const [coleccionActiva, setColeccionActiva] = useState(null);
   const [categoriaActiva, setCategoriaActiva] = useState(CATEGORIA_TODOS);
   const [ordenarPor, setOrdenarPor] = useState('relevancia');
-  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
-  const [toast, setToast] = useState(null);
-  const [heroSlideActivo, setHeroSlideActivo] = useState(0);
-  const [visteActivo, setVisteActivo] = useState(0);
+
+  // Pedido del usuario (2026-09-02): al volver desde el detalle de un
+  // producto ("Volver a la tienda"), la idea es aterrizar sobre la tarjeta
+  // de ESE producto en la grilla, no arriba de todo — mismo criterio en
+  // reversa que el scroll directo al producto al entrar. El id viaja como
+  // `state` de router (ver el Link en ProductoDetalle.jsx), no por query
+  // param, para no ensuciar la URL de la tienda.
+  const volverAProductoId = location.state?.volverAProductoId ?? null;
+  const [resaltadoId, setResaltadoId] = useState(null);
+
+  useEffect(() => {
+    if (!volverAProductoId || productos.length === 0) return;
+    const prod = productos.find(p => p.id === volverAProductoId);
+    if (!prod) return;
+    // La colección/categoría activa puede no ser la del producto al que se
+    // vuelve — sin esto, la tarjeta ni siquiera estaría en la grilla actual.
+    setColeccionActiva(prod.coleccionId);
+    setCategoriaActiva(CATEGORIA_TODOS);
+    setResaltadoId(prod.id);
+  }, [volverAProductoId, productos]);
+
+  useEffect(() => {
+    if (!resaltadoId) return;
+    // `scrollSuaveA` (duración fija) en vez de `scrollIntoView({behavior:
+    // 'smooth'})` — pedido del usuario (2026-09-02): la vuelta a un producto
+    // lejos en la grilla se sentía lenta, porque el navegador alarga la
+    // animación nativa según la distancia a recorrer.
+    const raf = requestAnimationFrame(() => {
+      const el = document.getElementById(`producto-${resaltadoId}`);
+      if (!el) return;
+      const y = el.getBoundingClientRect().top + window.scrollY - (window.innerHeight / 2) + (el.offsetHeight / 2);
+      scrollSuaveA(Math.max(y, 0));
+    });
+    const timer = setTimeout(() => setResaltadoId(null), 1800);
+    return () => { cancelAnimationFrame(raf); clearTimeout(timer); };
+  }, [resaltadoId]);
 
   const cargando = cargandoProductos || cargandoColecciones || cargandoCategorias;
   const error = errorProductos || errorColecciones || errorCategorias;
@@ -71,20 +81,6 @@ export default function Tienda() {
     setColeccionActiva(colecciones[0].id);
   }
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      setHeroSlideActivo(i => (i + 1) % heroSlides.length);
-    }, 5000);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setVisteActivo(i => (i + 1) % visteImgs.length);
-    }, 5000);
-    return () => clearInterval(id);
-  }, []);
-
   const filtrados = productos
     .filter(p => p.coleccionId === coleccionActiva)
     .filter(p => categoriaActiva === CATEGORIA_TODOS || p.categoriaId === categoriaActiva)
@@ -95,11 +91,6 @@ export default function Tienda() {
     });
 
   const coleccionLabel = colecciones.find(c => c.id === coleccionActiva)?.nombre ?? 'PRODUCTOS';
-
-  const handleAgregarSuccess = (nombre) => {
-    setToast(`"${nombre}" agregado al carrito`);
-    setTimeout(() => setToast(null), 2500);
-  };
 
   return (
     <main className="tienda-layout-raiz">
@@ -120,60 +111,8 @@ export default function Tienda() {
         <meta name="twitter:image" content={OG_IMAGE} />
       </Helmet>
 
-      {/* 1. Hero editorial asimétrico */}
-      <section className="tienda-editorial-hero">
-        <div
-          className="hero-col-izq"
-          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.65) 15%, transparent 60%), url(${import.meta.env.BASE_URL}tienda-hero/sonidos-que-nos-unen.webp)` }}
-        >
-          <div className="hero-editorial-contenido">
-            <h2 className="hero-ed-tagline">SONIDOS QUE NOS UNEN</h2>
-            <p className="hero-ed-parrafo">Piezas que cuentan historias, inspiradas en lo que somos, en nuestra gente y en la música que nos mueve.</p>
-            <button className="hero-ed-btn">VER COLECCIÓN</button>
-          </div>
-        </div>
-        <div className="hero-col-der">
-          {visteImgs.map((img, i) => (
-            <div
-              key={i}
-              className="hero-col-der-bg"
-              style={{
-                backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.65) 15%, transparent 60%), url(${import.meta.env.BASE_URL}${img})`,
-                opacity: i === visteActivo ? 1 : 0,
-              }}
-            />
-          ))}
-          <div className="hero-editorial-contenido">
-            <h2 className="hero-ed-tagline">VISTE LO QUE SIENTES</h2>
-            <p className="hero-ed-parrafo">Diseños únicos para llevar contigo tu orgullo, a donde quiera que vayas.</p>
-            <button className="hero-ed-btn">COMPRAR AHORA</button>
-          </div>
-        </div>
-      </section>
-
-      {/* 1b. Hero como carrusel único — solo tablet/mobile */}
-      <section className="tienda-hero-carrusel">
-        <div
-          className="hero-carrusel-slide"
-          style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.65) 15%, transparent 60%), url(${import.meta.env.BASE_URL}${heroSlides[heroSlideActivo].img})` }}
-        >
-          <div className="hero-editorial-contenido">
-            <h2 className="hero-ed-tagline">{heroSlides[heroSlideActivo].tagline}</h2>
-            <p className="hero-ed-parrafo">{heroSlides[heroSlideActivo].parrafo}</p>
-            <button className="hero-ed-btn">{heroSlides[heroSlideActivo].cta}</button>
-          </div>
-        </div>
-        <div className="hero-carrusel-dots">
-          {heroSlides.map((_, i) => (
-            <button
-              key={i}
-              className={`hero-carrusel-dot${i === heroSlideActivo ? ' activo' : ''}`}
-              onClick={() => setHeroSlideActivo(i)}
-              aria-label={`Ver imagen ${i + 1}`}
-            />
-          ))}
-        </div>
-      </section>
+      {/* 1. Hero editorial (compartido con ProductoDetalle, ver TiendaHero.jsx) */}
+      <TiendaHero />
 
       {/* 2. Ticker de anuncios */}
       <div className="tienda-anuncios-ticker">
@@ -261,8 +200,9 @@ export default function Tienda() {
             {filtrados.map(prod => (
               <div
                 key={prod.id}
-                className="producto-card"
-                onClick={() => setProductoSeleccionado(prod)}
+                id={`producto-${prod.id}`}
+                className={`producto-card${resaltadoId === prod.id ? ' producto-card--resaltado' : ''}`}
+                onClick={() => navigate(`/tienda/producto/${prod.id}`)}
               >
                 {/* Zona imagen */}
                 <div className="producto-card-imagen" style={{ background: prod.bg }}>
@@ -282,9 +222,9 @@ export default function Tienda() {
                   {/* Barra hover */}
                   <div
                     className="producto-card-hover-bar"
-                    onClick={(e) => { e.stopPropagation(); setProductoSeleccionado(prod); }}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/tienda/producto/${prod.id}`); }}
                   >
-                    <span>Añadir al carrito</span>
+                    <span>Ver producto</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                       <line x1="3" y1="6" x2="21" y2="6" />
@@ -310,46 +250,8 @@ export default function Tienda() {
         </div>
       </section>
 
-      {/* 6. Paneles inferiores: siempre visibles */}
-      <section className="seccion-paneles-inferiores">
-        <div className="container-tienda">
-          <div className="grid-paneles-dobles">
-            <div
-              className="panel-inferior-item hecho-en-colombia"
-              style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.6) 10%, transparent 65%), url(${import.meta.env.BASE_URL}tienda-paneles/hecho-en-colombia.webp)` }}
-            >
-              <div className="panel-inf-contenido">
-                <h2 className="panel-inf-titulo">❤️ HECHO EN COLOMBIA</h2>
-                <p className="panel-inf-texto">Diseñado y producido localmente con orgullo y propósito.</p>
-              </div>
-            </div>
-            <div
-              className="panel-inferior-item accesorios-destacados"
-              style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.6) 10%, transparent 65%), url(${import.meta.env.BASE_URL}tienda-paneles/accesorios.webp)` }}
-            >
-              <div className="panel-inf-contenido">
-                <h2 className="panel-inf-titulo">✨ ACCESORIOS</h2>
-                <p className="panel-inf-texto">Pequeños detalles que dicen grandes cosas.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Toast */}
-      {toast && (
-        <div className="tienda-toast" role="status">✓ {toast}</div>
-      )}
-
-      {/* Modal de producto */}
-      {productoSeleccionado && (
-        <ProductoModal
-          producto={productoSeleccionado}
-          categoriaNombre={categorias.find(c => c.id === productoSeleccionado.categoriaId)?.nombre}
-          onClose={() => setProductoSeleccionado(null)}
-          onAgregarSuccess={handleAgregarSuccess}
-        />
-      )}
+      {/* 6. Paneles inferiores (compartido con ProductoDetalle, ver TiendaPaneles.jsx) */}
+      <TiendaPaneles />
 
       <ContactoSection />
       <Footer />

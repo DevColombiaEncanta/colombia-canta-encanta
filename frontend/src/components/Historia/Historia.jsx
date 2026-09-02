@@ -122,7 +122,7 @@ export default function Historia() {
           </div>
         </div>
         <Link to="/nosotros" className="btn btn-azul">
-          Conoce nuestra historia →
+          Conoce nuestra historia
         </Link>
       </div>
     </section>

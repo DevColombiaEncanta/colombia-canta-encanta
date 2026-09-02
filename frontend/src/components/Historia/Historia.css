@@ -9,7 +9,9 @@
   margin: 0 auto;
   max-width: 1200px;
   padding: 24px 24px 0;
-  border-top: 1px solid var(--border-sutil);
+  /* Sin `border-top` — el límite con el Hero ahora lo marca la franja
+     tribal (ver SeparadorTribal.jsx en Inicio.jsx); una línea recta debajo
+     se sentía redundante. */
   overflow: hidden;
 }
 
@@ -17,6 +19,26 @@
   grid-column: 1 / -1;
   padding-bottom: 16px;
   text-align: center;
+}
+
+/* Separador — pequeña franja tricolor a modo de bandera de Colombia (2:1:1,
+   mismos colores que `.footer-bandera`), debajo del antetítulo. Pedido del
+   usuario (2026-09-02): de vuelta en desktop también (se había sacado, junto
+   con el antetítulo, en una vuelta anterior) — mismo criterio que ya usan
+   Eventos/Noticias en todos los anchos. */
+.historia-seccion-label::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 8px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #fcd116 0%, #fcd116 50%,
+    #003087 50%, #003087 75%,
+    #ce1126 75%, #ce1126 100%
+  );
 }
 
 /* ── Contenido ──────────────────────────── */
@@ -278,40 +300,88 @@
 @media (max-width: 1024px) {
   .historia-section {
     grid-template-columns: 1fr;
-    margin: 32px 0;
+    margin: 24px 0;
     justify-items: center;
   }
 
-  .historia-carrusel,
+  .historia-seccion-label {
+    padding-bottom: 4px;
+  }
+
+  /* Pedido del usuario (2026-09-02): en tablet/mobile el título debe quedar
+     justo debajo de "Quiénes Somos" y ANTES del carrusel de fotos (en
+     desktop va dentro de `.historia-contenido`, junto al resto del texto, a
+     la derecha del carrusel — layout que no se toca). `display: contents`
+     "desarma" el contenedor para que sus hijos se puedan reordenar junto al
+     carrusel con `order`, sin duplicar el título en el JSX ni afectar el
+     grid de desktop. */
   .historia-contenido {
+    display: contents;
+  }
+
+  .historia-carrusel,
+  .historia-contenido h2,
+  .historia-contenido p,
+  .historia-reconocimiento,
+  .historia-stats {
     width: 100%;
-    margin: 0 auto;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .historia-contenido h2 {
+    order: 1;
     text-align: center;
+    /* Mismo hallazgo que en Escuela.css: sin resetear, el margen superior
+       por defecto del navegador se sumaba al espacio ya dado por el nuevo
+       separador de arriba. */
+    margin-top: 0;
+  }
+
+  .historia-carrusel {
+    order: 2;
+    /* La base trae `padding-left: 24px` pensado para dejarle aire a las
+       flechas prev/next en desktop — acá no se usan (el carrusel es
+       autorrotable, sin controles) y ese padding asimétrico corría la foto
+       hacia la derecha en vez de dejarla centrada (pedido del usuario,
+       2026-09-02). */
+    padding-left: 0;
   }
 
   .historia-contenido p {
+    order: 3;
     text-align: justify;
   }
 
+  .historia-reconocimiento {
+    order: 4;
+  }
+
   .historia-stats {
+    order: 5;
     gap: 20px;
     flex-wrap: wrap;
+  }
+
+  /* Sin ancho forzado: como grid item bajo `justify-items: center`, un
+     botón centrado a su tamaño natural es el comportamiento por defecto. */
+  .historia-contenido a.btn {
+    order: 6;
   }
 }
 
 /* ── Tablet (600px–1024px): formato más grande, no tan apretado como mobile ── */
 @media (min-width: 600px) and (max-width: 1024px) {
-  .historia-carrusel {
-    min-height: 360px;
+  .historia-carrusel,
+  .historia-contenido h2,
+  .historia-contenido p,
+  .historia-reconocimiento,
+  .historia-stats {
     max-width: 640px;
   }
 
-  .historia-contenido {
-    padding: 40px 32px;
-    max-width: 640px;
+  .historia-carrusel {
+    min-height: 360px;
   }
 
   .historia-contenido h2 {
@@ -334,25 +404,90 @@
   .stat-label {
     font-size: 13px;
   }
+
+  /* Pedido del usuario (2026-09-02): en tablet el botón queda angosto en
+     medio de mucho espacio vacío a los lados. Primera versión (una "greca"
+     ondulada) no convenció — se veía muy parecida a los trazos de un boceto
+     a mano; esta es más discreta: un rombo pequeño junto al botón y una
+     línea que se desvanece hacia afuera, mismo lenguaje que ya usa el sitio
+     en `.testimonios-divider`/`.eventos-ac-destacados-titulo` (línea +
+     rombo). `::after` va a la derecha del botón; `::before` reutiliza el
+     mismo dibujo reflejado (`scaleX(-1)`) para la izquierda, así el rombo
+     siempre queda pegado al botón y la línea se difumina hacia el borde. */
+  .historia-contenido a.btn {
+    position: relative;
+  }
+
+  .historia-contenido a.btn::before,
+  .historia-contenido a.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 110px;
+    height: 16px;
+    transform: translateY(-50%);
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='110'%20height='16'%20viewBox='0%200%20110%2016'%3E%3Crect%20x='4'%20y='5'%20width='6'%20height='6'%20fill='%23ff5c8d'%20transform='rotate(45%207%208)'/%3E%3Cline%20x1='16'%20y1='8'%20x2='104'%20y2='8'%20stroke='%23ff5c8d'%20stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    /* El desvanecido se hace con `mask` en vez de un gradiente adentro del
+       SVG — más confiable dentro de un data URI (la referencia `url(#id)` a
+       un gradiente propio del SVG es frágil una vez codificada). El mask
+       viaja con el `transform: scaleX(-1)` del `::before`, así el
+       desvanecido siempre queda hacia afuera del botón en ambos lados. */
+    -webkit-mask-image: linear-gradient(to right, #000 0%, #000 20%, transparent 90%);
+    mask-image: linear-gradient(to right, #000 0%, #000 20%, transparent 90%);
+    pointer-events: none;
+  }
+
+  .historia-contenido a.btn::after {
+    left: 100%;
+    margin-left: 10px;
+  }
+
+  .historia-contenido a.btn::before {
+    right: 100%;
+    margin-right: 10px;
+    transform: translateY(-50%) scaleX(-1);
+  }
 }
 
+/* Pedido del usuario (2026-09-02): en mobile la sección se veía
+   desproporcionadamente alta (~1.6x el alto de pantalla) — se recortan
+   paddings/márgenes y se baja el tamaño de párrafo (18px venía heredado
+   del ajuste pensado para tablet, demasiado grande en mobile). */
 @media (max-width: 599px) {
   .historia-slide {
     width: 100%;
   }
 
-  .historia-carrusel {
-    min-height: 220px;
+  .historia-carrusel,
+  .historia-contenido h2,
+  .historia-contenido p,
+  .historia-reconocimiento,
+  .historia-stats {
     max-width: 480px;
   }
 
-  .historia-contenido {
-    padding: 32px 24px;
-    max-width: 480px;
+  .historia-carrusel {
+    min-height: 190px;
   }
 
   .historia-contenido p {
-    font-size: 18px;
-    line-height: 1.75;
+    font-size: 15px;
+    line-height: 1.65;
+    margin-bottom: 12px;
+  }
+
+  .historia-reconocimiento {
+    margin-bottom: 12px;
+  }
+
+  .historia-stats {
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .stat-item {
+    padding: 8px 10px;
   }
 }

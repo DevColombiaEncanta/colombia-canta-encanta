@@ -1,0 +1,639 @@
+/* ==========================================
+   PRODUCTO DETALLE — página propia (reemplaza el quick-view modal)
+   ========================================== */
+
+/* Pedido del usuario (2026-09-02): pasar de la Tienda (o de un producto a
+   otro vía `.pd-vecinos`) se sentía "brusco" — de una foto a otra sin
+   ninguna transición. Este componente se remonta entero por cada producto
+   (`key={producto.id}`), así que una animación de entrada en el mismo mount
+   alcanza para los 2 casos (entrar desde la grilla y cambiar de producto)
+   sin lógica extra. */
+.pd-pagina {
+  background: var(--bg-body);
+  min-height: 60vh;
+  padding: 32px 0 64px;
+  animation: pd-entrada 0.4s ease both;
+}
+
+@keyframes pd-entrada {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-pagina {
+    animation: none;
+  }
+}
+
+.pd-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* ---- Breadcrumb "volver" ----
+   Ajuste pedido por el usuario (2026-09-02): la barra grande de arriba con
+   volver + anterior + siguiente no convencía en ningún tamaño de pantalla.
+   Volver queda como un breadcrumb chico y discreto (no le compite atención
+   al producto); anterior/siguiente se movieron abajo de toda la ficha, ver
+   `.pd-vecinos*`. */
+.pd-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-secundario);
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: color 0.15s ease;
+}
+
+.pd-breadcrumb:hover {
+  color: var(--coral);
+}
+
+/* ---- Cuerpo: galería + info ----
+   Tamaños reducidos (pedido del usuario, 2026-09-01): la columna de galería
+   tenía un ancho flexible que en desktop terminaba ocupando ~700px — un
+   ancho fijo y más moderado se ve "de tamaño ideal" en vez de gigante.
+   `align-items: start` para que cada columna quede a la altura de su propio
+   contenido (sin sticky en `.pd-info`, no hace falta que ambas columnas
+   compartan la misma altura — pedido del usuario, 2026-09-02: prefiere la
+   ficha sin ese comportamiento). */
+.pd-cuerpo {
+  display: grid;
+  grid-template-columns: 460px minmax(0, 1fr);
+  gap: 44px;
+  align-items: start;
+}
+
+/* ---- Galería ----
+   Pedido explícito del usuario: la foto del producto se tiene que ver
+   COMPLETA en cualquier responsividad — `object-fit: contain` (en vez de
+   `cover`) nunca recorta, aunque dependiendo del aspect-ratio real de la
+   foto puede dejar franjas del fondo (`producto.bg`, ya lo pinta el propio
+   frame) a los costados o arriba/abajo. Sin viñeta oscura — esa estaba
+   pensada para una foto a sangre completa (cover), con contain se vería
+   oscureciendo el fondo alrededor de la foto en vez de sus bordes. */
+.pd-galeria-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pd-galeria-foto {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pd-emoji {
+  font-size: 160px;
+  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.45));
+  position: relative;
+  z-index: 1;
+}
+
+.pd-thumbs {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.pd-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid var(--border-media);
+  padding: 0;
+  background: var(--bg-surface);
+  flex-shrink: 0;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.pd-thumb.activo {
+  border-color: var(--coral);
+  transform: scale(1.05);
+}
+
+.pd-thumb:hover:not(.activo) {
+  border-color: var(--texto-secundario);
+}
+
+.pd-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* ---- Info ----
+   `.pd-info-col` es el grid item real; `min-width: 0` es el arreglo
+   clásico de grid para que el texto largo (nombre del producto, etc.) pueda
+   truncarse/ajustarse en vez de desbordar la columna. Sin `position: sticky`
+   a propósito — se probó y funcionaba, pero el usuario prefiere la ficha
+   sin ese comportamiento (2026-09-02). */
+.pd-info-col {
+  min-width: 0;
+}
+
+.pd-info {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* `.label-seccion` (global, main.css) trae `align-self: center` pensado para
+   contextos donde no es hijo directo de un flex — acá sí lo es, y sin este
+   override queda centrada mientras el resto de la columna (título, precio)
+   sigue alineado a la izquierda. */
+.pd-info > .label-seccion {
+  align-self: flex-start;
+}
+
+.pd-titulo {
+  font-family: var(--font-titulo);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  margin: 6px 0 0;
+  line-height: 1.15;
+}
+
+.pd-precio-fila {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pd-precio {
+  font-family: var(--font-titulo);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--coral);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.pd-precio-moneda {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-secundario);
+  letter-spacing: 0.03em;
+}
+
+.pd-precio-usd {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--texto-secundario);
+}
+
+.pd-stock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-family: var(--font-cuerpo);
+  font-size: 12px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.pd-stock-disponible {
+  background: rgba(22, 163, 74, 0.12);
+  color: #16A34A;
+}
+
+.pd-stock-agotado {
+  background: rgba(239, 68, 68, 0.12);
+  color: #EF4444;
+}
+
+.pd-stock-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.pd-descripcion {
+  font-family: var(--font-cuerpo);
+  font-size: 14px;
+  color: var(--texto-secundario);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.pd-label {
+  font-family: var(--font-cuerpo);
+  font-size: 13px;
+  color: var(--texto-secundario);
+  margin-bottom: 10px;
+}
+
+.pd-label strong {
+  color: var(--texto-principal);
+}
+
+/* ---- Colores ---- */
+.pd-colores-grupo {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pd-color-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--swatch-color);
+  border: none;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px rgba(0, 0, 0, 0.15);
+  outline: 2px solid transparent;
+  outline-offset: 0px;
+  transition: transform 0.15s, outline-offset 0.15s, outline-color 0.15s;
+}
+
+.pd-color-swatch.activo {
+  outline-color: var(--coral);
+  outline-offset: 3px;
+  transform: scale(1.1);
+}
+
+.pd-color-swatch:hover:not(.activo) {
+  transform: scale(1.1);
+}
+
+.pd-color-swatch:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  box-shadow: inset 0 0 0 1.5px rgba(0, 0, 0, 0.15), inset 0 0 0 100px rgba(128, 128, 128, 0.4);
+}
+
+.pd-color-swatch:disabled:hover {
+  transform: none;
+}
+
+/* ---- Tallas ---- */
+.pd-tallas-grupo {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pd-talla-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-media);
+  background: var(--bg-surface);
+  color: var(--texto-principal);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-cuerpo);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.pd-talla-btn:hover:not(.activo) {
+  border-color: var(--coral);
+  color: var(--coral);
+}
+
+.pd-talla-btn.activo {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: #fff;
+}
+
+.pd-talla-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.pd-talla-btn:disabled:hover {
+  border-color: var(--border-media);
+  color: var(--texto-principal);
+}
+
+/* ---- Cantidad ---- */
+.pd-cantidad-control {
+  display: flex;
+  align-items: center;
+}
+
+.pd-cantidad-btn {
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--border-media);
+  background: var(--bg-surface);
+  color: var(--texto-principal);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-cuerpo);
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.pd-cantidad-btn:first-child {
+  border-radius: 8px 0 0 8px;
+  border-right: none;
+}
+
+.pd-cantidad-btn:last-child {
+  border-radius: 0 8px 8px 0;
+  border-left: none;
+}
+
+.pd-cantidad-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.pd-cantidad-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pd-cantidad-num {
+  width: 52px;
+  height: 38px;
+  border: 1.5px solid var(--border-media);
+  border-left: none;
+  border-right: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  background: var(--bg-card);
+}
+
+.pd-cantidad-max {
+  margin-left: 10px;
+  font-size: 12px;
+  color: var(--texto-secundario);
+  opacity: 0.75;
+}
+
+/* ---- Botón agregar ---- */
+.pd-btn-agregar {
+  width: 100%;
+  justify-content: center;
+  padding: 15px;
+  font-size: 15px;
+}
+
+/* ---- Seguir explorando (anterior/siguiente) ----
+   De vuelta arriba de la foto (2026-09-02, pedido del usuario) — abajo del
+   todo no convencía, sobre todo en tablet/mobile. El separador pasa de
+   arriba (cuando vivía después del contenido) a abajo (ahora separa esto de
+   la galería que viene después). */
+.pd-vecinos {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-sutil);
+}
+
+.pd-vecinos-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+  margin-bottom: 16px;
+}
+
+.pd-vecinos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pd-vecino-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1.5px solid var(--border-media);
+  background: var(--bg-card);
+  text-decoration: none;
+  min-width: 0;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.pd-vecino-card:hover {
+  border-color: var(--coral);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Bug real encontrado verificando este ajuste (2026-09-02): con `flex: 1`
+   en `.pd-vecino-texto`, ese ítem SIEMPRE crece hasta encontrarse con la
+   foto (tamaño fijo) — juntos ocupan el ancho completo de la tarjeta sin
+   importar la dirección. `row-reverse` ubica el "inicio" del eje principal
+   a la derecha, así que el texto (1er hijo del DOM) crecía DESDE la
+   derecha, empujando la foto hacia la IZQUIERDA — el resultado real era
+   idéntico a "anterior" en vez de reflejado. `row` (sin invertir) es lo que
+   de verdad deja la foto pegada al borde derecho, porque acá el texto (1er
+   hijo) crece desde la izquierda y la foto (2do hijo) quede al final. */
+.pd-vecino-card--siguiente {
+  flex-direction: row;
+  text-align: right;
+}
+
+.pd-vecino-card--vacio {
+  border-color: transparent;
+  background: transparent;
+}
+
+.pd-vecino-foto {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pd-vecino-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pd-vecino-emoji {
+  font-size: 28px;
+}
+
+/* Bug real reportado por el usuario (2026-09-02, responsividad 320-598px):
+   sin `flex-grow`, el texto ocupaba solo su ancho de contenido y la foto
+   quedaba pegada justo al lado (no al borde derecho de la tarjeta) — se
+   notaba en la card "siguiente" al pasar de `row-reverse` (desktop) a
+   `row` (mobile), donde el orden del DOM (texto, foto) ya no alcanzaba para
+   empujar la foto sola al extremo. `flex: 1` fuerza al texto a ocupar
+   siempre el espacio sobrante, así la foto (con `flex-shrink: 0` fijo en
+   56px) queda pegada al borde correspondiente sin importar la dirección
+   (row o row-reverse) ni el breakpoint. */
+.pd-vecino-texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pd-vecino-card--siguiente .pd-vecino-texto {
+  align-items: flex-end;
+}
+
+.pd-vecino-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--coral);
+}
+
+.pd-vecino-nombre {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* ---- Toast de "agregado al carrito" ----
+   Mismo ajuste que ya tenía Tienda.css (bug real, 5.4 tercera ronda): el
+   mensaje incluye el nombre del producto, que en un nombre largo es más
+   ancho que una pantalla de celular — max-width + white-space:normal deja
+   que pase a una 2da línea en vez de cortarse contra los bordes. */
+.pd-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--azul-oscuro);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  max-width: calc(100vw - 40px);
+  text-align: center;
+  white-space: normal;
+}
+
+/* ---- Tablet ----
+   Pedido del usuario: la imagen quedaba "no ajustada al contenedor" al
+   estirarse a todo el ancho de la columna (se veía enorme) — acotada a un
+   ancho máximo y centrada se ve de tamaño ideal en vez de a sangre completa. */
+@media (max-width: 1024px) {
+  .pd-container {
+    padding: 0 24px;
+  }
+
+  /* Pedido del usuario (2026-09-02): centrado en tablet/mobile — en desktop
+     queda alineado a la izquierda, arriba de la galería/info que sí tiene
+     ese alineado, pero en el layout apilado de tablet/mobile se lee más
+     equilibrado centrado. */
+  .pd-vecinos-label {
+    text-align: center;
+  }
+
+  .pd-cuerpo {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .pd-galeria {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  /* Pedido del usuario (2026-09-02): apilado en una sola columna, la info
+     quedaba a todo el ancho del contenedor (~700px en un tablet) — mucho más
+     ancha que la foto de 440px centrada arriba, y con líneas de texto
+     demasiado largas para leerse bien. Acotada al mismo ancho que la foto y
+     centrada, se lee como un solo bloque coherente en vez de una imagen
+     angosta seguida de texto corrido de punta a punta. */
+  .pd-info-col {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+}
+
+/* ---- Mobile ---- */
+@media (max-width: 599px) {
+  .pd-pagina {
+    padding: 20px 0 48px;
+  }
+
+  .pd-container {
+    padding: 0 16px;
+  }
+
+  /* A todo el ancho (sin el max-width del breakpoint de tablet) — en un
+     celular no sobra espacio a los costados para "acotar" la foto ni la
+     info (ya son más angostos que 440px de por sí). */
+  .pd-galeria,
+  .pd-info-col {
+    max-width: none;
+  }
+
+  .pd-galeria-frame {
+    border-radius: 16px;
+  }
+
+  .pd-emoji {
+    font-size: 100px;
+  }
+
+  /* Apiladas en vez de lado a lado — con solo 16px de espacio no alcanza
+     para foto + eyebrow + nombre en cada mitad sin apretarse. Bug real
+     reportado por el usuario (2026-09-02): antes se forzaba a "siguiente" a
+     alinear su texto a la izquierda dentro de una caja `flex:1` que ocupa
+     casi todo el ancho de la tarjeta — el texto quedaba pegado al borde
+     izquierdo con un hueco grande antes de la foto, muy distinto a
+     "anterior" (foto y texto pegados). Sin este override, "siguiente"
+     hereda `row-reverse` + `align-items: flex-end` de la regla base — texto
+     pegado a la foto de la derecha, igual de compacto que "anterior". */
+  .pd-vecinos-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pd-vecino-card--vacio {
+    display: none;
+  }
+}

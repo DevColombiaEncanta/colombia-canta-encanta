@@ -4,12 +4,6 @@ import { formatearFecha, gradienteDiagonal } from '../../utils/formato';
 import InstagramWidget from '../InstagramWidget/InstagramWidget';
 import './Noticias.css';
 
-const ArrowIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 12h14M12 5l7 7-7 7" />
-  </svg>
-);
-
 export default function Noticias() {
   const { noticias, cargando, error } = useNoticias();
 
@@ -19,10 +13,8 @@ export default function Noticias() {
         <div className="noticias-header">
           <div className="noticias-intro">
             <span className="label-seccion label-amarillo">Noticias</span>
+            <h2 className="noticias-titulo">Lo último de nuestra comunidad</h2>
           </div>
-          <Link to="/noticias" className="noticias-ver-todas">
-            VER TODAS <ArrowIcon />
-          </Link>
         </div>
 
         <div className="noticias-con-ig">

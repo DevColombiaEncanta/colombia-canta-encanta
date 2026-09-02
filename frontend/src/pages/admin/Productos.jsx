@@ -56,7 +56,7 @@ function varianteVacia() {
 }
 
 // Producto público asume SIEMPRE al menos 1 fila en `producto_variantes` para
-// calcular `en_stock` (ver ProductoModal.jsx) — un producto nuevo arranca con
+// calcular `en_stock` (ver ProductoDetalle.jsx) — un producto nuevo arranca con
 // 1 fila ya puesta, no en 0 (ver pre-análisis 5.4).
 function variantesDesdeProducto(producto) {
   if (!producto?.variantes?.length) return [varianteVacia()];
@@ -112,7 +112,7 @@ function ProductoForm({ producto, colecciones, categorias, onGuardado, onBorrado
     if (!form.precio || Number(form.precio) <= 0) nuevosErrores.precio = 'El precio es obligatorio y debe ser mayor a 0';
     if (!form.coleccionId) nuevosErrores.coleccionId = 'Selecciona una colección';
     if (!form.categoriaId) nuevosErrores.categoriaId = 'Selecciona una categoría';
-    // ⭐ Regla real encontrada en ProductoModal.jsx (sitio público, no estaba
+    // ⭐ Regla real encontrada en ProductoDetalle.jsx (sitio público, no estaba
     // en la guía de diseño): sin ninguna fila en `producto_variantes` el
     // producto queda "agotado" para siempre, sin forma de cargarle stock
     // después — no hace falta que talla/color estén completos, pero tiene
@@ -140,7 +140,7 @@ function ProductoForm({ producto, colecciones, categorias, onGuardado, onBorrado
 
     // Punto 11: si el producto usa tallas, no se puede mezclar filas con y sin
     // talla — es justo la mezcla que rompía el selector de tallas en la
-    // Tienda pública (ver ProductoModal.jsx, tallaTieneStock/colorTieneStock).
+    // Tienda pública (ver ProductoDetalle.jsx, tallaTieneStock/colorTieneStock).
     const algunaFilaConTalla = variantes.items.some((v) => v.talla.trim());
     if (algunaFilaConTalla) {
       const erroresTalla = {};

@@ -48,10 +48,8 @@ export default function CarruselEventos() {
         <div className="eventos-ac-header">
           <div className="eventos-ac-intro">
             <span className="label-seccion label-rojo">Eventos</span>
+            <h2 className="eventos-ac-titulo-seccion">Vive nuestras próximas presentaciones</h2>
           </div>
-          <Link to="/eventos" className="eventos-ac-ver-todos">
-            Ver todos <span className="eventos-ac-flecha">→</span>
-          </Link>
         </div>
       </div>
 
@@ -101,7 +99,7 @@ export default function CarruselEventos() {
                 <h3 className="evento-ac-nombre">{ev.titulo}</h3>
                 <p className="evento-ac-ciudad">📍 {ev.ciudad}</p>
                 <p className="evento-ac-fecha-texto">{ev.fecha}</p>
-                <span className="evento-ac-cta">Ver evento →</span>
+                <span className="evento-ac-cta">Ver evento</span>
               </div>
             </Link>
           ))}

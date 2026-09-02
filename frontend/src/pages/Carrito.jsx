@@ -3,183 +3,13 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useCarrito } from '../context/CarritoContext';
 import Footer from '../components/Footer/Footer';
-import { apiFetch } from '../utils/api';
-import { EMAIL_REGEX } from '../utils/validacion';
+import CompradorModal from '../components/CompradorModal/CompradorModal';
 import { formatCOP as formatPrecio } from '../utils/formato';
 import { BASE_URL, OG_IMAGE } from '../utils/seo';
 import './Carrito.css';
 
 const PAGE_TITLE = 'Carrito | Colombia Canta y Encanta';
 const PAGE_DESC = 'Revisa tu pedido y procede al pago de los productos oficiales de Colombia Canta y Encanta.';
-
-function validateField(field, value) {
-  if (field === 'nombre') return value.trim().length < 2 ? 'Ingresa tu nombre completo' : '';
-  if (field === 'celular') return value.replace(/\D/g, '').length < 7 ? 'Ingresa un número válido' : '';
-  if (field === 'email') return EMAIL_REGEX.test(value.trim()) ? '' : 'Ingresa un correo electrónico válido';
-  if (field === 'direccion') return value.trim().length < 5 ? 'Ingresa tu dirección de envío' : '';
-  if (field === 'ciudad') return value.trim().length < 2 ? 'Ingresa tu ciudad' : '';
-  return '';
-}
-
-const CAMPOS_REQUERIDOS = ['nombre', 'celular', 'email', 'direccion', 'ciudad'];
-
-// Formulario de datos del comprador — desplegado dentro de la misma pestaña
-// del carrito (no un modal aparte, a diferencia de Eventos/ReservaModal),
-// según lo acordado con el usuario: se completa antes de mostrar cualquier
-// opción de medio de pago. Incluye dirección de envío (Tienda despacha
-// productos físicos, a diferencia de una reserva de evento) y el checkbox de
-// términos y condiciones.
-function CompradorForm({ items, subtotal, onVolver, onExito }) {
-  const [form, setForm] = useState({
-    nombre: '', celular: '', email: '', direccion: '', ciudad: '', direccionAdicional: '',
-  });
-  const [aceptaTerminos, setAceptaTerminos] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [errorEnvio, setErrorEnvio] = useState(null);
-
-  const set = (field, val) => {
-    setForm((f) => ({ ...f, [field]: val }));
-    if (touched[field]) setErrors((e) => ({ ...e, [field]: validateField(field, val) }));
-  };
-
-  const handleBlur = (field) => {
-    setTouched((t) => ({ ...t, [field]: true }));
-    setErrors((e) => ({ ...e, [field]: validateField(field, form[field]) }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const allTouched = Object.fromEntries(CAMPOS_REQUERIDOS.map((f) => [f, true]));
-    const allErrors = Object.fromEntries(CAMPOS_REQUERIDOS.map((f) => [f, validateField(f, form[f])]));
-    setTouched(allTouched);
-    setErrors(allErrors);
-    if (Object.values(allErrors).some(Boolean) || !aceptaTerminos) return;
-
-    setErrorEnvio(null);
-    setLoading(true);
-
-    try {
-      const { data } = await apiFetch('/api/pedidos', {
-        method: 'POST',
-        body: {
-          nombre: form.nombre.trim(),
-          celular: form.celular.trim(),
-          email: form.email.trim(),
-          direccion: form.direccion.trim(),
-          ciudad: form.ciudad.trim(),
-          direccion_adicional: form.direccionAdicional.trim() || null,
-          items: items.map((item) => ({ variante_id: item.id, cantidad: item.cantidad })),
-          acepta_terminos: true,
-        },
-      });
-      onExito(data);
-    } catch (err) {
-      setErrorEnvio(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const canSubmit = !Object.values(errors).some(Boolean)
-    && CAMPOS_REQUERIDOS.every((f) => form[f].trim()) && aceptaTerminos;
-
-  return (
-    <div className="cf-panel">
-      <h3 className="cf-titulo">Datos de envío</h3>
-      <p className="cf-subtitulo">Completa tus datos para coordinar el pago y el envío de tu pedido.</p>
-
-      <form className="cf-form" onSubmit={handleSubmit} noValidate>
-        <div className="cf-field-fila">
-          <div className="cf-field">
-            <label className="cf-label">Nombre completo</label>
-            <input
-              className={`cf-input${touched.nombre && errors.nombre ? ' cf-input--error' : ''}`}
-              type="text" value={form.nombre} onChange={(e) => set('nombre', e.target.value)}
-              onBlur={() => handleBlur('nombre')} autoComplete="name"
-            />
-            {touched.nombre && errors.nombre && <span className="cf-field-error">{errors.nombre}</span>}
-          </div>
-          <div className="cf-field">
-            <label className="cf-label">Celular</label>
-            <input
-              className={`cf-input${touched.celular && errors.celular ? ' cf-input--error' : ''}`}
-              type="tel" value={form.celular} onChange={(e) => set('celular', e.target.value)}
-              onBlur={() => handleBlur('celular')} autoComplete="tel"
-            />
-            {touched.celular && errors.celular && <span className="cf-field-error">{errors.celular}</span>}
-          </div>
-        </div>
-
-        <div className="cf-field">
-          <label className="cf-label">Correo electrónico</label>
-          <input
-            className={`cf-input${touched.email && errors.email ? ' cf-input--error' : ''}`}
-            type="email" value={form.email} onChange={(e) => set('email', e.target.value)}
-            onBlur={() => handleBlur('email')} autoComplete="email"
-          />
-          {touched.email && errors.email ? (
-            <span className="cf-field-error">{errors.email}</span>
-          ) : (
-            <span className="cf-field-hint">Aquí recibirás la confirmación de tu pedido</span>
-          )}
-        </div>
-
-        <div className="cf-field">
-          <label className="cf-label">Dirección de envío</label>
-          <input
-            className={`cf-input${touched.direccion && errors.direccion ? ' cf-input--error' : ''}`}
-            type="text" placeholder="Calle, número" value={form.direccion} onChange={(e) => set('direccion', e.target.value)}
-            onBlur={() => handleBlur('direccion')} autoComplete="street-address"
-          />
-          {touched.direccion && errors.direccion && <span className="cf-field-error">{errors.direccion}</span>}
-        </div>
-
-        <div className="cf-field-fila">
-          <div className="cf-field">
-            <label className="cf-label">Ciudad</label>
-            <input
-              className={`cf-input${touched.ciudad && errors.ciudad ? ' cf-input--error' : ''}`}
-              type="text" value={form.ciudad} onChange={(e) => set('ciudad', e.target.value)}
-              onBlur={() => handleBlur('ciudad')} autoComplete="address-level2"
-            />
-            {touched.ciudad && errors.ciudad && <span className="cf-field-error">{errors.ciudad}</span>}
-          </div>
-          <div className="cf-field">
-            <label className="cf-label">Apto / referencia <span className="cf-opcional">(opcional)</span></label>
-            <input
-              className="cf-input" type="text" value={form.direccionAdicional}
-              onChange={(e) => set('direccionAdicional', e.target.value)} autoComplete="address-line2"
-            />
-          </div>
-        </div>
-
-        <div className="cf-total">
-          <span className="cf-total-label">Total del pedido</span>
-          <span className="cf-total-valor">{formatPrecio(subtotal)}</span>
-        </div>
-
-        <label className="cf-checkbox">
-          <input type="checkbox" checked={aceptaTerminos} onChange={(e) => setAceptaTerminos(e.target.checked)} />
-          <span>
-            He leído y acepto los{' '}
-            <Link to="/terminos-y-condiciones" target="_blank" rel="noopener noreferrer">Términos y Condiciones</Link>.
-          </span>
-        </label>
-
-        {errorEnvio && <p className="cf-field-error" role="alert">{errorEnvio}</p>}
-
-        <div className="cf-acciones">
-          <button type="button" className="cf-btn-volver" onClick={onVolver} disabled={loading}>← Volver al carrito</button>
-          <button type="submit" className="cf-btn-submit" disabled={loading || !canSubmit}>
-            {loading ? <span className="cf-spinner" /> : 'Confirmar pedido'}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
 
 function PedidoExito({ pedido, onCerrar }) {
   return (
@@ -200,13 +30,15 @@ function PedidoExito({ pedido, onCerrar }) {
 
 export default function Carrito() {
   const { items, actualizarCantidad, eliminar, vaciar } = useCarrito();
-  const [paso, setPaso] = useState('carrito'); // 'carrito' | 'datos' | 'listo'
+  const [paso, setPaso] = useState('carrito'); // 'carrito' | 'listo'
+  const [modalAbierto, setModalAbierto] = useState(false);
   const [pedidoCreado, setPedidoCreado] = useState(null);
   const subtotal = items.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
 
   const manejarExito = (pedido) => {
     setPedidoCreado(pedido);
     vaciar();
+    setModalAbierto(false);
     setPaso('listo');
   };
 
@@ -352,7 +184,6 @@ export default function Carrito() {
                       <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button
                           onClick={() => actualizarCantidad(item.id, -1)}
-                          disabled={paso === 'datos'}
                           style={{
                             width: '32px', height: '32px',
                             border: '1.5px solid var(--border-media)',
@@ -382,7 +213,7 @@ export default function Carrito() {
                         </span>
                         <button
                           onClick={() => actualizarCantidad(item.id, 1)}
-                          disabled={paso === 'datos'}
+                          disabled={item.stock != null && item.cantidad >= item.stock}
                           style={{
                             width: '32px', height: '32px',
                             border: '1.5px solid var(--border-media)',
@@ -391,7 +222,8 @@ export default function Carrito() {
                             background: 'var(--bg-surface)',
                             color: 'var(--texto-principal)',
                             fontSize: '18px',
-                            cursor: 'pointer',
+                            cursor: (item.stock != null && item.cantidad >= item.stock) ? 'not-allowed' : 'pointer',
+                            opacity: (item.stock != null && item.cantidad >= item.stock) ? 0.4 : 1,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontFamily: 'var(--font-cuerpo)',
                             lineHeight: 1
@@ -400,6 +232,11 @@ export default function Carrito() {
                           +
                         </button>
                       </div>
+                      {item.stock != null && item.cantidad >= item.stock && (
+                        <span style={{ fontSize: '12px', color: 'var(--texto-secundario)', opacity: 0.75, marginTop: '4px' }}>
+                          Máximo disponible: {item.stock}
+                        </span>
+                      )}
                     </div>
 
                     <div className="carrito-item-acciones" style={{
@@ -416,110 +253,106 @@ export default function Carrito() {
                       }}>
                         {formatPrecio(item.precio * item.cantidad)}
                       </span>
-                      {paso !== 'datos' && (
-                        <button
-                          onClick={() => eliminar(item.id)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--texto-secundario)',
-                            cursor: 'pointer',
-                            fontSize: '13px',
-                            padding: '4px 0',
-                            fontFamily: 'var(--font-cuerpo)',
-                            textDecoration: 'underline',
-                            textUnderlineOffset: '2px'
-                          }}
-                        >
-                          Eliminar
-                        </button>
-                      )}
+                      <button
+                        onClick={() => eliminar(item.id)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--texto-secundario)',
+                          cursor: 'pointer',
+                          fontSize: '13px',
+                          padding: '4px 0',
+                          fontFamily: 'var(--font-cuerpo)',
+                          textDecoration: 'underline',
+                          textUnderlineOffset: '2px'
+                        }}
+                      >
+                        Eliminar
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Resumen del pedido / formulario de datos */}
-              <div className="carrito-resumen" style={paso === 'carrito' ? {
+              {/* Resumen del pedido */}
+              <div className="carrito-resumen" style={{
                 background: 'var(--bg-card)',
                 borderRadius: '16px',
                 border: '1px solid var(--border-sutil)',
                 padding: '24px'
-              } : undefined}>
-                {paso === 'datos' ? (
-                  <CompradorForm
-                    items={items}
-                    subtotal={subtotal}
-                    onVolver={() => setPaso('carrito')}
-                    onExito={manejarExito}
-                  />
-                ) : (
-                  <>
-                    <h3 style={{
-                      fontFamily: 'var(--font-titulo)',
-                      fontSize: '18px',
-                      marginBottom: '20px',
-                      color: 'var(--texto-principal)'
-                    }}>
-                      Resumen del pedido
-                    </h3>
+              }}>
+                <h3 style={{
+                  fontFamily: 'var(--font-titulo)',
+                  fontSize: '18px',
+                  marginBottom: '20px',
+                  color: 'var(--texto-principal)'
+                }}>
+                  Resumen del pedido
+                </h3>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px' }}>
-                        <span style={{ color: 'var(--texto-secundario)' }}>Subtotal</span>
-                        <span style={{ fontWeight: '600', color: 'var(--texto-principal)' }}>{formatPrecio(subtotal)}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px' }}>
-                        <span style={{ color: 'var(--texto-secundario)' }}>Envío</span>
-                        <span style={{ color: 'var(--texto-secundario)', fontSize: '13px' }}>A coordinar</span>
-                      </div>
-                    </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px' }}>
+                    <span style={{ color: 'var(--texto-secundario)' }}>Subtotal</span>
+                    <span style={{ fontWeight: '600', color: 'var(--texto-principal)' }}>{formatPrecio(subtotal)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px' }}>
+                    <span style={{ color: 'var(--texto-secundario)' }}>Envío</span>
+                    <span style={{ color: 'var(--texto-secundario)', fontSize: '13px' }}>A coordinar</span>
+                  </div>
+                </div>
 
-                    <div style={{
-                      borderTop: '1px solid var(--border-sutil)',
-                      paddingTop: '16px',
-                      marginBottom: '24px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <span style={{ fontFamily: 'var(--font-titulo)', fontSize: '17px', fontWeight: '700', color: 'var(--texto-principal)' }}>
-                        Total
-                      </span>
-                      <span style={{
-                        fontFamily: 'var(--font-titulo)',
-                        fontSize: '22px',
-                        fontWeight: '700',
-                        color: 'var(--coral)'
-                      }}>
-                        {formatPrecio(subtotal)}
-                      </span>
-                    </div>
+                <div style={{
+                  borderTop: '1px solid var(--border-sutil)',
+                  paddingTop: '16px',
+                  marginBottom: '24px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span style={{ fontFamily: 'var(--font-titulo)', fontSize: '17px', fontWeight: '700', color: 'var(--texto-principal)' }}>
+                    Total
+                  </span>
+                  <span style={{
+                    fontFamily: 'var(--font-titulo)',
+                    fontSize: '22px',
+                    fontWeight: '700',
+                    color: 'var(--coral)'
+                  }}>
+                    {formatPrecio(subtotal)}
+                  </span>
+                </div>
 
-                    <button
-                      onClick={() => setPaso('datos')}
-                      style={{
-                        width: '100%',
-                        padding: '14px',
-                        borderRadius: '10px',
-                        background: 'var(--coral)',
-                        border: 'none',
-                        color: '#fff',
-                        fontSize: '15px',
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                        fontFamily: 'var(--font-cuerpo)',
-                      }}
-                    >
-                      Continuar →
-                    </button>
-                  </>
-                )}
+                <button
+                  onClick={() => setModalAbierto(true)}
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    borderRadius: '10px',
+                    background: 'var(--coral)',
+                    border: 'none',
+                    color: '#fff',
+                    fontSize: '15px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-cuerpo)',
+                  }}
+                >
+                  Continuar →
+                </button>
               </div>
             </div>
           )}
         </div>
       </section>
+
+      {modalAbierto && (
+        <CompradorModal
+          items={items}
+          subtotal={subtotal}
+          onClose={() => setModalAbierto(false)}
+          onExito={manejarExito}
+        />
+      )}
 
       <Footer />
     </main>

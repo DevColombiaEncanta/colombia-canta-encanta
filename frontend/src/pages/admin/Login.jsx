@@ -82,7 +82,9 @@ export default function Login() {
   return (
     <div className="admin-login-page">
       <div className="admin-login-card">
+        <div className="admin-login-franja" aria-hidden="true" />
         <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Colombia Canta y Encanta" className="admin-login-logo" />
+        <span className="admin-login-eyebrow">Acceso administrativo</span>
         <h1>Panel de administración</h1>
 
         {paso === 'credenciales' && (

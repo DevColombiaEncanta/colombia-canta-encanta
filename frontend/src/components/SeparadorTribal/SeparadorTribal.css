@@ -1,0 +1,32 @@
+/* ==========================================
+   SEPARADOR TRIBAL — Hero → Quiénes Somos
+   ========================================== */
+
+/* Friso en zigzag de triángulos (greca), 4 colores en secuencia — pensado
+   como un guiño a los textiles/tejidos indígenas colombianos, distinto de
+   la franja plana de 3 colores (bandera) que ya se usa en el footer y en
+   los separadores de antetítulo/título de las demás secciones. Se arma con
+   un SVG repetible en vez de 4 elementos, para que sea una sola franja
+   liviana y fácil de mantener. */
+.separador-tribal {
+  height: 16px;
+  width: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='16'%20viewBox='0%200%2032%2016'%3E%3Cpolygon%20points='0,16%204,0%208,16'%20fill='%23f5c800'/%3E%3Cpolygon%20points='8,0%2012,16%2016,0'%20fill='%23ff5c8d'/%3E%3Cpolygon%20points='16,16%2020,0%2024,16'%20fill='%231a56db'/%3E%3Cpolygon%20points='24,0%2028,16%2032,0'%20fill='%23e8341a'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 32px 16px;
+  background-position: center;
+}
+
+@media (max-width: 1024px) {
+  .separador-tribal {
+    height: 13px;
+    background-size: 26px 13px;
+  }
+}
+
+@media (max-width: 599px) {
+  .separador-tribal {
+    height: 11px;
+    background-size: 22px 11px;
+  }
+}

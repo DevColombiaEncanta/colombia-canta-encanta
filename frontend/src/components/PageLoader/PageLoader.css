@@ -1,0 +1,63 @@
+/* ==========================================
+   PAGE LOADER — splash liviano para cargas dentro de la SPA
+   ========================================== */
+
+.page-loader {
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 80px 24px;
+  animation: page-loader-fade-in 0.3s ease;
+}
+
+@keyframes page-loader-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.page-loader-linea {
+  width: 56px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--coral);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Barrido continuo (no sabemos cuánto va a tardar la carga real, a
+   diferencia del splash inicial que sí tiene una duración fija) */
+.page-loader-linea::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--coral-oscuro, var(--coral)),
+    transparent
+  );
+  animation: page-loader-barrido 1.3s ease-in-out infinite;
+}
+
+@keyframes page-loader-barrido {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.page-loader-texto {
+  font-family: var(--font-cuerpo);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader-linea::after {
+    animation: none;
+  }
+}

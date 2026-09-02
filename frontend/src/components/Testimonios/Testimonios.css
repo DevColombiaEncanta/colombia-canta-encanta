@@ -4,7 +4,10 @@
 
 .testimonios-section {
   padding: 30px 0 40px;
-  background: var(--bg-body);
+  /* Pedido del usuario (2026-09-02): el `body` trae un degradado fijo sutil
+     (ver main.css) que el resto de las secciones del home dejan ver al no
+     pintar fondo propio — acá un relleno sólido de `--bg-body` lo tapaba,
+     dejando un parche plano distinto al resto. */
 }
 
 /* ── Divider ornamental ── */
@@ -189,29 +192,28 @@
   padding: 16px 0;
 }
 
-/* ── Identidad ── */
+/* ── Insignia genérica (reemplaza nombre/rol — pedido del usuario,
+   2026-09-02: no hay autorización para mostrar la identidad de quienes
+   dejaron el testimonio) ── */
 
-.tc-identidad {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.tc-nombre {
-  font-family: var(--font-titulo);
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--texto-principal);
-  line-height: 1.2;
-}
-
-.tc-rol {
+.tc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  align-self: flex-start;
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--coral) 12%, transparent);
+  color: var(--coral);
   font-family: var(--font-titulo);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--coral);
+  letter-spacing: 0.08em;
+}
+
+.tc-badge svg {
+  flex-shrink: 0;
 }
 
 /* ── Cita ── */
@@ -359,12 +361,16 @@
     width: 100%;
   }
 
-  .tc-identidad { align-items: center; }
+  .tc-badge { align-self: center; }
 
   .tc-cita {
     font-size: 15px;
     text-align: justify;
-    padding: 0 32px;
+    /* Pedido del usuario (2026-09-02): en ≤320px la cita se veía muy
+       angosta y alargada — este padding se sumaba al de `.tc-slide-wrap`
+       (40px tablet / 36px mobile), llegando a ~70px de margen por lado y
+       dejando apenas ~180px de ancho real para el texto en pantallas muy
+       chicas. El inset de `.tc-slide-wrap` ya es suficiente por sí solo. */
   }
 
   .tc-cita::before {
@@ -385,6 +391,41 @@
 
   .tc-nav:hover:not(:disabled) {
     transform: translateY(-50%) scale(1.08);
+  }
+}
+
+/* Mismo adorno que en Historia.css/Escuela.css (línea que se desvanece +
+   rombo) — pedido del usuario (2026-09-02), solo en tablet. */
+@media (min-width: 600px) and (max-width: 1024px) {
+  .tc-cta-btn {
+    position: relative;
+  }
+
+  .tc-cta-btn::before,
+  .tc-cta-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 110px;
+    height: 16px;
+    transform: translateY(-50%);
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='110'%20height='16'%20viewBox='0%200%20110%2016'%3E%3Crect%20x='4'%20y='5'%20width='6'%20height='6'%20fill='%23ff5c8d'%20transform='rotate(45%207%208)'/%3E%3Cline%20x1='16'%20y1='8'%20x2='104'%20y2='8'%20stroke='%23ff5c8d'%20stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    -webkit-mask-image: linear-gradient(to right, #000 0%, #000 20%, transparent 90%);
+    mask-image: linear-gradient(to right, #000 0%, #000 20%, transparent 90%);
+    pointer-events: none;
+  }
+
+  .tc-cta-btn::after {
+    left: 100%;
+    margin-left: 10px;
+  }
+
+  .tc-cta-btn::before {
+    right: 100%;
+    margin-right: 10px;
+    transform: translateY(-50%) scaleX(-1);
   }
 }
 
@@ -414,8 +455,9 @@
     aspect-ratio: 3 / 4;
   }
 
-  .tc-nombre {
-    font-size: 15px;
+  .tc-badge {
+    font-size: 10px;
+    padding: 5px 11px;
   }
 
   .tc-cita {

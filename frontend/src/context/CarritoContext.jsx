@@ -16,24 +16,31 @@ export function CarritoProvider({ children }) {
     localStorage.setItem('colombia-canta-carrito', JSON.stringify(items));
   }, [items]);
 
+  // `stock` (guardado en el item por ProductoDetalle al agregar) es el techo real
+  // — sin él, sumar el mismo producto varias veces desde la tienda, o darle a
+  // "+" en el carrito, podía pedir más unidades de las que existen para esa
+  // combinación talla/color.
+  const clampCantidad = (item, cantidadDeseada) =>
+    item.stock != null ? Math.min(item.stock, cantidadDeseada) : cantidadDeseada;
+
   const agregar = (producto, cantidad = 1) => {
     setItems(prev => {
       const existente = prev.find(item => item.id === producto.id);
       if (existente) {
         return prev.map(item =>
           item.id === producto.id
-            ? { ...item, cantidad: item.cantidad + cantidad }
+            ? { ...item, cantidad: clampCantidad(item, item.cantidad + cantidad) }
             : item
         );
       }
-      return [...prev, { ...producto, cantidad }];
+      return [...prev, { ...producto, cantidad: clampCantidad(producto, cantidad) }];
     });
   };
 
   const actualizarCantidad = (id, delta) => {
     setItems(prev =>
       prev
-        .map(item => item.id === id ? { ...item, cantidad: item.cantidad + delta } : item)
+        .map(item => item.id === id ? { ...item, cantidad: clampCantidad(item, item.cantidad + delta) } : item)
         .filter(item => item.cantidad > 0)
     );
   };

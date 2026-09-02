@@ -9,7 +9,6 @@
 
 /* ── Header ── */
 .noticias-header {
-  position: relative;
   text-align: center;
   margin-bottom: 24px;
 }
@@ -20,24 +19,40 @@
   align-items: center;
 }
 
-.noticias-ver-todas {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--texto-secundario);
-  text-decoration: none;
-  transition: color 0.15s ease;
+/* Pedido del usuario (2026-09-02): entre 1022px y el resto de tablet, este
+   título chocaba con el botón "Ver todas" (posicionado absoluto en la
+   esquina) — se quitó el botón y de paso se resuelve el choque de raíz. */
+
+/* Separador — pequeña franja tricolor a modo de bandera de Colombia (2:1:1,
+   mismos colores que `.footer-bandera`), entre antetítulo y título; en
+   desktop el antetítulo ya vive pegado al título acá (a diferencia de
+   Historia/Escuela), por eso se ve en todos los anchos. */
+.noticias-intro .label-seccion::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 8px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #fcd116 0%, #fcd116 50%,
+    #003087 50%, #003087 75%,
+    #ce1126 75%, #ce1126 100%
+  );
 }
 
-.noticias-ver-todas:hover {
-  color: var(--coral);
+/* Pedido del usuario (2026-09-02): mismo formato de título que "Quiénes
+   Somos"/"Escuela de Música" — antetítulo + título grande (la clase ya
+   existía sin usarse en el breakpoint mobile, señal de que este título
+   estaba contemplado desde antes). */
+.noticias-titulo {
+  font-family: var(--font-titulo);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  margin-top: 10px;
+  line-height: 1.1;
 }
 
 /* ── Layout lista + sidebar Instagram ── */
@@ -207,11 +222,11 @@
     width: 100%;
   }
 
+  /* Pedido del usuario (2026-09-02): el widget de Instagram se saca por
+     completo en tablet/mobile — sigue viéndose en desktop, al lado de la
+     lista. */
   .noticias-ig-sidebar {
-    position: static;
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto;
+    display: none;
   }
 }
 
@@ -221,10 +236,6 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
-  }
-
-  .noticias-ver-todas {
-    position: static;
   }
 
   .noticias-titulo {

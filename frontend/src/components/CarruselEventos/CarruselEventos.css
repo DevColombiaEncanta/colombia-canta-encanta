@@ -9,7 +9,6 @@
 
 /* ── Header ── */
 .eventos-ac-header {
-  position: relative;
   margin-bottom: 32px;
   text-align: center;
 }
@@ -20,40 +19,39 @@
   align-items: center;
 }
 
+/* Pedido del usuario (2026-09-02): entre 1022px y el resto de tablet, este
+   título chocaba con el botón "Ver todos" (posicionado absoluto en la
+   esquina) — se quitó el botón (dejaba de aportar mucho al lado del CTA
+   dentro del acordeón) y de paso se resuelve el choque de raíz. */
+
+/* Separador — pequeña franja tricolor a modo de bandera de Colombia (2:1:1,
+   mismos colores que `.footer-bandera`), entre antetítulo y título. Pedido
+   del usuario (2026-09-02): en desktop esta sección ya tiene el antetítulo
+   pegado al título (a diferencia de Historia/Escuela, donde el antetítulo
+   vive arriba de todo el layout de 2 columnas) — por eso acá se ve en todos
+   los anchos, no solo en tablet/mobile. */
+.eventos-ac-intro .label-seccion::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 8px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #fcd116 0%, #fcd116 50%,
+    #003087 50%, #003087 75%,
+    #ce1126 75%, #ce1126 100%
+  );
+}
+
 .eventos-ac-titulo-seccion {
   font-family: var(--font-titulo);
   font-size: 32px;
   font-weight: 700;
   color: var(--texto-principal);
-  margin-top: 8px;
+  margin-top: 10px;
   line-height: 1.1;
-}
-
-
-.eventos-ac-ver-todos {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--coral);
-  text-decoration: none;
-  transition: gap 0.2s ease;
-}
-
-.eventos-ac-ver-todos:hover {
-  gap: 10px;
-}
-
-.eventos-ac-flecha {
-  transition: transform 0.2s ease;
-}
-
-.eventos-ac-ver-todos:hover .eventos-ac-flecha {
-  transform: translateX(4px);
 }
 
 /* ── Acordeón ── */
@@ -185,7 +183,7 @@
   align-items: center;
   gap: 6px;
   background: var(--coral);
-  color: var(--texto-principal);
+  color: #ffffff;
   font-size: 13px;
   font-weight: 700;
   padding: 10px 20px;
@@ -342,10 +340,6 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
-  }
-
-  .eventos-ac-ver-todos {
-    position: static;
   }
 }
 

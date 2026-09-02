@@ -164,7 +164,7 @@ export default function Hero() {
           <span className="hero-anuncio-sep">·</span>
           <span className="hero-anuncio-fecha">{eventoDestacado.fecha} · {eventoDestacado.ciudad}</span>
           <Link to={`/eventos/${eventoDestacado.slug}`} className="hero-anuncio-cta">
-            {eventoDestacado.cta || "Ver evento"} →
+            {eventoDestacado.cta || "Ver evento"}
           </Link>
         </div>
       )}

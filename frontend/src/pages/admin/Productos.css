@@ -1,6 +1,6 @@
 /* ⭐ 5.4 — revisado contra todo el CSS público antes de nombrar nada acá: la
    Tienda pública usa `.producto-card`/`.productos-grid` (Tienda.css) y
-   `.modal-*` (ProductoModal.css) — ninguno choca con `.prod-` a secas
+   `.pd-*` (ProductoDetalle.css) — ninguno choca con `.prod-` a secas
    (confirmado con una búsqueda, mismo hallazgo que costó bugs reales en
    Hero/Noticias 5.2, no se repite acá). */
 

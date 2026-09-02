@@ -219,12 +219,19 @@ a.footer-contact-item:hover {
   display: none;
 }
 
-/* ── Barra inferior ── */
+/* ── Barra inferior ──
+   Centrada y en columna en las 3 responsividades a propósito (pedido del
+   usuario, 2026-09-02) — antes solo mobile la centraba; en desktop/tablet
+   usaba `space-between` (copyright a la izquierda, links a la derecha),
+   que con el 4to link ("Envíos y entrega") se leía descompensado en vez de
+   "bien definido". */
 .footer-bottom {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 20px 0;
+  gap: 12px;
+  padding: 24px 0;
+  text-align: center;
 }
 
 .footer-copyright {
@@ -234,7 +241,9 @@ a.footer-contact-item:hover {
 
 .footer-legal {
   display: flex;
-  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
 }
 
 .footer-legal a {
@@ -383,15 +392,5 @@ a.footer-contact-item:hover {
 
   .footer-contacto-acc.footer-open {
     display: flex;
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    gap: 12px;
-    text-align: center;
-  }
-
-  .footer-legal {
-    justify-content: center;
   }
 }

@@ -3,8 +3,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-body);
   padding: 24px;
+  position: relative;
+  overflow: hidden;
+  /* Pedido del usuario (2026-09-02): la página se veía plana — un
+     `background: var(--bg-body)` sólido acá tapaba el degradado sutil que
+     el `body` ya trae para todo el sitio (mismo hallazgo que en
+     Testimonios.css). Sin él, más dos manchas de color difuminadas propias
+     (abajo), la pantalla de login queda con algo de profundidad sin dejar
+     de ser sobria. */
+}
+
+.admin-login-page::before,
+.admin-login-page::after {
+  content: '';
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.admin-login-page::before {
+  top: -140px;
+  left: -120px;
+  background: var(--coral);
+}
+
+.admin-login-page::after {
+  bottom: -160px;
+  right: -120px;
+  background: var(--azul);
 }
 
 .admin-login-card {
@@ -12,55 +44,95 @@
   max-width: 380px;
   background: var(--bg-card);
   border: 1px solid var(--border-sutil);
-  border-radius: 16px;
-  padding: 36px 32px;
-  box-shadow: 0 8px 30px var(--sombra-media);
+  border-radius: 20px;
+  padding: 40px 32px 36px;
+  box-shadow: 0 20px 60px var(--sombra-fuerte);
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Franja tricolor (2:1:1, mismos colores que `.footer-bandera`) — mismo
+   lenguaje visual que ya usan los separadores de antetítulo/título del
+   home, acá como remate elegante en el borde superior de la tarjeta. */
+.admin-login-franja {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(
+    to right,
+    #fcd116 0%, #fcd116 50%,
+    #003087 50%, #003087 75%,
+    #ce1126 75%, #ce1126 100%
+  );
 }
 
 .admin-login-logo {
-  height: 48px;
-  /* ⭐ Bug real (2026-08-31, encontrado por el usuario): `img { display:
-     block }` (regla global en main.css) hace que `text-align: center` del
-     contenedor deje de centrar el logo (solo centra contenido inline) —
-     necesita su propio margen automático. */
-  margin: 0 auto 20px;
+  height: 46px;
+  margin: 8px auto 18px;
+  /* Logo negro en lightmode, blanco en dark — mismo criterio que
+     `.navbar--white .logo-img` en Navbar.css. Antes no tenía filtro acá y
+     el logo (blanco de origen) quedaba invisible sobre la tarjeta clara en
+     lightmode (pedido del usuario, 2026-09-02). */
+  filter: brightness(0);
+}
+
+[data-theme="dark"] .admin-login-logo {
+  filter: none;
+}
+
+.admin-login-eyebrow {
+  display: block;
+  font-family: var(--font-titulo);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--coral);
+  margin-bottom: 6px;
 }
 
 .admin-login-card h1 {
   font-family: var(--font-titulo);
-  font-size: 1.3rem;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: var(--texto-principal);
-  margin: 0 0 24px;
+  margin: 0 0 28px;
 }
 
 .admin-login-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   text-align: left;
 }
 
 .admin-login-form label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 0.85rem;
+  gap: 7px;
+  font-size: 0.83rem;
+  font-weight: 600;
   color: var(--texto-secundario);
 }
 
 .admin-login-form input {
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border-media);
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-media);
   background: var(--bg-input);
   color: var(--texto-principal);
   font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .admin-login-form input:focus {
-  outline: 2px solid var(--azul);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--coral);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--coral) 16%, transparent);
 }
 
 .admin-login-form input.invalido {
@@ -68,7 +140,8 @@
 }
 
 .admin-login-form input.invalido:focus {
-  outline-color: var(--rojo);
+  border-color: var(--rojo);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--rojo) 16%, transparent);
 }
 
 .admin-login-campo-error {
@@ -80,31 +153,38 @@
 }
 
 .admin-login-form button {
-  margin-top: 8px;
-  padding: 11px;
+  margin-top: 10px;
+  padding: 13px;
   border: none;
-  border-radius: 8px;
-  background: var(--azul);
+  border-radius: 10px;
+  background: var(--coral);
   color: #fff;
+  font-family: var(--font-titulo);
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--coral) 35%, transparent);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-login-form button:hover:not(:disabled) {
+  background: var(--coral-oscuro);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--coral) 45%, transparent);
 }
 
 .admin-login-form button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .admin-login-hint {
   font-size: 0.85rem;
   color: var(--texto-secundario);
-  margin: -8px 0 0;
+  margin: -10px 0 0;
 }
 
-/* ⭐ Ajuste 2026-08-31 (pedido del usuario): quedaba alineado a la izquierda
-   (heredaba el `text-align: left` de `.admin-login-form`, pensado para los
-   campos, no para un aviso de error) — se le da su propia caja centrada,
-   con más peso visual que un texto rojo suelto. */
 .admin-login-error {
   display: block;
   color: var(--rojo);

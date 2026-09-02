@@ -191,8 +191,7 @@ export const terminosCondiciones = {
       titulo: "Contacto",
       parrafos: [
         "Para preguntas relacionadas con estos términos, el funcionamiento del sitio web o el ejercicio de derechos, el usuario podrá comunicarse a través de:",
-        "Correo electrónico: info@colombiacanta.org",
-        "Info@colombiacanta.org",
+        "Correo electrónico: Info@colombiacanta.org",
         "WhatsApp 301 531 5116",
         "Dirección, Calle 76a 65, Sector estadio Medellín.",
       ],

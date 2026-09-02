@@ -1,0 +1,70 @@
+/* ==========================================
+   TIENDA PANELES INFERIORES — compartido entre Tienda y ProductoDetalle
+   ========================================== */
+
+/* `.container-tienda` y `--radius-paneles` viven en Tienda.css (ver misma
+   nota en TiendaHero.css) — siempre presente junto a este componente. */
+
+.seccion-paneles-inferiores {
+  padding: 10px 0 60px 0;
+}
+
+.grid-paneles-dobles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.panel-inferior-item {
+  height: 40vh;
+  background-size: cover;
+  background-position: center;
+  border-radius: var(--radius-paneles);
+  display: flex;
+  align-items: flex-end;
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel-inferior-item.hecho-en-colombia { background-color: #242b21; }
+.panel-inferior-item.accesorios-destacados { background-color: #2a2521; }
+
+.panel-inf-contenido {
+  color: #ffffff;
+  z-index: 2;
+  max-width: 320px;
+}
+
+.panel-inf-titulo {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.01em;
+}
+
+.panel-inf-texto {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .grid-paneles-dobles {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .panel-inferior-item {
+    height: 35vh;
+    padding: 28px;
+  }
+}
+
+@media (max-width: 599px) {
+  .panel-inferior-item {
+    height: 30vh;
+    padding: 24px;
+  }
+}

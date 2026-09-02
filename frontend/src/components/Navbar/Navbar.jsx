@@ -76,13 +76,6 @@ const IconoChevron = ({ abierto }) => (
   </svg>
 );
 
-const tiendaDropdown = [
-  { nombre: "Camisetas", precio: "desde $45.000", emoji: "👕" },
-  { nombre: "Hoodies", precio: "desde $75.000", emoji: "🧥" },
-  { nombre: "Bags", precio: "desde $28.000", emoji: "👜" },
-  { nombre: "Otros", precio: "termos · café", emoji: "☕" },
-];
-
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -154,61 +147,29 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* Eventos */}
+            {/* Eventos — pedido del usuario (2026-09-02): el desplegable con
+               tarjetas de imagen se sentía fuera de tono al lado de los
+               demás links (Nosotros/Inscripciones, texto plano); mismo
+               formato `dropdown-simple` acá. */}
             <div className="nav-group">
               <Link to="/eventos" className={`nav-link${isActive('/eventos') ? ' active' : ''}`}>
                 Eventos <span className="nav-chevron">▾</span>
               </Link>
-              <div className="dropdown dropdown-eventos">
-                <div className="dropdown-header">
-                  <h4>Programas permanentes</h4>
-                </div>
-                <div className="dropdown-eventos-grid">
-                  {eventosFijos.map(ev => (
-                    <Link to={`/eventos/${ev.slug}`} className="evento-mini-card" key={ev.id}>
-                      <div
-                        className="evento-mini-bg"
-                        style={ev.img ? {
-                          backgroundImage: `linear-gradient(rgba(0,0,0,0.05), rgba(0,0,0,0.18)), url(${ev.img})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                        } : {
-                          background: `linear-gradient(135deg, ${ev.color}, ${ev.colorHero})`,
-                        }}
-                      />
-                      <div className="evento-mini-info">
-                        <div className="evento-mini-tipo" style={{ color: ev.color }}>{ev.tipo}</div>
-                        <div className="evento-mini-titulo">{ev.titulo}</div>
-                        <div className="evento-mini-ciudad">{ev.ciudad}</div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-                <Link to="/eventos" className="dropdown-eventos-btn-todos">
-                  Ver todos los eventos →
-                </Link>
+              <div className="dropdown dropdown-simple">
+                {eventosFijos.map(ev => (
+                  <Link to={`/eventos/${ev.slug}`} key={ev.id}>{ev.titulo}</Link>
+                ))}
+                <Link to="/eventos">Ver todos los eventos</Link>
               </div>
             </div>
 
-            {/* Tienda */}
-            <div className="nav-group">
-              <Link to="/tienda" className={`nav-link${isActive('/tienda') ? ' active' : ''}`}>
-                Tienda <span className="nav-chevron">▾</span>
-              </Link>
-              <div className="dropdown dropdown-tienda">
-                <div className="dropdown-header">
-                  <h4>Merch oficial</h4>
-                  <Link to="/tienda" className="dropdown-ver-todos">Ver todo →</Link>
-                </div>
-                {tiendaDropdown.map(item => (
-                  <Link to="/tienda" className="tienda-lista-item" key={item.nombre}>
-                    <span className="tienda-lista-emoji">{item.emoji}</span>
-                    <span className="tienda-lista-nombre">{item.nombre}</span>
-                    <span className="tienda-lista-precio">{item.precio}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
+            {/* Tienda — sin desplegable a propósito (pedido del usuario,
+               2026-09-02): antes mostraba categorías (Camisetas, Hoodies,
+               Bags, Otros) que en realidad llevaban todas al mismo lugar
+               (/tienda) — ahora un click directo. */}
+            <Link to="/tienda" className={`nav-link${isActive('/tienda') ? ' active' : ''}`}>
+              Tienda
+            </Link>
 
             {/* Inscripciones */}
             <div className="nav-group">
@@ -310,20 +271,9 @@ export default function Navbar() {
             )}
           </div>
 
-          <div className="mobile-drawer-group">
-            <button className="mobile-drawer-link mobile-drawer-link--toggle" onClick={() => toggleMobile('tienda')}>
-              <span className="mobile-drawer-link-left"><IconoTienda /> Tienda</span>
-              <IconoChevron abierto={mobileExpanded === 'tienda'} />
-            </button>
-            {mobileExpanded === 'tienda' && (
-              <div className="mobile-drawer-submenu">
-                {tiendaDropdown.map(item => (
-                  <Link to="/tienda" key={item.nombre}>{item.emoji} {item.nombre}</Link>
-                ))}
-                <Link to="/tienda">Ver todo →</Link>
-              </div>
-            )}
-          </div>
+          <Link to="/tienda" className="mobile-drawer-link">
+            <span className="mobile-drawer-link-left"><IconoTienda /> Tienda</span>
+          </Link>
 
           <button className="mobile-drawer-link" onClick={() => { setMobileOpen(false); navigate('/tienda/carrito'); }}>
             <span className="mobile-drawer-link-left">

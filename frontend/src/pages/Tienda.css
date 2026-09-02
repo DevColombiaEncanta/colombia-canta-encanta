@@ -113,125 +113,8 @@
   padding: 0 40px;
 }
 
-/* ── 1. Hero editorial asimétrico ── */
-.tienda-editorial-hero {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  height: 100vh;
-  width: 100%;
-  gap: 16px;
-  padding: 100px 40px 16px;
-  box-sizing: border-box;
-}
-
-.hero-col-izq, .hero-col-der {
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: flex-end;
-  padding: 40px;
-  position: relative;
-  border-radius: var(--radius-paneles);
-  overflow: hidden;
-}
-
-.hero-col-izq { background-color: #1c1a17; }
-.hero-col-der { background-color: #2b2824; }
-
-.hero-col-der-bg {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  transition: opacity 0.9s ease;
-  z-index: 0;
-}
-
-/* ── 1b. Hero como carrusel único — solo tablet/mobile ── */
-.tienda-hero-carrusel {
-  display: none;
-}
-
-.hero-carrusel-slide {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  background-size: cover;
-  background-position: center;
-  background-color: #1c1a17;
-  display: flex;
-  align-items: flex-end;
-  padding: 28px;
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-paneles);
-}
-
-.hero-carrusel-dots {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 0;
-}
-
-.hero-carrusel-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: none;
-  background: var(--border-tienda-linea);
-  cursor: pointer;
-  padding: 0;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.hero-carrusel-dot.activo {
-  background: #cc3333;
-  transform: scale(1.3);
-}
-
-.hero-editorial-contenido {
-  color: #ffffff;
-  max-width: 380px;
-  z-index: 2;
-}
-
-.hero-ed-tagline {
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin-bottom: 10px;
-  line-height: 1.15;
-}
-
-.hero-ed-parrafo {
-  font-size: 13px;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.85);
-  margin-bottom: 20px;
-}
-
-.hero-ed-btn {
-  background: var(--coral);
-  border: none;
-  color: #0a0f1e;
-  padding: 10px 24px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  border-radius: var(--radius-botones);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-[data-theme="dark"] .hero-ed-btn {
-  color: #ffffff;
-}
-
-.hero-ed-btn:hover {
-  opacity: 0.88;
-  transform: translateY(-1px);
-}
+/* ── 1. Hero editorial asimétrico — extraído a TiendaHero.css (2026-09-01),
+   reusado también en la página de detalle de producto. ── */
 
 /* ── 2. Ticker de anuncios infinito ── */
 .tienda-anuncios-ticker {
@@ -340,12 +223,8 @@
 
 .btn-categoria-tag.activo {
   background: var(--coral);
-  color: #0a0f1e;
-  border-color: var(--coral);
-}
-
-[data-theme="dark"] .btn-categoria-tag.activo {
   color: #ffffff;
+  border-color: var(--coral);
 }
 
 .tienda-subcabecera-grid-cabecera {
@@ -439,77 +318,8 @@
   color: var(--texto-secundario);
 }
 
-/* ── 6. Paneles inferiores: Hecho en Colombia y Accesorios ── */
-.seccion-paneles-inferiores {
-  padding: 10px 0 60px 0;
-}
-
-.grid-paneles-dobles {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.panel-inferior-item {
-  height: 40vh;
-  background-size: cover;
-  background-position: center;
-  border-radius: var(--radius-paneles);
-  display: flex;
-  align-items: flex-end;
-  padding: 36px;
-  position: relative;
-  overflow: hidden;
-}
-
-.panel-inferior-item.hecho-en-colombia { background-color: #242b21; }
-.panel-inferior-item.accesorios-destacados { background-color: #2a2521; }
-
-.panel-inf-contenido {
-  color: #ffffff;
-  z-index: 2;
-  max-width: 320px;
-}
-
-.panel-inf-titulo {
-  font-size: 22px;
-  font-weight: 800;
-  margin: 0 0 8px 0;
-  letter-spacing: -0.01em;
-}
-
-.panel-inf-texto {
-  font-size: 12.5px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-}
-
-/* ── Toast ── */
-/* Punto 22 (5.4 tercera ronda) — bug confirmado: el mensaje incluye el nombre
-   del producto (`"${nombre}" agregado al carrito`), que para un nombre real
-   largo (ej. "Camiseta Colombia Canta y Encanta") es más ancho que una
-   pantalla de celular. `white-space: nowrap` sin ningún `max-width` dejaba
-   ese texto cortado contra los bordes en mobile. Ahora el toast tiene un
-   ancho máximo y el texto puede pasar a una 2da línea si hace falta — en
-   desktop, donde casi siempre entra en una sola línea, se ve igual que antes. */
-.tienda-toast {
-  position: fixed;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--azul-oscuro);
-  color: #fff;
-  padding: 14px 28px;
-  border-radius: 24px;
-  font-size: 14px;
-  font-weight: 600;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  max-width: calc(100vw - 40px);
-  text-align: center;
-  white-space: normal;
-}
+/* ── 6. Paneles inferiores — extraídos a TiendaPaneles.css (2026-09-01),
+   reusados también en la página de detalle de producto. ── */
 
 /* ── Responsive: tablet+mobile (1024px) y mobile (599px) ── */
 @media (max-width: 1024px) {
@@ -549,29 +359,6 @@
   .flex-tags-categorias {
     justify-content: center;
   }
-
-  .grid-paneles-dobles {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .panel-inferior-item {
-    height: 35vh;
-    padding: 28px;
-  }
-}
-
-/* Hasta 760px se mantienen las dos imágenes lado a lado, como en
-   escritorio; el carrusel de una sola imagen entra solo por debajo. */
-@media (max-width: 760px) {
-  .tienda-editorial-hero {
-    display: none;
-  }
-
-  .tienda-hero-carrusel {
-    display: block;
-    padding: 90px 40px 0;
-  }
 }
 
 @media (max-width: 599px) {
@@ -579,17 +366,8 @@
     padding: 0 20px;
   }
 
-  .tienda-hero-carrusel {
-    padding: 90px 20px 0;
-  }
-
   .grid-colecciones-links {
     grid-template-columns: 1fr;
-  }
-
-  .panel-inferior-item {
-    height: 30vh;
-    padding: 24px;
   }
 }
 
@@ -603,18 +381,13 @@
   gap: 36px 20px;
 }
 
+/* 3 columnas en tablet (pedido del usuario, 2026-09-02) — con 2 cada card
+   llegaba a ~460px de ancho cerca de 1024px, desproporcionada para una
+   card de producto. Estándar de grillas de e-commerce para este rango. */
 @media (min-width: 600px) and (max-width: 1024px) {
   .productos-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-
-  /* Mismas proporciones que en mobile: el ancho manda y llega de
-     extremo a extremo de su contenedor (sin max-width), el alto sale
-     de ahí con la misma relación 4:5. */
-  .hero-carrusel-slide {
-    width: 100%;
-    aspect-ratio: 4 / 5;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
   }
 }
 
@@ -625,28 +398,52 @@
   }
 }
 
+/* Rediseño pedido por el usuario (2026-09-01): antes la imagen tenía su
+   propio borde recto y el texto de abajo quedaba suelto sin ningún borde
+   propio — ahora toda la card (foto + info) es una única tarjeta redondeada,
+   con elevación sutil al pasar el mouse. */
 .producto-card {
   cursor: pointer;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1.5px solid var(--border-sutil);
+  background: var(--bg-card);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+/* Pedido del usuario (2026-09-02): al volver desde el detalle de un
+   producto ("Volver a la tienda"), esta tarjeta se resalta brevemente para
+   que quede claro sobre cuál producto se aterrizó (ver Tienda.jsx,
+   `resaltadoId`). */
+.producto-card--resaltado {
+  border-color: #cc3333;
+  animation: producto-card-resaltado 1.6s ease;
+}
+
+@keyframes producto-card-resaltado {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(204, 51, 51, 0.25); }
+  50%      { box-shadow: 0 0 0 6px rgba(204, 51, 51, 0.12); }
+}
+
+.producto-card:hover {
+  border-color: #cc3333;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
 }
 
 /* ── Zona imagen ──
    aspect-ratio en vez de height fijo: las fotos son cuadradas, así el
    recorte de object-fit:cover siempre coincide exacto sin importar el
    ancho de la card (con un alto fijo, a más ancho más se recortaba
-   arriba/abajo). */
+   arriba/abajo). Sin borde propio — ahora lo lleva `.producto-card` como
+   una única tarjeta. */
 .producto-card-imagen {
   position: relative;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  border: 1px solid var(--border-sutil);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.2s ease;
-}
-
-.producto-card:hover .producto-card-imagen {
-  border-color: var(--border-media);
 }
 
 .producto-card-emoji {
@@ -675,7 +472,10 @@
   text-transform: uppercase;
   background: var(--amarillo);
   color: #090d1a;
-  border-radius: 0 0 4px 0;
+  /* La esquina superior-izq ahora sigue la misma curva que el borde redondeado
+     de `.producto-card` (18px) — sin esto quedaba un corte recto encima de
+     una esquina redondeada, un choque visual con el nuevo diseño de la card. */
+  border-radius: 18px 0 8px 0;
 }
 
 /* ── Agotado ── */
@@ -719,9 +519,11 @@
   transform: translateY(0);
 }
 
-/* ── Info debajo ── */
+/* ── Info debajo — ahora dentro de la misma tarjeta, con su propio fondo
+   y más aire (antes vivía pegada al borde de la imagen, sin padding
+   lateral real). ── */
 .producto-card-info {
-  padding: 14px 2px 0;
+  padding: 16px 18px 18px;
 }
 
 .producto-card-fila-top {
@@ -729,19 +531,35 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
+/* Bug real reportado por el usuario (2026-09-02, responsividad 600-650px):
+   sin `overflow-wrap`, una palabra larga (ej. "Colcanta") no partía y
+   desbordaba su caja — como la card entera usa `overflow: hidden` (para
+   los bordes redondeados), ese desborde se veía como texto cortado.
+   Además, fijar el nombre a 2 líneas siempre (con `line-clamp` truncando
+   nombres más largos) hace que la etiqueta de categoría de abajo quede
+   siempre a la misma altura entre cards de una fila — antes dependía de si
+   el nombre ocupaba 1 o 2 líneas, y se veía desalineada hasta 41px. */
 .producto-card-nombre {
   font-family: var(--font-titulo);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-tienda-oscuro);
   line-height: 1.3;
+  min-width: 0;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6em;
 }
 
 .producto-card-precio {
-  font-size: 15px;
+  font-family: var(--font-titulo);
+  font-size: 16px;
   font-weight: 700;
   color: #cc3333;
   white-space: nowrap;

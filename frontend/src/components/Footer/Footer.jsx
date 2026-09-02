@@ -45,15 +45,6 @@ const cols = [
       { label: "Preguntas frecuentes", to: "/inscripciones#faq" },
     ],
   },
-  {
-    titulo: "Tienda",
-    links: [
-      { label: "Camisetas", to: "/tienda" },
-      { label: "Hoodies", to: "/tienda" },
-      { label: "Bags", to: "/tienda" },
-      { label: "Otros", to: "/tienda" },
-    ],
-  },
 ];
 
 const aliados = [
@@ -176,6 +167,15 @@ export default function Footer() {
                 </ul>
               </div>
             ))}
+            {/* Tienda — sin categorías desplegables a propósito (pedido del
+               usuario, 2026-09-02): antes listaba Camisetas/Hoodies/Bags/
+               Otros, que en realidad llevaban todas al mismo /tienda —
+               ahora un link directo, igual que Contacto. */}
+            <div className="footer-col-acc">
+              <Link to="/tienda" className="footer-col-acc-titulo footer-col-acc-link">
+                <span>Tienda</span>
+              </Link>
+            </div>
             <div className="footer-col-acc">
               <Link to="/contacto" className="footer-col-acc-titulo footer-col-acc-link">
                 <span>Contacto</span>
@@ -193,6 +193,7 @@ export default function Footer() {
               <Link to="/terminos-y-condiciones">Términos y condiciones</Link>
               <Link to="/politicas-eventos-gratuitos">Eventos gratuitos</Link>
               <Link to="/politicas-eventos-pago">Eventos de pago</Link>
+              <Link to="/politica-envios">Envíos y entrega</Link>
             </div>
           </div>
 

@@ -19,6 +19,25 @@
   text-align: center;
 }
 
+/* Separador — pequeña franja tricolor a modo de bandera de Colombia (2:1:1,
+   mismos colores que `.footer-bandera`), debajo del antetítulo, en todos los
+   anchos (mismo criterio que Historia/Eventos/Noticias — pedido del
+   usuario, 2026-09-02: faltaba en la versión desktop de esta sección). */
+.escuela-seccion-label::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 8px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #fcd116 0%, #fcd116 50%,
+    #003087 50%, #003087 75%,
+    #ce1126 75%, #ce1126 100%
+  );
+}
+
 .escuela-contenido {
   padding: 40px;
   display: flex;
@@ -57,40 +76,8 @@
   color: var(--texto-secundario);
   font-size: 15px;
   line-height: 1.8;
-  margin-bottom: 24px;
-  text-align: justify;
-}
-
-
-.escuela-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
   margin-bottom: 28px;
-  justify-content: center;
-}
-
-.escuela-pill {
-  padding: 8px 18px;
-  border-radius: 100px;
-  background: var(--bg-chip);
-  border: 1px solid var(--border-media);
-  color: var(--texto-principal);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: default;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.escuela-pill:hover {
-  background: var(--coral);
-  border-color: var(--coral);
-  color: #ffffff;
-  transform: translateY(-2px);
+  text-align: justify;
 }
 
 .escuela-imagenes {
@@ -124,40 +111,167 @@
 
 @media (max-width: 1024px) {
   .escuela-section {
-    grid-template-columns: 1fr;
-    margin: 0 0 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 28px;
+    padding: 24px 24px 0;
   }
 
+  .escuela-seccion-label {
+    /* Junto con `gap: 14px` en `.escuela-section`, ya da suficiente aire —
+       antes sumaba a un margen superior del h2 sin resetear (ver abajo) y
+       quedaba doble de separado (pedido del usuario, 2026-09-02). */
+    padding-bottom: 4px;
+  }
+
+  /* Pedido del usuario (2026-09-02): en tablet/mobile las fotos deben ir
+     entre la descripción y las pills (en desktop siguen en su propia
+     columna al lado del texto — layout que no se toca), y se elimina el
+     fondo degradado animado (ya no aporta en un layout de una sola
+     columna y competía visualmente con las fotos). `display: contents`
+     "desarma" el contenedor de texto: sus hijos pasan a ser hijos directos
+     de `.escuela-section` — pierden con eso el padding/fondo de la
+     tarjeta, y se pueden reordenar junto a las fotos con `order`. */
   .escuela-contenido {
-    padding: 32px 24px;
+    display: contents;
+  }
+
+  .escuela-contenido h2,
+  .escuela-contenido p,
+  .escuela-carrusel {
+    width: 100%;
+  }
+
+  .escuela-contenido h2 {
     order: 1;
+    font-size: 36px;
+    /* Sin reset, el h2 heredaba el margen superior por defecto del
+       navegador (~0.83em) y quedaba muy separado del antetítulo "Escuela
+       de Música" (pedido del usuario, 2026-09-02). */
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  /* Pedido del usuario (2026-09-02): en vez del mosaico fijo (que en
+     desktop sigue igual, ver arriba), en tablet/mobile las fotos van como
+     carrusel autorrotable de a una — mismo criterio que `.historia-*` en
+     Historia.jsx/css, centrado con `margin: 0 auto` + `max-width` (ver
+     bloques de tablet/mobile más abajo). Escuela.jsx decide cuál de las dos
+     estructuras renderizar según el ancho. */
+  .escuela-carrusel {
+    order: 2;
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    height: 300px;
+    margin: 0 auto;
+  }
+
+  .escuela-track {
+    display: flex;
+    height: 100%;
+    overflow-x: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .escuela-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .escuela-slide {
+    flex-shrink: 0;
+    width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    overflow: hidden;
+  }
+
+  .escuela-slide-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .escuela-contenido p {
+    order: 3;
     text-align: justify;
     font-size: 18px;
     line-height: 1.85;
   }
 
-  .escuela-imagenes {
-    min-height: 280px;
-    order: 2;
-  }
-
-  .escuela-contenido h2 {
-    font-size: 36px;
+  /* Sin ancho forzado: como flex item centrado (`align-items: center` en
+     `.escuela-section`), el botón queda a su tamaño natural por defecto. */
+  .escuela-contenido a.btn {
+    order: 4;
   }
 }
 
-/* Tablet (600px–1024px): el botón heredaba el stretch del flex-column
-   y quedaba a todo el ancho del bloque — en mobile sí se ve bien. */
+/* Tablet (600px–1024px): formato más grande, no tan apretado como mobile. */
 @media (min-width: 600px) and (max-width: 1024px) {
-  .escuela-contenido p {
-    font-size: 18px;
+  .escuela-contenido h2,
+  .escuela-contenido p,
+  .escuela-carrusel {
+    max-width: 640px;
   }
 
-  .escuela-contenido .btn {
-    align-self: center;
-    width: fit-content;
+  /* Mismo adorno que en Historia.css (línea que se desvanece + rombo, ver
+     ese archivo para el detalle de por qué se cambió el diseño), acá en
+     amarillo para diferenciarlo sutilmente — pedido del usuario,
+     2026-09-02, solo en tablet. */
+  .escuela-contenido a.btn {
+    position: relative;
+  }
+
+  .escuela-contenido a.btn::before,
+  .escuela-contenido a.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 110px;
+    height: 16px;
+    transform: translateY(-50%);
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='110'%20height='16'%20viewBox='0%200%20110%2016'%3E%3Crect%20x='4'%20y='5'%20width='6'%20height='6'%20fill='%23f5c800'%20transform='rotate(45%207%208)'/%3E%3Cline%20x1='16'%20y1='8'%20x2='104'%20y2='8'%20stroke='%23f5c800'%20stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    /* Ver Historia.css: el desvanecido se hace con `mask`, más confiable en
+       un data URI que un gradiente propio del SVG. */
+    -webkit-mask-image: linear-gradient(to right, #000 0%, #000 20%, transparent 90%);
+    mask-image: linear-gradient(to right, #000 0%, #000 20%, transparent 90%);
+    pointer-events: none;
+  }
+
+  .escuela-contenido a.btn::after {
+    left: 100%;
+    margin-left: 10px;
+  }
+
+  .escuela-contenido a.btn::before {
+    right: 100%;
+    margin-right: 10px;
+    transform: translateY(-50%) scaleX(-1);
+  }
+}
+
+/* Mobile (hasta 599px): mismo pedido de arriba — el párrafo a 18px venía
+   heredado del ajuste de tablet y en mobile se sentía excesivo, sumado a
+   paddings pensados para una pantalla más grande. */
+@media (max-width: 599px) {
+  .escuela-contenido h2 {
+    font-size: 28px;
+  }
+
+  .escuela-contenido p {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .escuela-carrusel {
+    height: 220px;
+    max-width: 480px;
   }
 }

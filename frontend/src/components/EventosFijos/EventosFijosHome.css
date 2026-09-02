@@ -230,7 +230,7 @@
   padding: 9px 22px;
   border-radius: 100px;
   background: var(--coral);
-  color: var(--texto-principal);
+  color: #ffffff;
   font-size: 13px;
   font-weight: 700;
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -663,7 +663,7 @@
   padding: 9px 22px;
   border-radius: 100px;
   background: var(--coral);
-  color: var(--texto-principal);
+  color: #ffffff;
   font-size: 12.5px;
   font-weight: 700;
   transition: opacity 0.2s ease, transform 0.2s ease;

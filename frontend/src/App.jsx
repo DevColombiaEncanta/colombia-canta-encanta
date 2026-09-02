@@ -25,6 +25,7 @@ import Nosotros from './pages/Nosotros';
 import Eventos from './pages/Eventos';
 import EventoDetallePage from './pages/EventoDetallePage';
 import Tienda from './pages/Tienda';
+import ProductoDetallePage from './pages/ProductoDetallePage';
 import Carrito from './pages/Carrito';
 import Inscripciones from './pages/Inscripciones';
 import Contacto from './pages/Contacto';
@@ -36,6 +37,7 @@ import PagoCancelado from './pages/PagoCancelado';
 import TerminosCondiciones from './pages/TerminosCondiciones';
 import PoliticasEventosGratuitos from './pages/PoliticasEventosGratuitos';
 import PoliticasEventosPago from './pages/PoliticasEventosPago';
+import PoliticaEnvios from './pages/PoliticaEnvios';
 import NotFound from './pages/NotFound';
 import './styles/main.css';
 
@@ -64,6 +66,7 @@ export default function App() {
                 <Route path="/eventos" element={<Eventos />} />
                 <Route path="/eventos/:slug" element={<EventoDetallePage />} />
                 <Route path="/tienda" element={<Tienda />} />
+                <Route path="/tienda/producto/:id" element={<ProductoDetallePage />} />
                 <Route path="/tienda/carrito" element={<Carrito />} />
                 <Route path="/inscripciones" element={<Inscripciones />} />
                 <Route path="/elenco" element={<Elenco />} />
@@ -75,6 +78,7 @@ export default function App() {
                 <Route path="/terminos-y-condiciones" element={<TerminosCondiciones />} />
                 <Route path="/politicas-eventos-gratuitos" element={<PoliticasEventosGratuitos />} />
                 <Route path="/politicas-eventos-pago" element={<PoliticasEventosPago />} />
+                <Route path="/politica-envios" element={<PoliticaEnvios />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/bienvenida" element={<AdminBienvenida />} />
                 <Route path="/admin" element={<Navigate to="/admin/hero" replace />} />

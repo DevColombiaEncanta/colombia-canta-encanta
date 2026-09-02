@@ -211,31 +211,29 @@ h5 {
   transform: none;
 }
 
+/* Texto siempre blanco (pedido del usuario, 2026-09-02) — antes era negro
+   en lightmode (#0a0f1e) y solo pasaba a blanco en dark vía el override de
+   abajo; ya no gustaba el negro en ningún modo, así que blanco queda fijo
+   en los 2. */
 .btn-azul {
   background: var(--coral);
-  color: #0a0f1e;
+  color: #ffffff;
   border: none;
   justify-content: center;
 }
 
 .btn-amarillo {
   background: var(--coral);
-  color: #0a0f1e;
+  color: #ffffff;
   border: none;
   justify-content: center;
 }
 
 .btn-rojo {
   background: var(--coral);
-  color: #0a0f1e;
+  color: #ffffff;
   border: none;
   justify-content: center;
-}
-
-[data-theme="dark"] .btn-azul,
-[data-theme="dark"] .btn-amarillo,
-[data-theme="dark"] .btn-rojo {
-  color: #ffffff;
 }
 
 .btn-outline-oscuro {
@@ -1711,7 +1709,7 @@ h5 {
   width: 100%;
   padding: 16px;
   background: var(--coral);
-  color: #0a0f1e;
+  color: #ffffff;
   border: none;
   border-radius: 100px;
   font-size: 13px;
@@ -2524,7 +2522,7 @@ h5 {
 
 .inscr-card-btn-solido {
   background: var(--coral);
-  color: var(--texto-principal);
+  color: #ffffff;
   border-color: var(--coral);
   box-shadow: 0 2px 10px rgba(255, 92, 141, 0.22);
 }
